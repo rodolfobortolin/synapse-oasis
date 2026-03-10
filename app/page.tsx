@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import NavBar from "./components/NavBar";
 import HeroSection from "./components/HeroSection";
 import ScrollReveal from "./components/ScrollReveal";
@@ -17,27 +18,6 @@ const CheckIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
     <circle cx="9" cy="9" r="9" fill="var(--blue-cta)" fillOpacity="0.12"/>
     <path d="M5.5 9.5l2 2 5-5" stroke="var(--blue-cta)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const BrainIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-    <path d="M12 2a7 7 0 0 0-7 7c0 3 2 5.5 4 7l3 3 3-3c2-1.5 4-4 4-7a7 7 0 0 0-7-7z" />
-    <path d="M9 12h6M12 9v6" />
-  </svg>
-);
-
-const ShieldIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    <path d="M9 12l2 2 4-4" />
-  </svg>
-);
-
-const FieldIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-    <rect x="2" y="4" width="20" height="16" rx="2" />
-    <path d="M6 8h12M6 12h8M6 16h4" />
   </svg>
 );
 
@@ -119,53 +99,47 @@ export default function Home() {
                 <span style={{ color: "var(--grey)" }}>in Jira &amp; JSM</span>
               </h2>
               <p className="text-base max-w-2xl mx-auto mt-5" style={{ color: "var(--grey)" }}>
-                We build Forge-native apps across three areas where we saw the biggest gaps during over 15 years of enterprise Atlassian implementations.
+                Forge-native apps built from 15+ years of enterprise Atlassian consulting. Each one solves a real problem we encountered in the field.
               </p>
             </div>
           </ScrollReveal>
 
+          {/* Row 1: AI & Security apps */}
           <div className="grid md:grid-cols-3" style={{ border: "1px dashed var(--border)" }}>
             {[
               {
-                icon: <BrainIcon />,
-                title: "AI-Powered Apps",
-                desc: "Intelligent ticket routing, portal assistants, sentiment analysis, and AI workflow functions. Flexible AI integration that lets you choose your provider — use your own API keys today, or leverage Atlassian's native AI capabilities as they become available.",
+                icon: "/ai-triage.png",
+                title: "AI Triage for Jira",
+                desc: "Intelligent ticket routing and incident detection. The Dispatcher Agent assigns teams and users automatically, Smart Escalation handles priority-based routing, and Incident Detection clusters similar issues in real time.",
                 color: "#7E7CDE",
-                checks: ["NLP & Sentiment", "Auto-routing", "Workflow AI", "Multi-provider"],
+                checks: ["Auto-routing", "Smart Escalation", "Incident Clustering", "Real-time Detection"],
               },
               {
-                icon: <ShieldIcon />,
-                title: "Admin & Security",
-                desc: "Instance health monitoring, bulk operations, permission auditing, and credential scanning. The tools every Jira administrator needs but Atlassian does not ship out of the box.",
-                color: "#EC8546",
-                checks: ["Health Monitoring", "Bulk Operations", "Security Scanning", "Permission Audit"],
+                icon: "/ai-portal.png",
+                title: "AI Portal Chat for Jira",
+                desc: "AI-powered chatbot for Jira Service Management portals. Answers customer questions instantly, creates tickets from conversations, and reduces agent workload with intelligent self-service.",
+                color: "#2B2ED8",
+                checks: ["Portal Chatbot", "Auto Ticket Creation", "Self-service AI", "Agent Assist"],
               },
               {
-                icon: <FieldIcon />,
-                title: "Custom Fields",
-                desc: "Purpose-built fields that fill the gaps — issue pickers, checklists, project selectors, encrypted fields, and real-time activity feeds. All Forge-native, all designed for real workflows.",
-                color: "#51A2E7",
-                checks: ["Issue Pickers", "Checklists", "Encrypted Fields", "Realtime Feeds"],
+                icon: "/secret-scanner.png",
+                title: "Secret Scanner for Jira",
+                desc: "Scans issues, comments, and attachments for exposed credentials — API keys, tokens, passwords, and secrets. Alerts administrators before sensitive data spreads across your Jira instance.",
+                color: "#E5484D",
+                checks: ["Credential Detection", "Real-time Scanning", "Admin Alerts", "Data Protection"],
               },
             ].map((card, i) => (
               <ScrollReveal key={card.title} delay={i * 100}>
                 <div
                   className="p-8 md:p-10 h-full"
                   style={{
-                    borderRight: i < 2 ? "1px dashed var(--border)" : "none",
+                    borderRight: i % 3 !== 2 ? "1px dashed var(--border)" : "none",
                     background: "white",
                   }}
                 >
-                  <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-6"
-                    style={{ background: `${card.color}12`, color: card.color }}
-                  >
-                    {card.icon}
-                  </div>
+                  <Image src={card.icon} alt={card.title} width={72} height={72} className="rounded-xl mb-6" />
                   <h3 className="font-bold mb-3" style={{ color: "var(--navy)" }}>{card.title}</h3>
-                  <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--grey)" }}>
-                    {card.desc}
-                  </p>
+                  <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--grey)" }}>{card.desc}</p>
                   <div className="space-y-2">
                     {card.checks.map((item) => (
                       <span key={item} className="flex items-center gap-2 text-sm" style={{ color: "var(--navy)" }}>
@@ -176,6 +150,77 @@ export default function Home() {
                 </div>
               </ScrollReveal>
             ))}
+          </div>
+
+          {/* Row 2: Toolkits */}
+          <div className="grid md:grid-cols-3" style={{ border: "1px dashed var(--border)", borderTop: "none" }}>
+            {[
+              {
+                icon: "/workflow-toolkit.png",
+                title: "Workflow Toolkit for Jira",
+                desc: "AI-powered workflow modules — conditions, validators, and post-functions. Define rules in plain language: the AI generates Jira expressions, validates transitions, and executes multi-step actions automatically.",
+                color: "#51A2E7",
+                checks: ["AI Conditions", "AI Validators", "AI Post Functions", "Workflow Automation"],
+              },
+              {
+                icon: "/admin-toolkit.png",
+                title: "Admin Toolkit for Jira",
+                desc: "The admin tools Atlassian doesn't ship. Bulk operations, permission auditing, configuration management, and instance cleanup — everything a Jira administrator needs to manage at scale.",
+                color: "#EC8546",
+                checks: ["Bulk Operations", "Permission Audit", "Config Management", "Instance Cleanup"],
+              },
+              {
+                icon: "/cf-toolkit.png",
+                title: "Custom Fields Toolkit for Jira",
+                desc: "Purpose-built custom fields that Jira doesn't offer natively. Issue pickers with JQL filtering, checklists with progress tracking, and project-managed select lists — so project leads can manage field options without being Jira admins.",
+                color: "#3B9FE3",
+                checks: ["Issue Picker", "Checklists", "Project-managed Lists", "No Admin Required"],
+              },
+            ].map((card, i) => (
+              <ScrollReveal key={card.title} delay={i * 100}>
+                <div
+                  className="p-8 md:p-10 h-full"
+                  style={{
+                    borderRight: i % 3 !== 2 ? "1px dashed var(--border)" : "none",
+                    background: "white",
+                  }}
+                >
+                  <Image src={card.icon} alt={card.title} width={72} height={72} className="rounded-xl mb-6" />
+                  <h3 className="font-bold mb-3" style={{ color: "var(--navy)" }}>{card.title}</h3>
+                  <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--grey)" }}>{card.desc}</p>
+                  <div className="space-y-2">
+                    {card.checks.map((item) => (
+                      <span key={item} className="flex items-center gap-2 text-sm" style={{ color: "var(--navy)" }}>
+                        <CheckIcon /> {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+
+          {/* Health Hub — separate, may be removed later */}
+          <div className="grid md:grid-cols-3" style={{ border: "1px dashed var(--border)", borderTop: "none" }}>
+            <ScrollReveal>
+              <div
+                className="p-8 md:p-10 h-full"
+                style={{ borderRight: "1px dashed var(--border)", background: "white" }}
+              >
+                <Image src="/health-hub.png" alt="Health Hub for Jira" width={72} height={72} className="rounded-xl mb-6" />
+                <h3 className="font-bold mb-3" style={{ color: "var(--navy)" }}>Health Hub for Jira</h3>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--grey)" }}>
+                  Project health dashboard that analyzes your Jira configuration — schemes, screens, workflows, permissions, and fields. Generates a quality score with actionable recommendations to clean up your instance.
+                </p>
+                <div className="space-y-2">
+                  {["Health Score", "Config Analysis", "Recommendations", "Scheme Audit"].map((item) => (
+                    <span key={item} className="flex items-center gap-2 text-sm" style={{ color: "var(--navy)" }}>
+                      <CheckIcon /> {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
