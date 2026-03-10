@@ -6,6 +6,7 @@ import HeroSection from "./components/HeroSection";
 import ScrollReveal from "./components/ScrollReveal";
 import SynapseOasisLogo from "./components/SynapseOasisLogo";
 import AnimatedStats from "./components/AnimatedStats";
+import ContactForm from "./components/ContactForm";
 
 /* ── Icons ─────────────────────────────────── */
 const ArrowIcon = () => (
@@ -109,21 +110,21 @@ export default function Home() {
             {[
               {
                 icon: "/ai-triage.png",
-                title: "AI Triage for Jira",
+                title: "AI Triage",
                 desc: "Intelligent ticket routing and incident detection. The Dispatcher Agent assigns teams and users automatically, Smart Escalation handles priority-based routing, and Incident Detection clusters similar issues in real time.",
                 color: "#7E7CDE",
                 checks: ["Auto-routing", "Smart Escalation", "Incident Clustering", "Real-time Detection"],
               },
               {
                 icon: "/ai-portal.png",
-                title: "AI Portal Chat for Jira",
+                title: "AI Portal Chat",
                 desc: "AI-powered chatbot for Jira Service Management portals. Answers customer questions instantly, creates tickets from conversations, and reduces agent workload with intelligent self-service.",
                 color: "#2B2ED8",
                 checks: ["Portal Chatbot", "Auto Ticket Creation", "Self-service AI", "Agent Assist"],
               },
               {
                 icon: "/secret-scanner.png",
-                title: "Secret Scanner for Jira",
+                title: "Secret Scanner",
                 desc: "Scans issues, comments, and attachments for exposed credentials — API keys, tokens, passwords, and secrets. Alerts administrators before sensitive data spreads across your Jira instance.",
                 color: "#E5484D",
                 checks: ["Credential Detection", "Real-time Scanning", "Admin Alerts", "Data Protection"],
@@ -157,21 +158,21 @@ export default function Home() {
             {[
               {
                 icon: "/workflow-toolkit.png",
-                title: "Workflow Toolkit for Jira",
+                title: "Workflow Toolkit",
                 desc: "AI-powered workflow modules — conditions, validators, and post-functions. Define rules in plain language: the AI generates Jira expressions, validates transitions, and executes multi-step actions automatically.",
                 color: "#51A2E7",
                 checks: ["AI Conditions", "AI Validators", "AI Post Functions", "Workflow Automation"],
               },
               {
                 icon: "/admin-toolkit.png",
-                title: "Admin Toolkit for Jira",
+                title: "Admin Toolkit",
                 desc: "The admin tools Atlassian doesn't ship. Bulk operations, permission auditing, configuration management, and instance cleanup — everything a Jira administrator needs to manage at scale.",
                 color: "#EC8546",
                 checks: ["Bulk Operations", "Permission Audit", "Config Management", "Instance Cleanup"],
               },
               {
                 icon: "/cf-toolkit.png",
-                title: "Custom Fields Toolkit for Jira",
+                title: "Custom Fields Toolkit",
                 desc: "Purpose-built custom fields that Jira doesn't offer natively. Issue pickers with JQL filtering, checklists with progress tracking, and project-managed select lists — so project leads can manage field options without being Jira admins.",
                 color: "#3B9FE3",
                 checks: ["Issue Picker", "Checklists", "Project-managed Lists", "No Admin Required"],
@@ -207,8 +208,8 @@ export default function Home() {
                 className="p-8 md:p-10 h-full"
                 style={{ borderRight: "1px dashed var(--border)", background: "white" }}
               >
-                <Image src="/health-hub.png" alt="Health Hub for Jira" width={72} height={72} className="rounded-xl mb-6" />
-                <h3 className="font-bold mb-3" style={{ color: "var(--navy)" }}>Health Hub for Jira</h3>
+                <Image src="/health-hub.png" alt="Health Hub" width={72} height={72} className="rounded-xl mb-6" />
+                <h3 className="font-bold mb-3" style={{ color: "var(--navy)" }}>Health Hub</h3>
                 <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--grey)" }}>
                   Project health dashboard that analyzes your Jira configuration — schemes, screens, workflows, permissions, and fields. Generates a quality score with actionable recommendations to clean up your instance.
                 </p>
@@ -294,9 +295,9 @@ export default function Home() {
       </section>
 
       {/* ── The Difference (dark navy) ───────── */}
-      <section className="py-20 md:py-28" style={{ background: "var(--hero-gradient)" }}>
+      <section className="py-20 md:py-28 relative" style={{ background: "var(--hero-gradient)" }}>
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{
             backgroundImage:
               "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
@@ -392,29 +393,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── CTA (dark navy) ──────────────────── */}
+      {/* ── Contact (dark navy) ──────────────── */}
       <section id="contact" className="py-20 md:py-28" style={{ background: "var(--navy)" }}>
-        <div className="max-w-[800px] mx-auto px-6 md:px-12 text-center">
+        <div className="max-w-[800px] mx-auto px-6 md:px-12">
           <ScrollReveal>
-            <div className="flex justify-center mb-6">
-              <SynapseOasisLogo size={64} />
+            <div className="text-center mb-10">
+              <div className="flex justify-center mb-6">
+                <SynapseOasisLogo size={64} />
+              </div>
+              <h2 className="text-white mb-4">
+                Ready to Transform
+                <br />
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>Your Atlassian Stack?</span>
+              </h2>
+              <p className="text-base mb-2 max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.5)" }}>
+                Get in touch to discuss how SynapseOasis can help your team.
+              </p>
             </div>
-            <h2 className="text-white mb-4">
-              Ready to Transform
-              <br />
-              <span style={{ color: "rgba(255,255,255,0.4)" }}>Your Atlassian Stack?</span>
-            </h2>
-            <p className="text-base mb-8 max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Get in touch to discuss how SynapseOasis can help transform your Atlassian stack.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <a href="mailto:contact@synapseoasis.com" className="cta-button">
-                Contact Us <ArrowIcon />
-              </a>
-              <a href="https://synapseoasis.atlassian.net/servicedesk/customer/portals" target="_blank" rel="noopener noreferrer" className="cta-button-outline">
-                Support Portal <ArrowIcon />
-              </a>
-            </div>
+            <ContactForm />
           </ScrollReveal>
         </div>
       </section>
@@ -435,7 +431,7 @@ export default function Home() {
             <a href="https://synapseoasis.atlassian.net/servicedesk/customer/portals" target="_blank" rel="noopener noreferrer" className="text-xs transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.5)" }}>
               Support
             </a>
-            <a href="mailto:contact@synapseoasis.com" className="text-xs transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <a href="#contact" className="text-xs transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.5)" }}>
               Contact
             </a>
           </div>
