@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { HeroWordReveal, HeroBlurIn } from "./HeroReveal";
 import NeuralCanvas from "./NeuralCanvas";
-import SynapseOasisLogo from "./SynapseOasisLogo";
 
 const ForgeIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -70,17 +69,6 @@ export default function HeroSection() {
             "radial-gradient(circle at center, transparent 0%, transparent 56%, rgba(4,6,24,0.14) 100%)",
         }}
       />
-
-      <div
-        className="absolute left-1/2 z-10 -translate-x-1/2"
-        style={{ top: "clamp(172px, 20vh, 212px)" }}
-      >
-        <HeroBlurIn delayMs={120}>
-          <div className="flex items-center justify-center" style={{ width: 128, height: 128 }}>
-            <SynapseOasisLogo size={128} />
-          </div>
-        </HeroBlurIn>
-      </div>
 
       <div className="relative z-10 max-w-[1280px] mx-auto px-6 md:px-12 text-center">
         {/* Badge */}
