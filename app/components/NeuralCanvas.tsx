@@ -14,6 +14,10 @@ const MOBILE_BREAKPOINT = 820;
 const FIELD_RADIUS = 200;
 const MAX_PULSES = 48;
 const MIN_IDLE_PULSES = 5;
+const MAX_GROWTH_RATIO = 0.4;
+const GROWTH_DELAY_MS = 2200;
+const GROWTH_JITTER_MS = 900;
+const GROWTH_FADE_SPEED = 0.6;
 
 interface Branch {
   angle: number;
@@ -53,6 +57,7 @@ interface Neuron {
   excitability: number;
   flow: number;
   cluster: number;
+  maturity: number;
   color: Rgb;
   axonAngle: number;
   dendrites: Dendrite[];
@@ -89,6 +94,14 @@ interface CubicPath {
 interface Point {
   x: number;
   y: number;
+}
+
+interface GrowthState {
+  baseCount: number;
+  maxCount: number;
+  baseCounts: number[];
+  targetCounts: number[];
+  nextAt: number;
 }
 
 const clamp = (value: number, min: number, max: number) =>
@@ -189,6 +202,231 @@ const strokePolyline = (
   }
 };
 
+const sampleClusterPoint = (
+  cluster: Cluster,
+  width: number,
+  height: number,
+  radial = Math.sqrt(Math.random()),
+) => {
+  const theta = Math.random() * Math.PI * 2;
+
+  return {
+    x: clamp(
+      cluster.x + Math.cos(theta) * cluster.radius * radial * 0.95 + (Math.random() - 0.5) * 18,
+      36,
+      width - 36,
+    ),
+    y: clamp(
+      cluster.y + Math.sin(theta) * cluster.radius * radial * 0.68 + (Math.random() - 0.5) * 14,
+      36,
+      height - 36,
+    ),
+  };
+};
+
+const createNeuronAt = (
+  x: number,
+  y: number,
+  clusterIndex: number,
+  cluster: Cluster,
+  width: number,
+  height: number,
+  maturity = 1,
+): Neuron => {
+  const depth = 0.68 + Math.random() * 0.52;
+
+  return {
+    x,
+    y,
+    anchorX: x,
+    anchorY: y,
+    driftX: 7 + Math.random() * 12,
+    driftY: 5 + Math.random() * 10,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.75 + Math.random() * 0.55,
+    radius: 1.9 + depth * 1.6,
+    depth,
+    charge: Math.random() * 0.2,
+    signal: 0,
+    firing: 0,
+    refractory: Math.random() * 0.25,
+    excitability: 0.72 + Math.random() * 0.48,
+    flow:
+      x / width +
+      (y / height) * 0.2 +
+      clusterIndex * 0.04 +
+      Math.random() * 0.04,
+    cluster: clusterIndex,
+    maturity,
+    color: mixColor(cluster.color, WHITE, 0.08 + Math.random() * 0.08),
+    axonAngle: 0,
+    dendrites: [],
+  };
+};
+
+const hasConnectionBetween = (
+  connections: Connection[],
+  left: number,
+  right: number,
+) =>
+  connections.some(
+    (connection) =>
+      (connection.from === left && connection.to === right) ||
+      (connection.from === right && connection.to === left),
+  );
+
+const countIncomingConnections = (connections: Connection[], targetIndex: number) =>
+  connections.reduce(
+    (total, connection) => total + (connection.to === targetIndex ? 1 : 0),
+    0,
+  );
+
+const addRuntimeConnection = (
+  connections: Connection[],
+  outgoing: number[][],
+  from: number,
+  to: number,
+  strength: number,
+  curve: number,
+  bridge: boolean,
+) => {
+  if (from === to || hasConnectionBetween(connections, from, to)) return false;
+
+  const connectionIndex =
+    connections.push({
+      from,
+      to,
+      strength,
+      curve,
+      bridge,
+    }) - 1;
+
+  if (!outgoing[from]) {
+    outgoing[from] = [];
+  }
+
+  outgoing[from].push(connectionIndex);
+  return true;
+};
+
+const updateNeuronOrientation = (
+  neuronIndex: number,
+  neurons: Neuron[],
+  connections: Connection[],
+  outgoing: number[][],
+  width: number,
+  height: number,
+) => {
+  const neuron = neurons[neuronIndex];
+  const edges = outgoing[neuronIndex] ?? [];
+
+  if (edges.length === 0) {
+    neuron.axonAngle = Math.atan2(height * 0.5 - neuron.y, width * 0.5 - neuron.x);
+    neuron.dendrites = createDendrites(neuron.axonAngle, neuron.depth);
+    return;
+  }
+
+  let vectorX = 0;
+  let vectorY = 0;
+
+  edges.forEach((connectionIndex) => {
+    const connection = connections[connectionIndex];
+    const target = neurons[connection.to];
+    const distance = Math.hypot(target.x - neuron.x, target.y - neuron.y) || 1;
+    vectorX += (target.x - neuron.x) / distance;
+    vectorY += (target.y - neuron.y) / distance;
+  });
+
+  neuron.axonAngle = Math.atan2(vectorY, vectorX);
+  neuron.dendrites = createDendrites(neuron.axonAngle, neuron.depth);
+};
+
+const selectDrivers = (
+  clusters: Cluster[],
+  neurons: Neuron[],
+  outgoing: number[][],
+  width: number,
+) => {
+  const orderedIndices = Array.from({ length: neurons.length }, (_, index) => index).sort(
+    (left, right) => neurons[left].flow - neurons[right].flow,
+  );
+
+  return clusters.flatMap((_, clusterIndex) => {
+    const candidates = orderedIndices.filter(
+      (index) => neurons[index].cluster === clusterIndex && (outgoing[index]?.length ?? 0) > 0,
+    );
+
+    return candidates.slice(0, width < MOBILE_BREAKPOINT ? 2 : 3);
+  });
+};
+
+const pickGrowthClusterIndex = (neurons: Neuron[], growthState: GrowthState) => {
+  return growthState.targetCounts
+    .map((targetCount, clusterIndex) => {
+      const currentCount = neurons.filter((neuron) => neuron.cluster === clusterIndex).length;
+
+      return {
+        clusterIndex,
+        fillRatio: currentCount / Math.max(1, targetCount),
+        currentCount,
+      };
+    })
+    .sort((left, right) => {
+      if (left.fillRatio !== right.fillRatio) {
+        return left.fillRatio - right.fillRatio;
+      }
+
+      return left.currentCount - right.currentCount;
+    })[0]?.clusterIndex ?? 0;
+};
+
+const pickGrowthPosition = (
+  clusterIndex: number,
+  clusters: Cluster[],
+  neurons: Neuron[],
+  width: number,
+  height: number,
+) => {
+  const cluster = clusters[clusterIndex];
+  const sameCluster = neurons.filter((neuron) => neuron.cluster === clusterIndex);
+  let bestPoint = sampleClusterPoint(cluster, width, height, 0.56);
+  let bestScore = -Infinity;
+
+  for (let attempt = 0; attempt < 14; attempt += 1) {
+    const radial = 0.28 + Math.random() * 0.58;
+    const candidate = sampleClusterPoint(cluster, width, height, radial);
+    const nearestDistance = sameCluster.reduce((closest, neuron) => {
+      return Math.min(
+        closest,
+        Math.hypot(neuron.anchorX - candidate.x, neuron.anchorY - candidate.y),
+      );
+    }, Number.POSITIVE_INFINITY);
+    const score = nearestDistance - Math.abs(radial - 0.58) * 28;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestPoint = candidate;
+    }
+  }
+
+  return bestPoint;
+};
+
+const buildTargetCounts = (baseCounts: number[], maxCount: number) => {
+  const targetCounts = [...baseCounts];
+  let remaining = Math.max(0, maxCount - baseCounts.reduce((sum, count) => sum + count, 0));
+  let cursor = 0;
+
+  while (remaining > 0 && targetCounts.length > 0) {
+    const clusterIndex = cursor % targetCounts.length;
+    targetCounts[clusterIndex] += 1;
+    remaining -= 1;
+    cursor += 1;
+  }
+
+  return targetCounts;
+};
+
 const createClusters = (width: number, height: number): Cluster[] => {
   if (width < MOBILE_BREAKPOINT) {
     return [
@@ -237,52 +475,24 @@ const createDendrites = (axonAngle: number, depth: number): Dendrite[] => {
 
 const createNetwork = (width: number, height: number) => {
   const clusters = createClusters(width, height);
-  const counts =
-    width < MOBILE_BREAKPOINT ? [7, 8, 7] : [8, 7, 8, 7];
+  const counts = width < MOBILE_BREAKPOINT ? [7, 8, 7] : [8, 7, 8, 7];
   const neurons: Neuron[] = [];
 
   clusters.forEach((cluster, clusterIndex) => {
     const count = counts[clusterIndex] ?? 7;
 
     for (let index = 0; index < count; index += 1) {
-      const theta = Math.random() * Math.PI * 2;
-      const radial = Math.sqrt(Math.random());
-      const x =
-        cluster.x +
-        Math.cos(theta) * cluster.radius * radial * 0.95 +
-        (Math.random() - 0.5) * 18;
-      const y =
-        cluster.y +
-        Math.sin(theta) * cluster.radius * radial * 0.68 +
-        (Math.random() - 0.5) * 14;
-      const depth = 0.68 + Math.random() * 0.52;
-
-      neurons.push({
-        x: clamp(x, 36, width - 36),
-        y: clamp(y, 36, height - 36),
-        anchorX: clamp(x, 36, width - 36),
-        anchorY: clamp(y, 36, height - 36),
-        driftX: 7 + Math.random() * 12,
-        driftY: 5 + Math.random() * 10,
-        phase: Math.random() * Math.PI * 2,
-        speed: 0.75 + Math.random() * 0.55,
-        radius: 1.9 + depth * 1.6,
-        depth,
-        charge: Math.random() * 0.2,
-        signal: 0,
-        firing: 0,
-        refractory: Math.random() * 0.25,
-        excitability: 0.72 + Math.random() * 0.48,
-        flow:
-          x / width +
-          (y / height) * 0.2 +
-          clusterIndex * 0.04 +
-          Math.random() * 0.04,
-        cluster: clusterIndex,
-        color: mixColor(cluster.color, WHITE, 0.08 + Math.random() * 0.08),
-        axonAngle: 0,
-        dendrites: [],
-      });
+      const point = sampleClusterPoint(cluster, width, height);
+      neurons.push(
+        createNeuronAt(
+          point.x,
+          point.y,
+          clusterIndex,
+          cluster,
+          width,
+          height,
+        ),
+      );
     }
   });
 
@@ -452,37 +662,11 @@ const createNetwork = (width: number, height: number) => {
     );
   }
 
-  neurons.forEach((neuron, index) => {
-    const edges = outgoing[index];
-
-    if (edges.length === 0) {
-      neuron.axonAngle = Math.atan2(height * 0.5 - neuron.y, width * 0.5 - neuron.x);
-      neuron.dendrites = createDendrites(neuron.axonAngle, neuron.depth);
-      return;
-    }
-
-    let vectorX = 0;
-    let vectorY = 0;
-
-    edges.forEach((connectionIndex) => {
-      const connection = connections[connectionIndex];
-      const target = neurons[connection.to];
-      const distance = Math.hypot(target.x - neuron.x, target.y - neuron.y) || 1;
-      vectorX += (target.x - neuron.x) / distance;
-      vectorY += (target.y - neuron.y) / distance;
-    });
-
-    neuron.axonAngle = Math.atan2(vectorY, vectorX);
-    neuron.dendrites = createDendrites(neuron.axonAngle, neuron.depth);
+  neurons.forEach((_, index) => {
+    updateNeuronOrientation(index, neurons, connections, outgoing, width, height);
   });
 
-  const drivers = clusters.flatMap((_, clusterIndex) => {
-    const candidates = order.filter(
-      (index) => neurons[index].cluster === clusterIndex && outgoing[index].length > 0,
-    );
-
-    return candidates.slice(0, width < MOBILE_BREAKPOINT ? 2 : 3);
-  });
+  const drivers = selectDrivers(clusters, neurons, outgoing, width);
 
   for (const driverIndex of drivers) {
     const neuron = neurons[driverIndex];
@@ -490,7 +674,14 @@ const createNetwork = (width: number, height: number) => {
     neuron.signal = 0.14 + Math.random() * 0.12;
   }
 
-  return { clusters, neurons, connections, outgoing, drivers };
+  return {
+    clusters,
+    neurons,
+    connections,
+    outgoing,
+    drivers,
+    baseCounts: clusters.map((_, clusterIndex) => counts[clusterIndex] ?? 7),
+  };
 };
 
 const createConnectionPath = (
@@ -499,8 +690,10 @@ const createConnectionPath = (
   curve: number,
 ): CubicPath => {
   const linkAngle = Math.atan2(to.y - from.y, to.x - from.x);
-  const startReach = from.radius + 5 + from.depth * 5;
-  const endReach = to.radius + 4;
+  const fromScale = 0.45 + from.maturity * 0.55;
+  const toScale = 0.45 + to.maturity * 0.55;
+  const startReach = from.radius * fromScale + 5 + from.depth * 5 * fromScale;
+  const endReach = to.radius * toScale + 4;
   const startX = from.x + Math.cos(from.axonAngle) * startReach;
   const startY = from.y + Math.sin(from.axonAngle) * startReach;
   const endX = to.x - Math.cos(linkAngle) * endReach;
@@ -538,6 +731,13 @@ export default function NeuralCanvas() {
   const animRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   const motionScaleRef = useRef(1);
+  const growthRef = useRef<GrowthState>({
+    baseCount: 0,
+    maxCount: 0,
+    baseCounts: [],
+    targetCounts: [],
+    nextAt: Number.POSITIVE_INFINITY,
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -554,6 +754,26 @@ export default function NeuralCanvas() {
       outgoingRef.current = network.outgoing;
       driversRef.current = network.drivers;
       pulsesRef.current = [];
+      growthRef.current = {
+        baseCount: network.neurons.length,
+        maxCount: Math.max(
+          network.neurons.length,
+          Math.floor(network.neurons.length * (1 + MAX_GROWTH_RATIO)),
+        ),
+        baseCounts: network.baseCounts,
+        targetCounts: buildTargetCounts(
+          network.baseCounts,
+          Math.max(
+            network.neurons.length,
+            Math.floor(network.neurons.length * (1 + MAX_GROWTH_RATIO)),
+          ),
+        ),
+        nextAt:
+          performance.now() +
+          GROWTH_DELAY_MS +
+          Math.random() * GROWTH_JITTER_MS,
+      };
+      lastTimeRef.current = 0;
     };
 
     const resize = () => {
@@ -601,6 +821,162 @@ export default function NeuralCanvas() {
       }
     };
 
+    const growNetwork = (timestamp: number) => {
+      const growthState = growthRef.current;
+      const neurons = neuronsRef.current;
+      const clusters = clustersRef.current;
+      const connections = connectionsRef.current;
+      const outgoing = outgoingRef.current;
+      const { w, h } = dimRef.current;
+
+      if (neurons.length >= growthState.maxCount || clusters.length === 0) {
+        growthState.nextAt = Number.POSITIVE_INFINITY;
+        return;
+      }
+
+      const clusterIndex = pickGrowthClusterIndex(neurons, growthState);
+      const cluster = clusters[clusterIndex];
+      const point = pickGrowthPosition(clusterIndex, clusters, neurons, w, h);
+      const newNeuron = createNeuronAt(
+        point.x,
+        point.y,
+        clusterIndex,
+        cluster,
+        w,
+        h,
+        0.08,
+      );
+      newNeuron.charge = 0.16 + Math.random() * 0.12;
+      newNeuron.signal = 0.04 + Math.random() * 0.04;
+
+      const newIndex = neurons.push(newNeuron) - 1;
+      outgoing.push([]);
+
+      const candidates = neurons
+        .map((neuron, index) => ({ neuron, index }))
+        .filter(({ index, neuron }) => index !== newIndex && neuron.cluster === clusterIndex)
+        .sort((left, right) => {
+          const leftDistance = Math.hypot(
+            left.neuron.anchorX - newNeuron.anchorX,
+            left.neuron.anchorY - newNeuron.anchorY,
+          );
+          const rightDistance = Math.hypot(
+            right.neuron.anchorX - newNeuron.anchorX,
+            right.neuron.anchorY - newNeuron.anchorY,
+          );
+
+          return leftDistance - rightDistance;
+        });
+
+      const upstream = candidates.find(
+        ({ index, neuron }) =>
+          neuron.flow <= newNeuron.flow + 0.08 &&
+          (outgoing[index]?.length ?? 0) > 0 &&
+          !hasConnectionBetween(connections, index, newIndex),
+      );
+
+      if (upstream) {
+        addRuntimeConnection(
+          connections,
+          outgoing,
+          upstream.index,
+          newIndex,
+          0.34 + Math.random() * 0.18,
+          (Math.random() - 0.5) * 0.16,
+          false,
+        );
+      }
+
+      const downstream = candidates.find(
+        ({ index, neuron }) =>
+          neuron.flow >= newNeuron.flow - 0.04 &&
+          countIncomingConnections(connections, index) < 5 &&
+          !hasConnectionBetween(connections, newIndex, index),
+      );
+
+      if (downstream) {
+        addRuntimeConnection(
+          connections,
+          outgoing,
+          newIndex,
+          downstream.index,
+          0.36 + Math.random() * 0.2,
+          (Math.random() - 0.5) * 0.18,
+          false,
+        );
+      }
+
+      if ((outgoing[newIndex]?.length ?? 0) === 0) {
+        const fallbackTarget = candidates.find(
+          ({ index }) => !hasConnectionBetween(connections, newIndex, index),
+        );
+
+        if (fallbackTarget) {
+          addRuntimeConnection(
+            connections,
+            outgoing,
+            newIndex,
+            fallbackTarget.index,
+            0.3 + Math.random() * 0.18,
+            (Math.random() - 0.5) * 0.14,
+            false,
+          );
+        }
+      }
+
+      const bridgeTarget = neurons
+        .map((neuron, index) => ({ neuron, index }))
+        .filter(({ index, neuron }) => {
+          if (index === newIndex) return false;
+          if (neuron.cluster === clusterIndex) return false;
+          if (neuron.flow <= newNeuron.flow + 0.04) return false;
+          if (countIncomingConnections(connections, index) >= 5) return false;
+
+          const distance = Math.hypot(
+            neuron.anchorX - newNeuron.anchorX,
+            neuron.anchorY - newNeuron.anchorY,
+          );
+
+          return distance < (w < MOBILE_BREAKPOINT ? 250 : 360);
+        })
+        .sort((left, right) => {
+          const leftDistance = Math.hypot(
+            left.neuron.anchorX - newNeuron.anchorX,
+            left.neuron.anchorY - newNeuron.anchorY,
+          );
+          const rightDistance = Math.hypot(
+            right.neuron.anchorX - newNeuron.anchorX,
+            right.neuron.anchorY - newNeuron.anchorY,
+          );
+
+          return leftDistance - rightDistance;
+        })[0];
+
+      if (bridgeTarget && Math.random() < 0.32) {
+        addRuntimeConnection(
+          connections,
+          outgoing,
+          newIndex,
+          bridgeTarget.index,
+          0.26 + Math.random() * 0.16,
+          (Math.random() - 0.5) * 0.24,
+          true,
+        );
+      }
+
+      updateNeuronOrientation(newIndex, neurons, connections, outgoing, w, h);
+
+      if (upstream) {
+        updateNeuronOrientation(upstream.index, neurons, connections, outgoing, w, h);
+      }
+
+      driversRef.current = selectDrivers(clusters, neurons, outgoing, w);
+      growthState.nextAt =
+        timestamp +
+        (GROWTH_DELAY_MS + Math.random() * GROWTH_JITTER_MS) *
+          (motionScaleRef.current < 1 ? 1.35 : 1);
+    };
+
     const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const syncMotionPreference = () => {
       motionScaleRef.current = reducedMotionQuery.matches ? 0.48 : 1;
@@ -633,6 +1009,10 @@ export default function NeuralCanvas() {
       const connections = connectionsRef.current;
       const pulses = pulsesRef.current;
       const fieldActive = mx > 0 && my > 0;
+
+      if (timestamp >= growthRef.current.nextAt) {
+        growNetwork(timestamp);
+      }
 
       ctx.clearRect(0, 0, w, h);
 
@@ -667,6 +1047,8 @@ export default function NeuralCanvas() {
 
       for (let index = 0; index < neurons.length; index += 1) {
         const neuron = neurons[index];
+        neuron.maturity = Math.min(1, neuron.maturity + dt * GROWTH_FADE_SPEED);
+        const activityScale = 0.3 + neuron.maturity * 0.7;
         const driftTime = timestamp * 0.00016 * neuron.speed * motion;
         const fieldBoost = fieldActive
           ? clamp(1 - Math.hypot(neuron.x - mx, neuron.y - my) / FIELD_RADIUS, 0, 1)
@@ -687,16 +1069,20 @@ export default function NeuralCanvas() {
         neuron.refractory = Math.max(0, neuron.refractory - dt);
 
         if (fieldBoost > 0) {
-          neuron.charge = clamp(neuron.charge + dt * fieldBoost * 0.24, 0, 1.35);
-          neuron.signal = Math.max(neuron.signal, fieldBoost * 0.16);
+          neuron.charge = clamp(neuron.charge + dt * fieldBoost * 0.24 * activityScale, 0, 1.35);
+          neuron.signal = Math.max(neuron.signal, fieldBoost * 0.16 * activityScale);
         }
 
-        const spontaneousRate = (0.022 + neuron.excitability * 0.012) * motion;
+        const spontaneousRate = (0.022 + neuron.excitability * 0.012) * motion * activityScale;
         if (Math.random() < dt * spontaneousRate) {
           neuron.charge = clamp(neuron.charge + 0.32 + Math.random() * 0.18, 0, 1.35);
         }
 
-        if (neuron.charge > 0.92 + (1 - neuron.excitability) * 0.1 && neuron.refractory <= 0) {
+        if (
+          neuron.maturity > 0.66 &&
+          neuron.charge > 0.92 + (1 - neuron.excitability) * 0.1 &&
+          neuron.refractory <= 0
+        ) {
           fireNeuron(index, 0.62 + Math.min(neuron.charge, 1) * 0.42);
         }
       }
@@ -718,6 +1104,9 @@ export default function NeuralCanvas() {
       for (const connection of connections) {
         const from = neurons[connection.from];
         const to = neurons[connection.to];
+        const visibility = Math.min(from.maturity, to.maturity);
+        if (visibility <= 0.04) continue;
+
         const path = createConnectionPath(from, to, connection.curve);
         const midX = (path.startX + path.endX) * 0.5;
         const midY = (path.startY + path.endY) * 0.5;
@@ -732,9 +1121,10 @@ export default function NeuralCanvas() {
           ? mixColor(AMBER, CYAN, 0.3)
           : mixColor(baseColor, TEAL, 0.34 + activity * 0.2);
         const alpha =
-          (connection.bridge ? 0.072 : 0.052) +
-          connection.strength * 0.036 +
-          activity * (connection.bridge ? 0.22 : 0.17);
+          ((connection.bridge ? 0.072 : 0.052) +
+            connection.strength * 0.036 +
+            activity * (connection.bridge ? 0.22 : 0.17)) *
+          visibility;
 
         const gradient = ctx.createLinearGradient(
           path.startX,
@@ -757,11 +1147,11 @@ export default function NeuralCanvas() {
           path.endY,
         );
         ctx.strokeStyle = gradient;
-        ctx.lineWidth = connection.bridge ? 1.08 : 0.88;
+        ctx.lineWidth = (connection.bridge ? 1.08 : 0.88) * (0.7 + visibility * 0.3);
         ctx.stroke();
 
         if (activity > 0.08) {
-          const terminalRadius = 1.4 + activity * 1.5;
+          const terminalRadius = (1.4 + activity * 1.5) * (0.72 + visibility * 0.28);
           const terminalGlow = ctx.createRadialGradient(
             path.endX,
             path.endY,
@@ -770,7 +1160,13 @@ export default function NeuralCanvas() {
             path.endY,
             terminalRadius * 3.4,
           );
-          terminalGlow.addColorStop(0, rgba(mixColor(to.color, WHITE, 0.22), 0.08 + activity * 0.12));
+          terminalGlow.addColorStop(
+            0,
+            rgba(
+              mixColor(to.color, WHITE, 0.22),
+              (0.08 + activity * 0.12) * visibility,
+            ),
+          );
           terminalGlow.addColorStop(1, rgba(to.color, 0));
           ctx.beginPath();
           ctx.arc(path.endX, path.endY, terminalRadius * 3.4, 0, Math.PI * 2);
@@ -779,7 +1175,10 @@ export default function NeuralCanvas() {
 
           ctx.beginPath();
           ctx.arc(path.endX, path.endY, terminalRadius, 0, Math.PI * 2);
-          ctx.fillStyle = rgba(mixColor(to.color, WHITE, 0.18), 0.08 + activity * 0.16);
+          ctx.fillStyle = rgba(
+            mixColor(to.color, WHITE, 0.18),
+            (0.08 + activity * 0.16) * visibility,
+          );
           ctx.fill();
         }
       }
@@ -794,6 +1193,10 @@ export default function NeuralCanvas() {
           pulses.splice(pulseIndex, 1);
           continue;
         }
+
+        const fromNeuron = neurons[connection.from];
+        const toNeuron = neurons[connection.to];
+        const visibility = Math.min(fromNeuron.maturity, toNeuron.maturity);
 
         pulse.age += dt;
         const phase = pulse.age / pulse.duration;
@@ -811,8 +1214,8 @@ export default function NeuralCanvas() {
         }
 
         const path = createConnectionPath(
-          neurons[connection.from],
-          neurons[connection.to],
+          fromNeuron,
+          toNeuron,
           connection.curve,
         );
         const pulseColor = mixColor(
@@ -845,17 +1248,26 @@ export default function NeuralCanvas() {
         ctx.lineJoin = "round";
 
         strokePolyline(ctx, outerBolt);
-        ctx.strokeStyle = rgba(pulseColor, 0.05 + pulse.intensity * 0.05);
+        ctx.strokeStyle = rgba(
+          pulseColor,
+          (0.05 + pulse.intensity * 0.05) * visibility,
+        );
         ctx.lineWidth = 2.8 + pulse.intensity * 0.85;
         ctx.stroke();
 
         strokePolyline(ctx, outerBolt);
-        ctx.strokeStyle = rgba(pulseColor, 0.16 + pulse.intensity * 0.08);
+        ctx.strokeStyle = rgba(
+          pulseColor,
+          (0.16 + pulse.intensity * 0.08) * visibility,
+        );
         ctx.lineWidth = 1.15 + pulse.intensity * 0.36;
         ctx.stroke();
 
         strokePolyline(ctx, innerBolt);
-        ctx.strokeStyle = rgba(WHITE, 0.14 + pulse.intensity * 0.08);
+        ctx.strokeStyle = rgba(
+          WHITE,
+          (0.14 + pulse.intensity * 0.08) * visibility,
+        );
         ctx.lineWidth = 0.48 + pulse.intensity * 0.14;
         ctx.stroke();
 
@@ -864,30 +1276,39 @@ export default function NeuralCanvas() {
 
         ctx.beginPath();
         ctx.arc(startFlash.x, startFlash.y, 0.8 + energy * 1.2, 0, Math.PI * 2);
-        ctx.fillStyle = rgba(pulseColor, 0.08 + pulse.intensity * 0.06);
+        ctx.fillStyle = rgba(
+          pulseColor,
+          (0.08 + pulse.intensity * 0.06) * visibility,
+        );
         ctx.fill();
 
         ctx.beginPath();
         ctx.arc(endFlash.x, endFlash.y, 1.1 + energy * 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = rgba(WHITE, 0.1 + pulse.intensity * 0.07);
+        ctx.fillStyle = rgba(
+          WHITE,
+          (0.1 + pulse.intensity * 0.07) * visibility,
+        );
         ctx.fill();
       }
 
       ctx.restore();
 
       for (const neuron of neurons) {
+        const maturity = neuron.maturity;
+        const visibleRadius = neuron.radius * (0.42 + maturity * 0.58);
         const dendriteColor = mixColor(neuron.color, TEAL, neuron.signal * 0.6);
-        const branchAlpha = 0.065 + neuron.signal * 0.1 + neuron.firing * 0.06;
+        const branchAlpha = (0.065 + neuron.signal * 0.1 + neuron.firing * 0.06) * maturity;
 
         for (const dendrite of neuron.dendrites) {
-          const endX = neuron.x + Math.cos(dendrite.angle) * dendrite.length;
-          const endY = neuron.y + Math.sin(dendrite.angle) * dendrite.length;
+          const dendriteLength = dendrite.length * (0.38 + maturity * 0.62);
+          const endX = neuron.x + Math.cos(dendrite.angle) * dendriteLength;
+          const endY = neuron.y + Math.sin(dendrite.angle) * dendriteLength;
           const controlX =
             neuron.x +
-            Math.cos(dendrite.angle + dendrite.curve) * dendrite.length * 0.56;
+            Math.cos(dendrite.angle + dendrite.curve) * dendriteLength * 0.56;
           const controlY =
             neuron.y +
-            Math.sin(dendrite.angle + dendrite.curve) * dendrite.length * 0.56;
+            Math.sin(dendrite.angle + dendrite.curve) * dendriteLength * 0.56;
 
           ctx.beginPath();
           ctx.moveTo(neuron.x, neuron.y);
@@ -899,8 +1320,9 @@ export default function NeuralCanvas() {
           for (const branch of dendrite.branches) {
             const branchStartX = neuron.x + (endX - neuron.x) * branch.fork;
             const branchStartY = neuron.y + (endY - neuron.y) * branch.fork;
-            const branchEndX = branchStartX + Math.cos(branch.angle) * branch.length;
-            const branchEndY = branchStartY + Math.sin(branch.angle) * branch.length;
+            const branchLength = branch.length * (0.34 + maturity * 0.66);
+            const branchEndX = branchStartX + Math.cos(branch.angle) * branchLength;
+            const branchEndY = branchStartY + Math.sin(branch.angle) * branchLength;
 
             ctx.beginPath();
             ctx.moveTo(branchStartX, branchStartY);
@@ -912,21 +1334,33 @@ export default function NeuralCanvas() {
         }
 
         const axonEndX =
-          neuron.x + Math.cos(neuron.axonAngle) * (neuron.radius + 6 + neuron.depth * 4);
+          neuron.x +
+          Math.cos(neuron.axonAngle) *
+            ((visibleRadius + 6 + neuron.depth * 4) * (0.46 + maturity * 0.54));
         const axonEndY =
-          neuron.y + Math.sin(neuron.axonAngle) * (neuron.radius + 6 + neuron.depth * 4);
+          neuron.y +
+          Math.sin(neuron.axonAngle) *
+            ((visibleRadius + 6 + neuron.depth * 4) * (0.46 + maturity * 0.54));
         const somaColor = mixColor(neuron.color, WHITE, neuron.firing * 0.24);
-        const somaGlowRadius = neuron.radius * 3.6 + neuron.firing * 8 + neuron.signal * 4;
+        const somaGlowRadius =
+          (visibleRadius * 3.6 + neuron.firing * 8 + neuron.signal * 4) *
+          (0.6 + maturity * 0.4);
 
         const halo = ctx.createRadialGradient(
           neuron.x,
           neuron.y,
-          neuron.radius * 0.2,
+          visibleRadius * 0.2,
           neuron.x,
           neuron.y,
           somaGlowRadius,
         );
-        halo.addColorStop(0, rgba(mixColor(somaColor, TEAL, 0.12), 0.18 + neuron.firing * 0.16));
+        halo.addColorStop(
+          0,
+          rgba(
+            mixColor(somaColor, TEAL, 0.12),
+            (0.18 + neuron.firing * 0.16) * maturity,
+          ),
+        );
         halo.addColorStop(1, rgba(somaColor, 0));
         ctx.beginPath();
         ctx.arc(neuron.x, neuron.y, somaGlowRadius, 0, Math.PI * 2);
@@ -936,23 +1370,29 @@ export default function NeuralCanvas() {
         ctx.beginPath();
         ctx.moveTo(neuron.x, neuron.y);
         ctx.lineTo(axonEndX, axonEndY);
-        ctx.strokeStyle = rgba(somaColor, 0.16 + neuron.firing * 0.22);
+        ctx.strokeStyle = rgba(somaColor, (0.16 + neuron.firing * 0.22) * maturity);
         ctx.lineWidth = 0.75 + neuron.depth * 0.2;
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(neuron.x, neuron.y, neuron.radius + 0.9, 0, Math.PI * 2);
-        ctx.fillStyle = rgba(mixColor(somaColor, WHITE, 0.08), 0.18 + neuron.firing * 0.22);
+        ctx.arc(neuron.x, neuron.y, visibleRadius + 0.9, 0, Math.PI * 2);
+        ctx.fillStyle = rgba(
+          mixColor(somaColor, WHITE, 0.08),
+          (0.18 + neuron.firing * 0.22) * maturity,
+        );
         ctx.fill();
 
         ctx.beginPath();
-        ctx.arc(neuron.x, neuron.y, neuron.radius, 0, Math.PI * 2);
-        ctx.fillStyle = rgba(somaColor, 0.56 + neuron.firing * 0.18);
+        ctx.arc(neuron.x, neuron.y, visibleRadius, 0, Math.PI * 2);
+        ctx.fillStyle = rgba(somaColor, (0.56 + neuron.firing * 0.18) * maturity);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.arc(neuron.x, neuron.y, Math.max(0.75, neuron.radius * 0.46), 0, Math.PI * 2);
-        ctx.fillStyle = rgba(WHITE, 0.18 + neuron.firing * 0.12 + neuron.signal * 0.08);
+        ctx.arc(neuron.x, neuron.y, Math.max(0.75, visibleRadius * 0.46), 0, Math.PI * 2);
+        ctx.fillStyle = rgba(
+          WHITE,
+          (0.18 + neuron.firing * 0.12 + neuron.signal * 0.08) * maturity,
+        );
         ctx.fill();
       }
 
