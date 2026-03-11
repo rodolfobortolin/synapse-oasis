@@ -251,8 +251,8 @@ export default function Home() {
               },
               {
                 icon: <KeyIcon />,
-                title: "Flexible AI Integration",
-                desc: "Our AI apps give you full control. Use your own API keys with the AI provider you trust, or take advantage of platform-native AI capabilities as Atlassian rolls them out. Your data stays yours, always.",
+                title: "Powered by Forge LLM",
+                desc: "Our AI apps use Forge LLM — Atlassian's native AI runtime that keeps everything inside the platform. No external API keys, no third-party servers, no data leaving the Atlassian ecosystem. Enterprise-grade AI with zero configuration.",
                 color: "#EC8546",
               },
               {
@@ -327,8 +327,8 @@ export default function Home() {
                 "Every SynapseOasis app runs on Forge. No external infrastructure. No data leaks.",
               ],
               [
-                "Most AI plugins lock you into their AI provider and see all your data.",
-                "We give you the flexibility to choose your AI provider. Your data, your control.",
+                "Most AI plugins require external API keys and route your data through third-party servers.",
+                "We use Forge LLM — AI runs natively inside Atlassian. No external keys, no data leaving the platform.",
               ],
               [
                 "Most vendors ship features to check marketing boxes.",
