@@ -39,39 +39,34 @@ export default function HeroSection() {
 
       {/* Grid pattern */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.045]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+            "linear-gradient(rgba(255,255,255,0.44) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.44) 1px, transparent 1px)",
           backgroundSize: "80px 80px",
         }}
       />
 
-
-      {/* Floating orbs */}
+      {/* Atmospheric gradients */}
       <div
-        className="absolute animate-float"
+        className="absolute inset-0"
         style={{
-          width: 400,
-          height: 400,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(126,124,222,0.1) 0%, transparent 70%)",
-          top: "10%",
-          left: "10%",
-          filter: "blur(60px)",
+          background:
+            "radial-gradient(ellipse 32% 28% at 17% 25%, rgba(81,162,231,0.13) 0%, rgba(81,162,231,0.05) 38%, transparent 72%), radial-gradient(ellipse 34% 30% at 82% 72%, rgba(126,124,222,0.15) 0%, rgba(126,124,222,0.06) 42%, transparent 74%), radial-gradient(circle at 50% 48%, rgba(255,255,255,0.035) 0%, transparent 26%)",
         }}
       />
       <div
-        className="absolute animate-float"
+        className="absolute inset-0"
         style={{
-          width: 350,
-          height: 350,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(236,133,70,0.08) 0%, transparent 70%)",
-          bottom: "15%",
-          right: "10%",
-          filter: "blur(50px)",
-          animationDelay: "3s",
+          background:
+            "linear-gradient(180deg, rgba(5,7,34,0.06) 0%, rgba(5,7,34,0) 18%, rgba(5,7,34,0) 78%, rgba(5,7,34,0.18) 100%)",
+        }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at center, transparent 0%, transparent 56%, rgba(4,6,24,0.14) 100%)",
         }}
       />
 
