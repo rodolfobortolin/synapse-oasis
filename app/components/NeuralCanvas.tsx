@@ -731,6 +731,7 @@ export default function NeuralCanvas() {
   const animRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   const motionScaleRef = useRef(1);
+  const visibleRef = useRef(true);
   const growthRef = useRef<GrowthState>({
     baseCount: 0,
     maxCount: 0,
@@ -999,6 +1000,11 @@ export default function NeuralCanvas() {
     window.addEventListener("mouseleave", onLeave);
 
     const drawFrame = (timestamp: number) => {
+      if (!visibleRef.current) {
+        lastTimeRef.current = 0;
+        animRef.current = requestAnimationFrame(drawFrame);
+        return;
+      }
       const dt = clamp((timestamp - (lastTimeRef.current || timestamp)) / 1000, 0.008, 0.04);
       lastTimeRef.current = timestamp;
 
@@ -1401,8 +1407,22 @@ export default function NeuralCanvas() {
 
     animRef.current = requestAnimationFrame(drawFrame);
 
+    /* Pause animation when canvas leaves viewport or tab is hidden */
+    const observer = new IntersectionObserver(
+      ([entry]) => { visibleRef.current = entry.isIntersecting && document.visibilityState === "visible"; },
+      { threshold: 0 },
+    );
+    observer.observe(canvas);
+
+    const onVisibility = () => {
+      visibleRef.current = document.visibilityState === "visible";
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       cancelAnimationFrame(animRef.current);
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseleave", onLeave);

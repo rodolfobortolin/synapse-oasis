@@ -112,7 +112,7 @@ export default function HeroSection() {
             style={{ color: "rgba(255,255,255,0.5)" }}
           >
             AI-powered, Forge-native apps built by consultants who spent 15+ years
-            solving the same problems you face every day in Jira and JSM.
+            solving the same problems you face every day across the Atlassian stack.
           </p>
         </HeroBlurIn>
 
