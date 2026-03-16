@@ -97,7 +97,7 @@ export default function Home() {
               <h2 style={{ color: "var(--navy)" }}>
                 Apps That Solve Real Problems
                 <br />
-                <span style={{ color: "var(--grey)" }}>in Jira &amp; JSM</span>
+                <span style={{ color: "var(--grey)" }}>in Jira, JSM &amp; Confluence</span>
               </h2>
               <p className="text-base max-w-2xl mx-auto mt-5" style={{ color: "var(--grey)" }}>
                 Forge-native apps built from 15+ years of enterprise Atlassian consulting. Each one solves a real problem we encountered in the field.
@@ -201,27 +201,52 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Health Hub — separate, may be removed later */}
+          {/* Row 3: Health Hub, License Waste Manager, Markdown Toolkit */}
           <div className="grid md:grid-cols-3" style={{ border: "1px dashed var(--border)", borderTop: "none" }}>
-            <ScrollReveal>
-              <div
-                className="p-8 md:p-10 h-full"
-                style={{ borderRight: "1px dashed var(--border)", background: "white" }}
-              >
-                <Image src="/health-hub.png" alt="Health Hub" width={72} height={72} className="rounded-xl mb-6" />
-                <h3 className="font-bold mb-3" style={{ color: "var(--navy)" }}>Health Hub</h3>
-                <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--grey)" }}>
-                  Project health dashboard that analyzes your Jira configuration — schemes, screens, workflows, permissions, and fields. Generates a quality score with actionable recommendations to clean up your instance.
-                </p>
-                <div className="space-y-2">
-                  {["Health Score", "Config Analysis", "Recommendations", "Scheme Audit"].map((item) => (
-                    <span key={item} className="flex items-center gap-2 text-sm" style={{ color: "var(--navy)" }}>
-                      <CheckIcon /> {item}
-                    </span>
-                  ))}
+            {[
+              {
+                icon: "/health-hub.png",
+                title: "Health Hub",
+                desc: "Project health dashboard that analyzes your Jira configuration — schemes, screens, workflows, permissions, and fields. Generates a quality score with actionable recommendations to clean up your instance.",
+                color: "#2BC48A",
+                checks: ["Health Score", "Config Analysis", "Recommendations", "Scheme Audit"],
+              },
+              {
+                icon: "/license-waste.png",
+                title: "License Waste Manager",
+                desc: "Identifies inactive users across Jira, Confluence, JSM, and Product Discovery. Visualizes license utilization, automates deprovisioning with scheduled rules, and tracks every action in a compliance-ready audit log.",
+                color: "#9B59B6",
+                checks: ["Inactive User Detection", "Automation Rules", "Multi-product Scan", "Audit & Compliance"],
+              },
+              {
+                icon: "/markdown-toolkit.png",
+                title: "Markdown Toolkit",
+                desc: "Export and import Confluence content as Markdown. Supports single pages, page trees, and full spaces. Includes an in-page macro that renders Markdown with code highlighting, Mermaid diagrams, and math expressions.",
+                color: "#2B9F6F",
+                checks: ["Page & Space Export", "Markdown Import", "Mermaid Diagrams", "Code Highlighting"],
+              },
+            ].map((card, i) => (
+              <ScrollReveal key={card.title} delay={i * 100}>
+                <div
+                  className="p-8 md:p-10 h-full"
+                  style={{
+                    borderRight: i % 3 !== 2 ? "1px dashed var(--border)" : "none",
+                    background: "white",
+                  }}
+                >
+                  <Image src={card.icon} alt={card.title} width={72} height={72} className="rounded-xl mb-6" />
+                  <h3 className="font-bold mb-3" style={{ color: "var(--navy)" }}>{card.title}</h3>
+                  <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--grey)" }}>{card.desc}</p>
+                  <div className="space-y-2">
+                    {card.checks.map((item) => (
+                      <span key={item} className="flex items-center gap-2 text-sm" style={{ color: "var(--navy)" }}>
+                        <CheckIcon /> {item}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </ScrollReveal>
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
