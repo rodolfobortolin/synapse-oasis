@@ -34,8 +34,10 @@ export default function HeroSection() {
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
       style={{ background: "var(--hero-gradient)" }}
     >
-      {/* Neural canvas only in hero */}
-      <NeuralCanvas />
+      {/* Neural canvas only in hero – hidden below 1100px to reduce visual noise */}
+      <div className="hidden min-[1100px]:block">
+        <NeuralCanvas />
+      </div>
 
       {/* Grid pattern */}
       <div
