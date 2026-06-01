@@ -59,6 +59,7 @@ export default function Home() {
         links={[
           { label: "What We Build", href: "#what-we-build" },
           { label: "Our Approach", href: "#approach" },
+          { label: "Blog", href: "/blog" },
           { label: "About", href: "#about" },
           { label: "Support", href: "https://synapseoasis.atlassian.net/servicedesk/customer/portals" },
           { label: "Contact", href: "#contact" },
