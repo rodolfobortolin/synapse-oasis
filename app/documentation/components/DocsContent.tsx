@@ -7,20 +7,24 @@ import type { Block } from "../types";
 
 function inline(text: string): ReactNode[] {
   // Bold is matched before italic so `**x**` is not read as two italics.
+  //
+  // Emphasis recurses into its own content: `**[label](href)**` matches the bold
+  // pattern first, and without recursing the link inside it rendered as literal
+  // markdown. Code spans do not recurse — their content is meant to be literal.
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*\n]+\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g);
   return parts.map((part, i) => {
     if (!part) return null;
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
         <strong key={i} className="font-semibold" style={{ color: "var(--navy)" }}>
-          {part.slice(2, -2)}
+          {inline(part.slice(2, -2))}
         </strong>
       );
     }
     if (part.startsWith("*") && part.endsWith("*")) {
       return (
         <em key={i} className="italic">
-          {part.slice(1, -1)}
+          {inline(part.slice(1, -1))}
         </em>
       );
     }
@@ -115,7 +119,7 @@ export default function DocsContent({
           {title}
         </h1>
         <p className="text-[15.5px] leading-relaxed" style={{ color: "var(--grey)" }}>
-          {description}
+          {inline(description)}
         </p>
       </header>
 
