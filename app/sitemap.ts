@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "./blog/data";
+import { flatPages } from "./documentation/lib";
+import { PRIVACY_FACTS } from "./privacy/facts";
 
 const SITE_URL = "https://synapseoasis.com";
 
@@ -15,6 +17,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/blog`, lastModified: latestPost, changeFrequency: "weekly", priority: 0.9 },
   ];
 
+  // Documentation and the per-app privacy policies are not linked from the marketing
+  // navigation yet, so the sitemap is how they get discovered.
+  const docRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}/documentation`, lastModified: latestPost, changeFrequency: "monthly", priority: 0.7 },
+    ...flatPages().map((f) => ({
+      url: `${SITE_URL}${f.href}`,
+      lastModified: latestPost,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+  ];
+
+  const privacyRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}/privacy`, lastModified: latestPost, changeFrequency: "yearly", priority: 0.4 },
+    ...PRIVACY_FACTS.map((p) => ({
+      url: `${SITE_URL}/privacy/${p.slug}`,
+      lastModified: latestPost,
+      changeFrequency: "yearly" as const,
+      priority: 0.4,
+    })),
+  ];
+
   const postRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `${SITE_URL}/blog/${post.slug}`,
     lastModified: new Date(post.date),
@@ -22,5 +46,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...postRoutes];
+  return [...staticRoutes, ...postRoutes, ...docRoutes, ...privacyRoutes];
 }

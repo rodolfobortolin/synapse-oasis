@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     "Jira workflow automation",
     "Jira bulk operations",
     "Jira permission audit",
-    "Jira health monitoring",
+    "Jira configuration cleanup",
     "Jira checklist custom field",
     "Jira issue picker",
     "Jira encrypted fields",

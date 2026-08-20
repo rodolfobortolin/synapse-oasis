@@ -16,6 +16,7 @@ const NAV_LINKS = [
   { label: "What We Build", href: "/#what-we-build" },
   { label: "Our Approach", href: "/#approach" },
   { label: "Blog", href: "/blog", active: true },
+  { label: "Docs", href: "/documentation" },
   { label: "About", href: "/#about" },
   { label: "Support", href: "https://synapseoasis.atlassian.net/servicedesk/customer/portals" },
   { label: "Contact", href: "/#contact" },

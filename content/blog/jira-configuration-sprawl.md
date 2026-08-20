@@ -77,17 +77,18 @@ Most teams audit configuration exactly once — during a migration, an upgrade, 
 
 ---
 
-## What Continuous Health Checks Actually Do — and How Health Hub for Jira Runs Them
+## What a Standing Cleanup Practice Looks Like — and How Admin Toolkit for Jira Runs It
 
-The fix for configuration debt is not a heroic annual purge. It's instrumentation: a standing, automated read on the health of your configuration so that debt is visible *as it accumulates*, not after it has already cost you a year of slow page loads. That's the entire premise of **Health Hub for Jira**.
+The fix for configuration debt is not a heroic annual purge. It's instrumentation: a standing, evidence-based read on what your configuration actually contains, so debt is visible *as it accumulates* rather than after it has already cost you a year of slow page loads. That's the premise behind the cleanup tools in **Admin Toolkit for Jira**.
 
-Health Hub runs **62 analyzers** across your instance and grades configuration against Atlassian best practices — the same thresholds and anti-patterns described above — so you get a continuous, evidence-based picture instead of a guess. Concretely, it lets admins:
+Instead of a research project every time someone asks "can we delete this field?", the toolkit answers the question with data:
 
-- **Find the fields you're afraid to delete.** Surface custom fields that are unused, duplicated, or have no values across any issue — exactly the "default-value" overhead Atlassian identified as the cause of the 13-second issue create. It also flags how close each project sits to the **700-field limit** so you act before enforcement does.
-- **Collapse workflow and status sprawl.** Detect duplicate and near-duplicate workflows, statuses that mean the same thing under different names, and orphaned schemes (workflow, permission, notification, field configuration) that no active project references.
-- **Spot orphaned and redundant configuration objects.** Unused priorities, resolutions, issue types, and screens that bloat every dropdown and slow every query — with the redundancy made explicit, so the "research project" of safe deletion is already done for you.
-- **Track health over time, not just once.** Because the 62 analyzers run continuously, you get a trend line on configuration debt rather than a single snapshot — turning governance from a periodic event into a standing control.
-- **Prioritize by impact and prepare for 2026.** Rather than a flat list, you get a graded view of what's hurting performance and what's about to breach Atlassian's enforced limits, so cleanup targets the highest-cost, highest-risk items first.
+- **Find the fields you're afraid to delete.** The **Custom Fields Health Assessment** grades every custom field for cleanup, consolidation, naming, searchability, and option quality — surfacing the unused, duplicated, and never-populated fields that create exactly the default-value overhead Atlassian identified as the cause of the 13-second issue create. The result exports to PDF, so the cleanup case can be reviewed by people who will never open the admin screens.
+- **Merge duplicates instead of abandoning them.** The **Custom Field Merger** takes two fields that mean the same thing, generates the CSV import that moves values onto the surviving field, and replaces the old field's references on every screen — the part that normally stalls a consolidation halfway through.
+- **Collapse scheme sprawl.** **Scheme Deduplication** finds configuration schemes that carry identical settings and can be consolidated, and **Unused Schemes Cleanup** finds workflow, screen, permission, and notification schemes that no active project references any more — then deletes them.
+- **Clean up the filter layer too.** **Filter Hygiene** audits every saved filter, exposes how each one is shared, and lets you act in bulk. Filters are the configuration object nobody inventories, and the one most likely to be sharing data more broadly than anyone intended.
+- **Know which projects still matter.** **Project Activity** charts issue creation across all projects over the last 12 months, which is usually the fastest way to tell a dormant project from a live one before you touch its configuration.
+- **Undo the migration tax.** After a Cloud migration, the **Migrated Fields Cleaner** and **Migrated Project Roles Cleanup** strip the "(migrated)" suffixes and consolidate users and groups back into the original roles, so the migration artifacts don't become permanent configuration.
 
 The point isn't to make your Jira minimal for its own sake. It's to make every "yes" to a new field or workflow a *visible* decision with a *measured* cost — and to keep the instance under Atlassian's thresholds before those thresholds start saying no for you.
 

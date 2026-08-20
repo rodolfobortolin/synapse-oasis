@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import NavBar from "./components/NavBar";
 import HeroSection from "./components/HeroSection";
 import ScrollReveal from "./components/ScrollReveal";
@@ -60,6 +61,7 @@ export default function Home() {
           { label: "What We Build", href: "#what-we-build" },
           { label: "Our Approach", href: "#approach" },
           { label: "Blog", href: "/blog" },
+          { label: "Docs", href: "/documentation" },
           { label: "About", href: "#about" },
           { label: "Support", href: "https://synapseoasis.atlassian.net/servicedesk/customer/portals" },
           { label: "Contact", href: "#contact" },
@@ -112,6 +114,7 @@ export default function Home() {
               {
                 icon: "/ai-triage.png",
                 title: "AI Triage",
+                doc: "ai-triage",
                 desc: "Intelligent ticket routing and incident detection. The Dispatcher Agent assigns teams and users automatically, Smart Escalation handles priority-based routing, and Incident Detection clusters similar issues in real time.",
                 color: "#7E7CDE",
                 checks: ["Auto-routing", "Smart Escalation", "Incident Clustering", "Real-time Detection"],
@@ -119,6 +122,7 @@ export default function Home() {
               {
                 icon: "/ai-portal.png",
                 title: "AI Portal Chat",
+                doc: "ai-portal-chat",
                 desc: "AI-powered chatbot for Jira Service Management portals. Answers customer questions instantly, creates tickets from conversations, and reduces agent workload with intelligent self-service.",
                 color: "#2B2ED8",
                 checks: ["Portal Chatbot", "Auto Ticket Creation", "Self-service AI", "Agent Assist"],
@@ -126,6 +130,7 @@ export default function Home() {
               {
                 icon: "/secret-scanner.png",
                 title: "Secret Scanner",
+                doc: "secret-scanner",
                 desc: "Scans issues, comments, and attachments for exposed credentials — API keys, tokens, passwords, and secrets. Alerts administrators before sensitive data spreads across your Jira instance.",
                 color: "#E5484D",
                 checks: ["Credential Detection", "Real-time Scanning", "Admin Alerts", "Data Protection"],
@@ -149,6 +154,13 @@ export default function Home() {
                       </span>
                     ))}
                   </div>
+                  <Link
+                    href={`/documentation/${card.doc}/overview`}
+                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold mt-6 transition-opacity hover:opacity-70"
+                    style={{ color: "var(--blue-cta)" }}
+                  >
+                    Read the documentation <ArrowIcon />
+                  </Link>
                 </div>
               </ScrollReveal>
             ))}
@@ -160,6 +172,7 @@ export default function Home() {
               {
                 icon: "/workflow-toolkit.png",
                 title: "Workflow Toolkit",
+                doc: "workflow-toolkit",
                 desc: "AI-powered workflow modules — conditions, validators, and post-functions. Define rules in plain language: the AI generates Jira expressions, validates transitions, and executes multi-step actions automatically.",
                 color: "#51A2E7",
                 checks: ["AI Conditions", "AI Validators", "AI Post Functions", "Workflow Automation"],
@@ -167,6 +180,7 @@ export default function Home() {
               {
                 icon: "/admin-toolkit.png",
                 title: "Admin Toolkit",
+                doc: "admin-toolkit",
                 desc: "The admin tools Atlassian doesn't ship. Bulk operations, permission auditing, configuration management, and instance cleanup — everything a Jira administrator needs to manage at scale.",
                 color: "#EC8546",
                 checks: ["Bulk Operations", "Permission Audit", "Config Management", "Instance Cleanup"],
@@ -174,6 +188,7 @@ export default function Home() {
               {
                 icon: "/cf-toolkit.png",
                 title: "Custom Fields Toolkit",
+                doc: "custom-fields-toolkit",
                 desc: "Purpose-built custom fields that Jira doesn't offer natively. Issue pickers with JQL filtering, checklists with progress tracking, and project-managed select lists — so project leads can manage field options without being Jira admins.",
                 color: "#3B9FE3",
                 checks: ["Issue Picker", "Checklists", "Project-managed Lists", "No Admin Required"],
@@ -197,24 +212,25 @@ export default function Home() {
                       </span>
                     ))}
                   </div>
+                  <Link
+                    href={`/documentation/${card.doc}/overview`}
+                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold mt-6 transition-opacity hover:opacity-70"
+                    style={{ color: "var(--blue-cta)" }}
+                  >
+                    Read the documentation <ArrowIcon />
+                  </Link>
                 </div>
               </ScrollReveal>
             ))}
           </div>
 
-          {/* Row 3: Health Hub, License Waste Manager, Markdown Toolkit */}
-          <div className="grid md:grid-cols-3" style={{ border: "1px dashed var(--border)", borderTop: "none" }}>
+          {/* Row 3: License Waste Manager, Markdown Toolkit */}
+          <div className="grid md:grid-cols-2" style={{ border: "1px dashed var(--border)", borderTop: "none" }}>
             {[
-              {
-                icon: "/health-hub.png",
-                title: "Health Hub",
-                desc: "Project health dashboard that analyzes your Jira configuration — schemes, screens, workflows, permissions, and fields. Generates a quality score with actionable recommendations to clean up your instance.",
-                color: "#2BC48A",
-                checks: ["Health Score", "Config Analysis", "Recommendations", "Scheme Audit"],
-              },
               {
                 icon: "/license-waste.png",
                 title: "License Waste Manager",
+                doc: "license-waste-manager",
                 desc: "Identifies inactive users across Jira, Confluence, JSM, and Product Discovery. Visualizes license utilization, automates deprovisioning with scheduled rules, and tracks every action in a compliance-ready audit log.",
                 color: "#9B59B6",
                 checks: ["Inactive User Detection", "Automation Rules", "Multi-product Scan", "Audit & Compliance"],
@@ -222,6 +238,7 @@ export default function Home() {
               {
                 icon: "/markdown-toolkit.png",
                 title: "Markdown Toolkit",
+                doc: "markdown-toolkit",
                 desc: "Export and import Confluence content as Markdown. Supports single pages, page trees, and full spaces. Includes an in-page macro that renders Markdown with code highlighting, Mermaid diagrams, and math expressions.",
                 color: "#2B9F6F",
                 checks: ["Page & Space Export", "Markdown Import", "Mermaid Diagrams", "Code Highlighting"],
@@ -231,7 +248,7 @@ export default function Home() {
                 <div
                   className="p-8 md:p-10 h-full"
                   style={{
-                    borderRight: i % 3 !== 2 ? "1px dashed var(--border)" : "none",
+                    borderRight: i === 0 ? "1px dashed var(--border)" : "none",
                     background: "white",
                   }}
                 >
@@ -245,6 +262,13 @@ export default function Home() {
                       </span>
                     ))}
                   </div>
+                  <Link
+                    href={`/documentation/${card.doc}/overview`}
+                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold mt-6 transition-opacity hover:opacity-70"
+                    style={{ color: "var(--blue-cta)" }}
+                  >
+                    Read the documentation <ArrowIcon />
+                  </Link>
                 </div>
               </ScrollReveal>
             ))}
@@ -454,6 +478,9 @@ export default function Home() {
             <a href="#about" className="text-xs transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.5)" }}>
               About
             </a>
+            <Link href="/documentation" className="text-xs transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Documentation
+            </Link>
             <a href="https://synapseoasis.atlassian.net/servicedesk/customer/portals" target="_blank" rel="noopener noreferrer" className="text-xs transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.5)" }}>
               Support
             </a>

@@ -64,7 +64,7 @@ const posts: Omit<BlogPost, "content">[] = [
     tag: "CONFIG SPRAWL",
     tagColor: "#7E7CDE",
     readTime: "8 min read",
-    app: "Health Hub for Jira",
+    app: "Admin Toolkit for Jira",
     date: "2026-05-08",
   },
   {
