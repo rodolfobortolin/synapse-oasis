@@ -346,7 +346,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
     personal: [
       "Exports and imports process the content you select. During a job, that content — including any personal data your pages happen to contain — is held in app storage inside your tenant until the job finishes and its data is cleared.",
       "Macro content is stored as written by the page author.",
-      "The app does not collect account identifiers for its own purposes, and does not collect email addresses, passwords, authentication tokens, API keys or payment data.",
+      "Your Atlassian account ID is stored while an export or import runs, as the key that keeps your job separate from anyone else's. The record is removed when the job is cleared. The app does not collect email addresses, display names, passwords, authentication tokens, API keys or payment data.",
     ],
     scopes: [
       "read:confluence-content.all",
