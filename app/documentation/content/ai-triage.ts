@@ -2,7 +2,7 @@ import type { AppDocs } from "../types";
 
 export const aiTriage: AppDocs = {
   slug: "ai-triage",
-  name: "AI Triage for Jira",
+  name: "AI Triage for JSM",
   shortName: "AI Triage",
   tagline:
     "Three assistants for a service desk. One routes each new ticket to the right team and person. One reads the customer's tone and escalates when they are losing patience. One spots when many tickets are the same incident and groups them.",

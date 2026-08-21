@@ -35,11 +35,11 @@ export const SUPPORT_PORTAL = "https://synapseoasis.atlassian.net/servicedesk/cu
 export const PRIVACY_FACTS: PrivacyFacts[] = [
   {
     slug: "ai-portal-chat",
-    name: "AI Portal Chat for Jira",
+    name: "AI Portal Chat for JSM",
     products: "Jira Service Management",
     icon: "/ai-portal.png",
     summary:
-      "AI Portal Chat for Jira is an AI assistant for the Jira Service Management customer portal. It answers customer questions, searches your knowledge base, and creates or updates requests from the conversation.",
+      "AI Portal Chat for JSM is an AI assistant for the Jira Service Management customer portal. It answers customer questions, searches your knowledge base, and creates or updates requests from the conversation.",
     ai: true,
     aiData: [
       "the customer's chat messages and the history of the current conversation",
@@ -90,11 +90,11 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
 
   {
     slug: "ai-triage",
-    name: "AI Triage for Jira",
+    name: "AI Triage for JSM",
     products: "Jira Service Management · Jira",
     icon: "/ai-triage.png",
     summary:
-      "AI Triage for Jira routes incoming tickets automatically. The Dispatcher Agent assigns the right team or agent, Smart Escalation raises priority based on request content and sentiment, and Incident Detection clusters similar reports in real time.",
+      "AI Triage for JSM routes incoming tickets automatically. The Dispatcher Agent assigns the right team or agent, Smart Escalation raises priority based on request content and sentiment, and Incident Detection clusters similar reports in real time.",
     ai: true,
     aiData: [
       "the summary, description, comments and selected field values of the issue being triaged",

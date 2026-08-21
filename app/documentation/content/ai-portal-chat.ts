@@ -2,7 +2,7 @@ import type { AppDocs } from "../types";
 
 export const aiPortalChat: AppDocs = {
   slug: "ai-portal-chat",
-  name: "AI Portal Chat for Jira",
+  name: "AI Portal Chat for JSM",
   shortName: "AI Portal Chat",
   tagline:
     "Adds a chat assistant to your Jira Service Management portal. It answers customer questions from your Confluence knowledge base, works out which request type they need, collects the fields in the conversation, takes attachments, and creates the ticket.",

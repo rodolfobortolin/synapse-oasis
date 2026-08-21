@@ -125,7 +125,7 @@ const posts: Omit<BlogPost, "content">[] = [
     tag: "MISROUTING",
     tagColor: "#EC8546",
     readTime: "8 min read",
-    app: "AI Triage for Jira",
+    app: "AI Triage for JSM",
     date: "2026-03-31",
   },
   {
@@ -169,7 +169,7 @@ const posts: Omit<BlogPost, "content">[] = [
     tag: "ESCALATION",
     tagColor: "#E25656",
     readTime: "10 min read",
-    app: "AI Triage for Jira",
+    app: "AI Triage for JSM",
     date: "2026-03-03",
   },
   {
@@ -180,7 +180,7 @@ const posts: Omit<BlogPost, "content">[] = [
     tag: "PROACTIVE SUPPORT",
     tagColor: "#1B9E6B",
     readTime: "9 min read",
-    app: "AI Triage for Jira",
+    app: "AI Triage for JSM",
     date: "2026-02-24",
   },
 ];
