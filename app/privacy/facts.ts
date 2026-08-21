@@ -151,7 +151,6 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "**Findings** — for each detection: the issue key and summary, the field it was found in, the pattern and category that matched, the **masked** matched text (first four characters followed by asterisks), a SHA-256 hash of the raw match used only for deduplication, the detection timestamp, and the comment author where applicable.",
       "**Triage metadata** — the Jira issue created to track a leak and its status, plus dismissal records: who dismissed a finding, when, and the reason given.",
       "**Scanner configuration** — enabled categories and rules, your custom regex patterns, whether attachments and change history are scanned, auto-redaction and dismissal settings, project exclusions, and the target project and issue type for remediation tickets.",
-      "**Webhook settings** — the Automation for Jira webhook URL, the **webhook secret** you paste from Automation, and the selected event types.",
       "**Audit log** — app events, retained for 90 days.",
       "**Scan job state** — progress and cursors for bulk scans, so a long scan can resume.",
     ],
@@ -165,7 +164,6 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "Because the app detects PII patterns — card numbers, national identifiers, contact details — a finding records that such a value was present in a specific field, in masked form only.",
       "Atlassian account IDs or display names are stored when they identify the author of a scanned comment or the administrator who dismissed a finding.",
       "Issue keys and issue summaries are stored so administrators can navigate to the affected issue.",
-      "The **webhook secret** is a credential you provide, stored inside your own tenant so the app can sign its notifications to Automation for Jira.",
     ],
     scopes: [
       "read:jira-work",
@@ -176,7 +174,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "storage:app",
     ],
     storageTech: "Forge app storage (key-value store)",
-    external: ["`*.atlassian.com` — the Atlassian REST APIs of your own site, including the Automation for Jira incoming webhook"],
+    external: [],
   },
 
   {

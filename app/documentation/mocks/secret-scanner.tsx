@@ -216,39 +216,6 @@ const settings = (
   </Screen>
 );
 
-/* ── Webhook notifications ─────────────────────────────────────────────── */
-
-const webhook = (
-  <Screen where="Jira → Apps → Secret Scanner → Settings → Webhook Notifications" width={820}>
-    <PageTitle>Webhook Notifications</PageTitle>
-    <Sub>
-      Send real-time notifications to Automation for Jira when secrets are detected, dismissed, resolved or redacted.
-    </Sub>
-
-    <Toggle on label="Webhook Notifications Enabled" />
-    <Field label="Automation Webhook URL" value="https://automation.atlassian.com/pro/hooks/••••••••" help="URL must start with https://" />
-    <Field label="Webhook Secret" value="••••••••••••••••" help="Paste the secret from Automation for Jira" />
-    <Row gap={8}>
-      <Btn>Test Connection</Btn>
-      <span className="text-[12px] self-center" style={{ color: ATL.green }}>
-        Connection successful
-      </span>
-    </Row>
-
-    <SectionLabel>Notification Events — 3 events selected</SectionLabel>
-    <Panel tone="subtle">
-      <Checkbox on label="secret-detected" />
-      <Checkbox on label="secret-redacted" />
-      <Checkbox on label="bulk-scan-complete" />
-      <Checkbox on={false} label="secret-dismissed" />
-      <Checkbox on={false} label="secret-resolved" />
-      <div className="text-[11px] mt-2" style={{ color: ATL.subtle }}>
-        Unselected events are silently skipped.
-      </div>
-    </Panel>
-  </Screen>
-);
-
 /* ── Analytics ─────────────────────────────────────────────────────────── */
 
 const analytics = (
@@ -323,6 +290,5 @@ export const SECRET_SCANNER_MOCKS: Record<string, ReactNode> = {
   "ss-bulk-scan": bulkScan,
   "ss-rules": rules,
   "ss-settings": settings,
-  "ss-webhook": webhook,
   "ss-analytics": analytics,
 };

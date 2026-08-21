@@ -117,7 +117,7 @@ export const secretScanner: AppDocs = {
               "The 17 categories and individual rules, your own regular expressions, **and the four scanning switches**: Scan Issue Changelog, Scan Attachments, Auto-Redaction and Require Reason When Dismissing.",
             ],
             ["**Project Exclusions**", "Projects the scanner skips silently."],
-            ["**Settings**", "Two cards only: **Issue Creation** (target project and issue type) and **Webhook Notifications**."],
+            ["**Settings**", "One card: **Issue Creation** \u2014 the target project and issue type for issues raised from a finding."],
           ],
         },
       ],
@@ -362,53 +362,23 @@ text ~ "BEGIN RSA PRIVATE KEY" OR text ~ "connectionString"`,
     },
 
     {
-      slug: "notifications",
-      title: "Notifications and audit log",
-      description: "Push findings into Automation for Jira, and keep a 90-day record of what happened.",
+      slug: "audit-log",
+      title: "Audit log",
+      description: "A 90-day record of what the app did and who acted on a finding.",
       blocks: [
         {
           type: "p",
-          text: "**Why.** A finding nobody sees is not a control. Webhook notifications hand each event to **Automation for Jira**, and your existing automation rules decide what happens next: a Slack message, an email, a page, a ticket somewhere else.",
-        },
-        { type: "mock", id: "ss-webhook" },
-
-        { type: "h", level: 2, text: "Setting it up" },
-        {
-          type: "steps",
-          items: [
-            "In Jira, go to **Project settings → Automation → Create rule** and choose the **Incoming webhook** trigger.",
-            "Copy the webhook URL and the secret that Automation generates.",
-            "In **Secret Scanner → Settings → Webhook Notifications**, switch notifications on and paste both values. The URL must start with `https://`.",
-            "Choose which events should fire.",
-            "Click **Test Connection** to confirm the rule receives a payload.",
-            "Build the rest of your automation rule around that payload.",
-          ],
+          text: "**Why.** A finding nobody can account for later is not evidence. The **Audit Log** tab records app events for **90 days**, so \u201cwho dismissed that finding, and when\u201d has an answer.",
         },
         {
-          type: "table",
-          head: ["Event", "Fires when", "Worth notifying?"],
-          rows: [
-            ["`secret-detected`", "A new finding is recorded.", "Yes. This is the one that needs a human."],
-            ["`bulk-scan-complete`", "A bulk scan finishes.", "Yes, so somebody goes and reads the results."],
-            ["`secret-redacted`", "Auto-redaction changed an issue.", "Yes, if redaction is enabled."],
-            ["`secret-dismissed`", "Somebody dismissed a finding.", "Only if you review dismissals."],
-            ["`secret-resolved`", "A finding was marked resolved.", "Usually not."],
-          ],
+          type: "p",
+          text: "You can filter by account ID, event type and details, and export the range to CSV. That export is what goes into an evidence pack for an audit.",
         },
         {
           type: "callout",
           variant: "info",
-          text: "Events you do not select are skipped silently. Start with the first two and add others when you have somewhere for them to go.",
-        },
-
-        { type: "h", level: 2, text: "Audit log" },
-        {
-          type: "p",
-          text: "The **Audit Log** tab records app events for **90 days**. You can filter by account ID, event type and details, and export to CSV.",
-        },
-        {
-          type: "p",
-          text: "This is what answers “who dismissed that finding, and when”. The CSV export is what goes into an evidence pack for an audit.",
+          title: "No outbound notifications",
+          text: "Secret Scanner sends nothing outside your Atlassian tenant \u2014 there is no webhook and no external address in its manifest at all. That is what earns it Atlassian's **Runs on Atlassian** badge, and for an app that reads credentials out of your issues we thought that mattered more than pushing events to a chat channel. To act on a finding automatically, have Automation for Jira watch the issues the app creates or the label it applies.",
         },
       ],
     },
@@ -445,7 +415,7 @@ text ~ "BEGIN RSA PRIVATE KEY" OR text ~ "connectionString"`,
         },
         {
           type: "p",
-          text: "Outbound access is limited to `*.atlassian.com`, which covers the Automation for Jira webhook. Nothing is sent anywhere else.",
+          text: "The app declares no outbound network access at all. Nothing leaves your Atlassian tenant.",
         },
 
         { type: "h", level: 2, text: "What the app stores" },
@@ -459,7 +429,7 @@ text ~ "BEGIN RSA PRIVATE KEY" OR text ~ "connectionString"`,
             { name: "Dismissals", text: "Who dismissed a finding, when, and the reason." },
             {
               name: "Configuration",
-              text: "Enabled categories and rules, your custom patterns, scanning scope, project exclusions, target project and issue type, and the webhook URL and **webhook secret**.",
+              text: "Enabled categories and rules, your custom patterns, scanning scope, project exclusions, and the target project and issue type for created issues.",
             },
             { name: "Audit log", text: "App events, for 90 days." },
             { name: "Scan progress", text: "Cursors for bulk scans, so a long scan can resume." },
@@ -491,10 +461,6 @@ text ~ "BEGIN RSA PRIVATE KEY" OR text ~ "connectionString"`,
               text: "Dismissal covers one exact value in one exact place. The same value pasted elsewhere is a new finding, by design.",
             },
             {
-              name: "The webhook test fails",
-              text: "The URL must be the Automation incoming-webhook URL and start with `https://`, with the secret Automation issued. A disabled automation rule also fails the test.",
-            },
-            {
               name: "Auto-redaction removed something it should not have",
               text: "The field cannot be un-redacted, but the original text is still in the issue's change history. Disable auto-redaction, dismiss the pattern that caused it, and restore the value from the history.",
             },
@@ -522,7 +488,7 @@ text ~ "BEGIN RSA PRIVATE KEY" OR text ~ "connectionString"`,
             },
             {
               name: "Does anything leave Atlassian?",
-              text: "No. The app runs on Atlassian Forge, and its only allowed outside address is `*.atlassian.com`, used for the Automation for Jira webhook.",
+              text: "No. The app runs on Atlassian Forge and declares no outbound address whatsoever, which is why it qualifies for Runs on Atlassian.",
             },
             {
               name: "Can SynapseOasis see our findings?",
