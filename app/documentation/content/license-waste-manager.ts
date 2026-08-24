@@ -36,7 +36,7 @@ export const licenseWasteManager: AppDocs = {
             "**Scans** your users and their product access into a snapshot, with last-activity dates.",
             "**Shows** licence utilisation per product: seats you pay for, seats in use, seats going to waste.",
             "**Filters** every user by product, activity, how long they have been inactive, group, email domain and name.",
-            "**Acts in bulk**: suspend accounts. Group changes are applied by automation rules; the manual group buttons on the Users tab do not work yet — see [Browsing and acting on users](/documentation/license-waste-manager/users).",
+            "**Acts in bulk**: remove people from access groups, revoke every licence a person holds, add people to a group, or suspend accounts — from the Users tab or from a scheduled rule. See [Browsing and acting on users](/documentation/license-waste-manager/users).",
             "**Automates** the same actions on a weekly, fortnightly or monthly schedule.",
             "**Records** every action, per user, with the result and any error.",
           ],
@@ -65,8 +65,8 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "callout",
           variant: "info",
-          title: "You can use it without the API key, with less power",
-          text: "Without the organisation API connection the app still reads what Jira exposes, but you lose last-active dates, visibility across your organisation's other sites, and the ability to suspend accounts. Most of the value is in the activity data, so get the key if you can.",
+          title: "The organisation API key is required to change anything",
+          text: "Without it the app still reads what Jira exposes and will show you a licence inventory, but it cannot act: you lose last-active dates, and every group change and suspension is skipped with a message telling you why. This is not a choice we made. Changing group membership needs organisation admin rights, and an app's own token does not have them — Jira answers 403 whatever permissions the app is granted. The organisation API key does have them, which is why it is the one credential this app asks for. Apps built on a personal user token need two.",
         },
 
         { type: "h", level: 2, text: "The five tabs" },
@@ -199,15 +199,21 @@ export const licenseWasteManager: AppDocs = {
           rows: [
             [
               "**Remove from Group…**",
-              "Intended to remove the selected people from a group. **Currently makes no change:** the screen collects a group *name* and the job needs a group *ID*, so nothing happens — and the audit log still records success.",
-              "n/a",
-              "Do not use yet. Use an automation rule, which picks the group from your detected licence groups and does work.",
+              "Removes the selected people from the group you pick. Groups managed by your identity provider are skipped, because it would put everyone back on its next sync. A person who was not in the group is recorded as skipped, not as a success.",
+              "Yes — add them back to the same group.",
+              "You want to free the seats a specific group grants, and you know which group grants them.",
+            ],
+            [
+              "**Revoke All Access…**",
+              "Works out every licence group the person belongs to and removes them from all of them, so you do not have to know which group grants which product. The account stays active and keeps its Atlassian identity, so access can be granted again later.",
+              "Yes — add them back to the groups they held. The audit log lists them.",
+              "You want the seats back but the person may return, or you do not know which groups to name.",
             ],
             [
               "**Add to Group…**",
-              "Same defect as above: no change is applied.",
-              "n/a",
-              "Do not use yet.",
+              "Adds the selected people to a group. Most often used to grant access back, or to tag a set of people you have just acted on.",
+              "Yes — remove them from the group.",
+              "Restoring access, or marking a set of users for follow-up.",
             ],
             [
               "**Suspend Users**",
@@ -226,8 +232,8 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "callout",
           variant: "warning",
-          title: "Only Protected Users is enforced — read this before you rely on it",
-          text: "Every account in **Protected Users** is skipped by bulk actions and by rule runs, with no override. **Protected Groups and Protected Domains are stored and displayed but are not applied at execution time.** Adding `org-admins` to Protected Groups does not protect its members. To protect somebody, add their individual account to Protected Users. We are fixing the other two; until then, treat them as notes to yourself.",
+          title: "All three protection lists are enforced",
+          text: "Accounts in **Protected Users**, members of **Protected Groups**, and anyone whose email is on a **Protected Domain** are skipped by every bulk action and every rule run, with no override. Each skip is recorded in the audit log with its reason, so you can see who was spared and why. One limit worth knowing: protection by domain can only match people whose email address the API returns, and Atlassian redacts that for many accounts — so protect those individually or by group.",
         },
         {
           type: "p",
@@ -382,22 +388,27 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "callout",
           variant: "warning",
-          title: "Today, only the Protected Users list actually protects anybody",
-          text: "The screen offers three lists. **Protected Users** is enforced: those accounts are skipped by every bulk action and every rule run. **Protected Groups** and **Protected Domains** are saved and shown back to you, but no execution path consults them — a rule will act on a member of a protected group. Protect people by account until that is fixed.",
+          title: "What each of the three lists protects",
+          text: "**Protected Users** protects named accounts. **Protected Groups** protects everyone in the group, and the scan now collects membership for the groups you name here even when they are not licence groups. **Protected Domains** protects by email domain — useful for a whole partner or contractor domain, with the caveat that Atlassian redacts the email address on many accounts, and a person whose email the API hides cannot be matched this way.",
         },
         {
           type: "list",
           items: [
-            "Add your **admin accounts individually**, including the one you are signed in as. Do not rely on adding `org-admins` as a group.",
+            "Add your **admin accounts**, including the one you are signed in as. Adding `org-admins` as a group works, and is the more durable choice because it keeps protecting new admins as they join.",
             "Add **service and integration accounts** individually. They are inactive by definition, which makes them prime targets for exactly the wrong reason.",
             "Add the individual accounts of anyone whose suspension would be expensive — executives, auditors, a regulator-facing team.",
-            "You can still fill in Protected Groups and Protected Domains, but treat them as documentation of your intent, not as a control.",
+            "Prefer **Protected Groups** for anything that changes over time — a group keeps protecting people who join it later, where a list of accounts silently goes stale.",
           ],
         },
         {
           type: "callout",
           variant: "tip",
           text: "Fill this in before your first bulk action, not after your first incident. Protection is what makes an aggressive automation rule safe to enable.",
+        },
+        { type: "h", level: 2, text: "Groups your identity provider owns" },
+        {
+          type: "p",
+          text: "If a group is synchronised from Azure AD, Okta or another directory, this app will not touch it — it is not selectable when you build a rule, and it is skipped at execution time with the reason recorded. That is not caution for its own sake: the provider would put everyone back on its next sync, the rule would remove them again on its next run, and you would have an audit log full of successes that never stuck and a savings figure counting seats that never came back. Change membership of those groups where they are actually managed.",
         },
       ],
     },
