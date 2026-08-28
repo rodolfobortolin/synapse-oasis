@@ -20,7 +20,7 @@ import {
   Toggle,
 } from "./ui";
 
-const TABS = ["Findings", "Dismissed", "Bulk Scan", "Analytics", "Audit Log", "Scanning Rules", "Project Exclusions", "Settings"];
+const TABS = ["Findings", "Dismissed", "Bulk Scan", "Analytics", "Scanning Rules", "Project Exclusions", "Settings", "Audit Log"];
 
 /* ── Findings ──────────────────────────────────────────────────────────── */
 
@@ -141,12 +141,29 @@ const rules = (
     <PageTitle>Scanning Rules</PageTitle>
     <Tabs items={TABS} active="Scanning Rules" />
 
+    <Toggle on label="Secret & PII Scanner" />
+
+    <SectionLabel>Scanning scope</SectionLabel>
+    <Toggle on label="Scan Issue Changelog" />
+    <Toggle on label="Scan Attachments — text-based files up to 1 MB (.txt, .json, .yaml, .env…)" />
+
+    <SectionLabel>Remediation</SectionLabel>
+    <Toggle on={false} label="Auto-Redaction" />
+    <Panel tone="warn">
+      <span className="text-[12px]">
+        Auto-redaction permanently modifies issue content. Secrets will be replaced with{" "}
+        <Code>[REDACTED]</Code>.
+      </span>
+    </Panel>
+    <Toggle on label="Require Reason When Dismissing" />
+
+    <SectionLabel>Pattern Categories</SectionLabel>
     <Row gap={8}>
       <Field placeholder="Search rules by name..." width={300} />
       <Btn>Enable All</Btn>
       <Btn variant="subtle">Disable All</Btn>
       <span className="text-[11px] self-center ml-auto" style={{ color: ATL.subtle }}>
-        128 of 142 rules enabled
+        151 of 165 rules enabled
       </span>
     </Row>
 
@@ -154,11 +171,11 @@ const rules = (
       <Table
         head={["Category", "Patterns", "Covers", "Enabled"]}
         rows={[
-          ["Cloud Providers", "12", "AWS, GCP, Azure and Firebase credentials", <Toggle key="t" on label="" />],
-          ["AI & ML Services", "6", "OpenAI, Anthropic, HuggingFace, Perplexity keys", <Toggle key="t" on label="" />],
-          ["Source Control & CI/CD", "16", "GitHub, GitLab, Terraform Cloud, CircleCI, Docker Hub", <Toggle key="t" on label="" />],
+          ["Cloud Providers", "17", "AWS, GCP, Azure, Firebase and Supabase credentials", <Toggle key="t" on label="" />],
+          ["AI & ML Services", "9", "OpenAI, Anthropic, HuggingFace, Groq, xAI, Perplexity keys", <Toggle key="t" on label="" />],
+          ["Source Control & CI/CD", "17", "GitHub, GitLab, Bitbucket, Terraform Cloud, CircleCI, Docker Hub", <Toggle key="t" on label="" />],
           ["Private Keys & Certificates", "5", "PEM, PGP, PuTTY, AGE keys", <Toggle key="t" on label="" />],
-          ["PII — Financial", "7", "Visa, Mastercard, Amex, Discover, JCB card numbers", <Toggle key="t" on label="" />],
+          ["PII — Financial", "8", "Visa, Mastercard, Amex, Discover, JCB card numbers, IBAN", <Toggle key="t" on label="" />],
           ["PII — Contact & Network", "3", "IPv4, MAC addresses, phone numbers", <Toggle key="t" on={false} label="" />],
         ]}
       />
@@ -187,31 +204,24 @@ const rules = (
 /* ── Settings ──────────────────────────────────────────────────────────── */
 
 const settings = (
-  <Screen where="Jira → Apps → Secret Scanner → Settings" width={860}>
+  <Screen where="Jira → Apps → Secret Scanner → Settings → Issue Creation" width={860}>
     <PageTitle>Secret &amp; PII Scanner</PageTitle>
     <Tabs items={TABS} active="Settings" />
 
-    <Toggle on label="Secret & PII Scanner Enabled" />
+    <Row gap={8}>
+      <Btn variant="subtle">← Back</Btn>
+    </Row>
 
-    <SectionLabel>Scanning scope</SectionLabel>
-    <Toggle on label="Scan Attachments — text-based files up to 1 MB (.txt, .json, .yaml, .env…)" />
-    <Toggle on label="Scan change history (changelog)" />
-
-    <SectionLabel>Remediation</SectionLabel>
-    <Toggle on={false} label="Auto-Redaction" />
-    <Panel tone="warn">
-      <span className="text-[12px]">
-        Auto-redaction permanently modifies issue content. Secrets will be replaced with{" "}
-        <Code>[REDACTED]</Code>.
-      </span>
-    </Panel>
-    <Toggle on label="Require Reason When Dismissing" />
-
-    <SectionLabel>Issue Creation</SectionLabel>
+    <SectionLabel>Remediation Tracking</SectionLabel>
+    <Sub>Where a ticket is filed when you raise one from a finding.</Sub>
     <Row gap={16}>
-      <Select label="Target Project" value="Security (SEC)" width="50%" />
+      <Select label="Tracking project" value="Security (SEC)" width="50%" />
       <Select label="Issue Type" value="Task" width="50%" />
     </Row>
+    <Row gap={16}>
+      <Select label="Priority" value="Highest" width="50%" />
+    </Row>
+    <Checkbox on={false} label="Create the tracking ticket automatically when a new finding is detected" />
     <Btn variant="primary">Save</Btn>
   </Screen>
 );
@@ -228,6 +238,7 @@ const analytics = (
       <Stat value="11" label="Active Findings" tone={ATL.red} />
       <Stat value="146" label="Total Detected" />
       <Stat value="97" label="Dismissed" tone={ATL.subtle} />
+      <Stat value="40" label="Resolved" tone={ATL.green} />
       <Stat value="38" label="Auto-Redacted" tone={ATL.teal} />
     </Row>
 
