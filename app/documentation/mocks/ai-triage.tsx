@@ -251,10 +251,6 @@ const escalation = (
         value="escalation-risk"
         help='Label added to issues when the "Flag with label" action is enabled.'
       />
-      <Toggle on={false} label="Always add analysis comment" />
-      <div className="text-[11px] mb-3" style={{ color: ATL.subtle }}>
-        Add an internal comment with sentiment analysis even when no escalation actions are triggered.
-      </div>
       <Field
         label="Custom AI Instructions"
         placeholder="Additional instructions for sentiment analysis..."
@@ -267,10 +263,9 @@ const escalation = (
       <div className="text-[11.5px] mb-2.5" style={{ color: ATL.subtle }}>
         Select which actions to perform when negative sentiment is detected.
       </div>
-      <Checkbox on label="Reassign to escalation user" />
-      <Checkbox on={false} label="Add escalation user as watcher" />
-      <Checkbox on={false} label="Add internal comment with analysis" />
-      <Checkbox on={false} label="Flag with label" />
+      <Checkbox on={false} label="Reassign to escalation user" />
+      <Checkbox on label="Add escalation user as watcher" />
+      <Checkbox on label="Flag with label" />
     </div>
 
     <SectionBar title="Escalation Users" />
@@ -278,7 +273,7 @@ const escalation = (
       <div className="text-[11.5px] mb-2.5" style={{ color: ATL.subtle }}>
         Assign an escalation user for this service desk. This user will be used for reassign and watcher actions.
       </div>
-      <Field placeholder="Enter Account ID..." width={420} />
+      <Select label="" value="Priya Raman — Service Desk Lead" width={420} />
     </div>
 
     <Btn variant="primary">Save Configuration</Btn>
@@ -294,20 +289,24 @@ const incident = (
 
     <EnableRow
       title="Enable Incident Detection"
-      desc="Detect clusters of similar tickets and automatically create major incidents."
+      desc="Detect clusters of similar tickets and promote one of them to a major incident."
     />
 
     <SectionBar title="General Settings" />
     <div className="rounded-b px-4 py-4 mb-4" style={{ border: `1px solid ${ATL.border}`, borderTop: "none" }}>
-      <Select label="Scan Interval" value="Every 15 minutes" width={420} />
+      <Select label="Scan Interval" value="Every hour" width={420} />
       <div className="text-[11px] -mt-2 mb-3" style={{ color: ATL.subtle }}>
         How often to scan for trending issues.
       </div>
       <Field label="Time Window (minutes)" value="90" help="Look back this many minutes when scanning for similar issues." width={420} />
       <Field label="Cluster Threshold" value="10" help="Minimum number of similar issues to trigger incident creation." width={420} />
-      <Select label="Link Type" value="-- Select link type --" width={420} />
+      <Select label="Link Type (required)" value="relates to" width={420} />
       <div className="text-[11px] -mt-2 mb-3" style={{ color: ATL.subtle }}>
         Jira link type used to link related issues to the incident.
+      </div>
+      <Select label="Which issue types are incidents (required)" value="Incident" width={420} />
+      <div className="text-[11px] -mt-2 mb-3" style={{ color: ATL.subtle }}>
+        Choose at least one issue type, or the detector cannot tell which tickets are incidents.
       </div>
       <Field
         label="Custom AI Instructions"
@@ -357,7 +356,7 @@ const issuePanel = (
           <strong>Key phrases:</strong> “third time this week”, “considering other vendors”
         </div>
         <div>
-          <strong>Actions:</strong> reassigned to escalation user, watcher added, internal comment posted
+          <strong>Actions:</strong> watcher added, flagged <Code>escalation-risk</Code>
         </div>
       </div>
     </Panel>

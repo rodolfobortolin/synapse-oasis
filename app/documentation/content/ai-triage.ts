@@ -37,9 +37,15 @@ export const aiTriage: AppDocs = {
             [
               "**Incident Detection**",
               "A ticket is created, plus a recurring scan",
-              "Groups tickets about the same problem, flags one of them with Jira Service Management's **Major incident** field, and links the rest to it. **No new issue is created.**",
+              "Groups tickets about the same problem, promotes one of them to major incident, and links the rest to it. **No new issue is created.**",
             ],
           ],
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "None of the three ever writes a comment",
+          text: "The app holds no code path that posts to an issue's activity feed. Every decision is written to the **AI Triage** panel on the issue and to the global **Audit Log** instead. That is worth knowing before you plan a rollout around “let it explain itself in the ticket first” — the explanation is there, just not in the comment stream.",
         },
         {
           type: "p",
@@ -67,10 +73,10 @@ export const aiTriage: AppDocs = {
           items: [
             "Install the app, open **Jira → Apps → AI Triage → Connection**, and enter the Atlassian Teams credentials. Do this once; every project uses them.",
             "Open **one** service desk project and go to **Project settings → AI Triage → Dispatcher Agent**. Switch **Enable Dispatcher Agent** on.",
-            "Select the teams, write a routing prompt for each one, and turn **Add routing comment** on so every decision is written on the ticket.",
-            "Watch it for a few days. Read the **AI Triage** panel on routed tickets and the global **Audit Log** — the app does not write comments on tickets. When it gets one wrong, fix that team's prompt. The prompt is where accuracy comes from.",
+            "Select the teams and write a routing prompt for each one. Leave **Use Team Routing Prompts** on if you want it to pick a person as well as a team; turn it off and it assigns the team only.",
+            "Watch it for a few days. Read the **AI Triage** panel on routed tickets and the global **Audit Log** — the app never writes a comment on a ticket, so those two are your evidence. When it gets one wrong, fix that team's prompt. The prompt is where accuracy comes from.",
             "Move to the **Smart Escalation** tab. Enable it, leave **Sentiment Threshold** at **Negative or worse (recommended)**, and select **no** actions. The scores appear in the issue panel and the audit log without anything changing on the ticket.",
-            "When the scores match what your team would have judged, add **Flag with label** — today that is the action that actually takes effect. See the [Smart Escalation page](/documentation/ai-triage/smart-escalation).",
+            "When the scores match what your team would have judged, add the actions you want — **Flag with label** first, then reassignment and the watcher once you trust it. See the [Smart Escalation page](/documentation/ai-triage/smart-escalation).",
             "Enable **Incident Detection** last, with a cluster threshold high enough that it only fires on a real wave.",
             "Repeat for the next project.",
           ],
@@ -78,8 +84,8 @@ export const aiTriage: AppDocs = {
         {
           type: "callout",
           variant: "tip",
-          title: "Comment first, act later",
-          text: "Every agent can explain itself before it changes anything. Running in comment-only mode for a week costs you nothing and turns “can we trust this?” into a question you can answer with evidence.",
+          title: "Watch first, act later",
+          text: "Every agent records its reasoning before it changes anything. Enable one with no actions selected for a week: the scores and routing decisions still land in the issue panel and the audit log, nothing on the ticket moves, and “can we trust this?” becomes a question you can answer with evidence.",
         },
 
         { type: "h", level: 2, text: "Two screens, and which one does what" },
@@ -147,21 +153,30 @@ export const aiTriage: AppDocs = {
           type: "table",
           head: ["Setting", "What it does", "What we recommend"],
           rows: [
-            ["**AI Model**", "Which Forge LLM model analyses the tickets.", "Leave the default."],
             [
               "**Dispatch Instructions**",
-              "Rules that apply to every routing decision. Team and member details are added automatically, so do not repeat them here.",
+              "Rules that apply to every routing decision. Team and member details are appended automatically, so do not repeat them here. Up to 1,200 characters.",
               "Two or three rules, such as “route by affected service first” and “never assign to someone on leave”.",
             ],
             [
-              "**Fallback Behavior**",
-              "What happens when no team is a confident match.",
-              "Leave the ticket unassigned and let your existing queue process handle it. Guessing is worse than not guessing.",
+              "**Use Team Routing Prompts**",
+              "On, the agent picks a team and then a person inside it. Off, it assigns the team only and leaves the person to you.",
+              "Leave it on unless your teams do their own intake. With it off, the whole **Members** step is skipped.",
             ],
             [
-              "**Add routing comment**",
-              "Intended to add an internal comment explaining the choice. **Saved but inert** — the app does not write comments.",
-              "Ignore it. Read the decision in the **AI Triage** panel on the issue and in the global **Audit Log**.",
+              "**When no one matches the required skill**",
+              "What happens when nobody is a confident match. Three options: **Leave unassigned — a human triages it (default)**, **Assign the closest expertise — always someone**, and **Assign the project lead**.",
+              "Leave it unassigned and let your existing queue process handle it. Guessing is worse than not guessing.",
+            ],
+            [
+              "**Issue Types**",
+              "Only these issue types are dispatched. Leave it empty to allow all of them.",
+              "Empty, until you find a type that should never be routed automatically.",
+            ],
+            [
+              "**Only process tickets matching this JQL**",
+              "A JQL filter evaluated before anything else. A ticket that does not match is left completely alone — no model call, no decision, no audit entry.",
+              "The cheapest scope control the app has, and the one to reach for when you want to pilot on part of a desk rather than all of it. The field validates the query as you type.",
             ],
           ],
         },
@@ -279,20 +294,35 @@ export const aiTriage: AppDocs = {
 
         { type: "h", level: 2, text: "The four actions" },
         {
-          type: "callout",
-          variant: "warning",
-          title: "Only one of the four actions works today",
-          text: "**Flag with label** takes effect. **Add internal comment with analysis** posts nothing — the app never writes comments. **Reassign to escalation user** and **Add escalation user as watcher** both need the escalation user, which the per-project screen saves under a key the trigger does not read, so they do not fire either. We are fixing them. Until then, read the analysis in the issue panel and the audit log, and use the label to build your queue.",
+          type: "p",
+          text: "There are three, and all three work — including from a per-project configuration, which was not true of earlier versions. Tick as many as you want, or none.",
         },
         {
           type: "table",
-          head: ["Action", "What it should do", "Status today"],
+          head: ["Action", "What it does", "Needs"],
           rows: [
-            ["**Flag with label**", "Adds the label you configure, so escalated tickets are one JQL query away.", "**Works.**"],
-            ["**Reassign to escalation user**", "Hands the ticket to the escalation owner for that desk.", "Does not fire from a per-project configuration."],
-            ["**Add escalation user as watcher**", "Keeps the assignee, adds a senior person as a watcher.", "Does not fire from a per-project configuration."],
-            ["**Add internal comment with analysis**", "Posts the score and reasoning as an internal comment.", "Not implemented — nothing is posted."],
+            [
+              "**Flag with label**",
+              "Adds the label you configure, so escalated tickets are one JQL query away.",
+              "The **Escalation Label** field. Nothing else.",
+            ],
+            [
+              "**Reassign to escalation user**",
+              "Hands the ticket to the escalation owner for that desk.",
+              "An escalation user for that desk. Visible to the customer — see the warning below.",
+            ],
+            [
+              "**Add escalation user as watcher**",
+              "Keeps the current assignee and adds a senior person as a watcher.",
+              "An escalation user for that desk. The gentlest of the three.",
+            ],
           ],
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "There is no comment action, and there is no longer a setting that suggests there is",
+          text: "Earlier versions offered **Add internal comment with analysis** and an **Always add analysis comment** toggle. Neither ever posted anything, because the app has no code path that writes to an issue, and both have been removed rather than left on the screen looking configurable. The score, the reasoning and the key phrases are in the **AI Triage** panel on the issue and in the audit log.",
         },
 
         { type: "h", level: 2, text: "The other settings" },
@@ -304,20 +334,20 @@ export const aiTriage: AppDocs = {
               text: "The label used by the **Flag with label** action. It ships as `escalation-risk`; keep it or pick something else you can query.",
             },
             {
-              name: "Always add analysis comment",
-              text: "Saved but inert today, for the same reason as the internal-comment action: the app writes no comments.",
-            },
-            {
               name: "Custom AI Instructions",
               text: "Your own rules, added to the analysis. This is where domain-specific triggers go, for example: “treat contract-renewal language and legal threats as critical regardless of tone”.",
             },
             {
               name: "Escalation Users",
-              text: "One person for this service desk, used by the reassign and watcher actions. The field takes an Atlassian **account ID**, not a name — you can copy it from the end of the user's profile URL in Jira.",
+              text: "One person per service desk, used by the reassign and watcher actions. It is a **user picker** — search by name and choose. Configure this before ticking either of those two actions; without a user for that desk, both are skipped.",
             },
             {
               name: "Issue Types (optional filter)",
               text: "Analyse only some issue types. Leave it empty to analyse all of them.",
+            },
+            {
+              name: "Only process tickets matching this JQL",
+              text: "A JQL filter checked before the comment is analysed. Anything that does not match is ignored entirely — no model call, no score, no audit entry. Useful for excluding a noisy request type, or for piloting on part of a desk.",
             },
           ],
         },
@@ -325,7 +355,7 @@ export const aiTriage: AppDocs = {
           type: "callout",
           variant: "warning",
           title: "Reassignment is visible to the customer",
-          text: "It changes who they are talking to, mid-conversation. During calibration use the watcher and internal-comment actions only. Enable reassignment when the scores have proven themselves.",
+          text: "It changes who they are talking to, mid-conversation. During calibration use the label and the watcher, which the customer never sees. Enable reassignment when the scores have proven themselves.",
         },
         {
           type: "callout",
@@ -343,7 +373,7 @@ export const aiTriage: AppDocs = {
       blocks: [
         {
           type: "p",
-          text: "**What it does.** During an outage the same problem arrives as many separate tickets. This agent notices they are the same problem, creates one incident issue, and links the tickets to it.",
+          text: "**What it does.** During an outage the same problem arrives as many separate tickets. This agent notices they are the same problem, promotes one of the existing tickets to be the incident, and links the others to it. **It never creates a new issue** — the incident is always one of the tickets your customers already raised.",
         },
         {
           type: "p",
@@ -358,8 +388,8 @@ export const aiTriage: AppDocs = {
           rows: [
             [
               "**Scan Interval**",
-              "How often the app scans for trending issues. A dropdown, from every few minutes upwards.",
-              "**Every 15 minutes** is the shipped default and works for most desks. Shorten it only if your outages are reported in bursts of minutes.",
+              "How often the recurring scan runs. A dropdown: **Every hour**, 2, 4, 6, 12 or 24 hours. One hour is the floor and the shipped default.",
+              "**Every hour** for most desks. This is the slow half of the feature — a sharp outage is caught by the per-ticket check within seconds of the tickets arriving, so a longer interval costs you less than it looks like it does.",
             ],
             [
               "**Time Window (minutes)**",
@@ -373,8 +403,13 @@ export const aiTriage: AppDocs = {
             ],
             [
               "**Link Type**",
-              "The Jira link type used to attach tickets to the incident. **It starts unset**, showing “-- Select link type --”.",
-              "Pick one before you enable the agent — `relates to` unless your team already uses something else. Nothing links itself while this is empty.",
+              "The Jira link type used to attach tickets to the incident. **Required.** It starts unset, showing “-- Select link type --”, and the screen will not let you save an enabled agent without it.",
+              "`relates to`, unless your team already uses something else.",
+            ],
+            [
+              "**Which issue types are incidents**",
+              "**Required.** Which issue types the agent may promote to be the incident. It is a separate question from the filter below, and the screen says so: without it the detector cannot tell which tickets are incidents.",
+              "Your desk's Incident type, if it has one. Otherwise the type your team actually treats as an outage record.",
             ],
             [
               "**Custom AI Instructions**",
@@ -387,7 +422,8 @@ export const aiTriage: AppDocs = {
           type: "list",
           items: [
             "**Service Desks** — which desks are monitored.",
-            "**Issue Types (optional filter)** — narrow it to incident-shaped types if your desk mixes requests and incidents.",
+            "**Issue Types (optional filter)** — which tickets are *analysed*. Leave it empty to analyse everything.",
+            "**Only process tickets matching this JQL** — the same filter the other two agents have. A ticket that does not match is never looked at.",
           ],
         },
 
@@ -396,8 +432,8 @@ export const aiTriage: AppDocs = {
           type: "steps",
           items: [
             "The agent works out the common topic across the tickets and picks one of them as the principal.",
-            "It promotes the clearest ticket in the cluster: it sets Jira Service Management's **Major incident** field on that ticket. If the field does not exist on your site, this step is skipped.",
-            "It links the rest of the cluster to that ticket, using your chosen link type — or Jira's built-in **Relates** type when you leave Link Type unset.",
+            "It promotes the clearest ticket in the cluster: it sets Jira Service Management's **Major incident** field on that ticket. If your site has no such field, it falls back to adding a `major-incident` label, so the promotion is still visible and still queryable.",
+            "It links the rest of the cluster to that ticket, using the link type you chose.",
             "Each ticket's **AI Triage** panel shows which incident it belongs to, and whether it was matched immediately or by a scheduled scan.",
           ],
         },
@@ -445,7 +481,7 @@ export const aiTriage: AppDocs = {
         { type: "mock", id: "at-statistics" },
         {
           type: "p",
-          text: "The **Statistics** tab exists on both the global page and each project's page. Pick a range with **Today**, **This Week**, **This Month** or **Custom**, and use **Refresh** after a busy period.",
+          text: "The **Statistics** tab exists on both the global page and each project's page, and it covers all three agents — dispatch counts and distribution, escalations by sentiment level, and incidents detected. Pick a range with **Today**, **This Week**, **This Month** or **Custom**, and use **Refresh** after a busy period.",
         },
         {
           type: "fields",
@@ -494,12 +530,21 @@ export const aiTriage: AppDocs = {
             ],
             [
               "`read:jira-work`, `write:jira-work`",
-              "Read issue data, comments and change history; assign, transition and escalate; create the incident issue and its links.",
+              "Read issue data, comments and change history; assign the ticket, add a label, add a watcher, set the major-incident field, and link a cluster together. No issue is ever created.",
             ],
             ["`read:jira-user`", "Resolve agents, teams and escalation users."],
-            ["`storage:app`", "Store configuration, decisions, statistics and the audit trail."],
-            ["`report:personal-data`", "Report to Atlassian the account IDs the app holds, so a closed account's records can be erased."],
+            ["`storage:app`", "Store configuration, decisions and statistics. The audit trail itself is **Forge SQL**, one row per event."],
+            [
+              "`report:personal-data`",
+              "Atlassian's Personal Data Reporting cycle. Once a day the app reports the account IDs it holds — across its own storage **and the SQL audit table** — and erases what belongs to an account Atlassian reports as closed.",
+            ],
           ],
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "Six scopes were dropped",
+          text: "Earlier versions asked for six more than the list above: three that nothing called, and three granular service-desk scopes already covered by the classic one next to them. If your security review is holding an older listing, this is why the two do not match.",
         },
         {
           type: "p",
@@ -531,13 +576,43 @@ export const aiTriage: AppDocs = {
           ],
         },
 
+        { type: "h", level: 2, text: "What happens without an active licence" },
+        {
+          type: "p",
+          text: "**Triage stops. Everything else stays open.** All three agents run from Jira event triggers and a scheduled trigger, and every one of those declares `appIsLicensed: true` in the manifest — so Forge does not invoke them at all. There is no half-run and no error on a ticket: new tickets simply arrive and sit there, exactly as they did before the app was installed.",
+        },
+        {
+          type: "p",
+          text: "Nothing in the admin screens is gated, and that is deliberate. Every configuration screen, the statistics, the audit log, the Connection tab, the issue panel and every decision already recorded stay fully readable and editable. A banner at the top of the app says the licence has lapsed and that triage is paused, because the failure mode this protects against is an administrator hunting a broken routing prompt for an hour. Nothing is deleted; renewing resumes triage on the next ticket, with no reconfiguration.",
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "The silence is the symptom",
+          text: "Because the platform declines to invoke the triggers, an unlicensed install looks identical to one where every agent was switched off — no failures in the audit log, because nothing ran to fail. If routing stopped and nothing else changed, check the banner first.",
+        },
+
+        { type: "h", level: 2, text: "Uninstalling" },
+        {
+          type: "p",
+          text: "Uninstalling now erases. Earlier versions registered cleanup against a Forge event that does not exist, so the handler was never once invoked; it is a `preUninstall` module now, and it runs. It empties the audit table and sweeps the key-value store — configuration, the Teams API token, per-issue decisions, skills and statistics — repeating until a pass finds nothing left, to a 45-second budget.",
+        },
+        {
+          type: "p",
+          text: "Assignments, labels, watchers, incident links and major-incident flags the agents set stay in Jira, because they are ordinary Jira data. See [Where your data goes](/documentation/start-here/your-data).",
+        },
+
         { type: "h", level: 2, text: "Troubleshooting" },
         {
           type: "fields",
           items: [
             {
               name: "Nothing is being routed",
-              text: "Check four things in order: **Enable Dispatcher Agent** is on for that project, at least one team is selected in **Step 1 — Teams**, each selected team has a routing prompt, and the global **Connection** tab shows as connected. Also remember the Dispatcher only acts on tickets created **after** it was enabled.",
+              text: "Check in order: there is **an active licence** — without one the triggers are never invoked and every agent goes quiet at once, which is the banner at the top of the app; **Enable Dispatcher Agent** is on for that project; at least one team is selected in **Step 1 — Teams**; each selected team has a routing prompt; the **Only process tickets matching this JQL** filter is not excluding the tickets; and the global **Connection** tab shows as connected. Also remember the Dispatcher only acts on tickets created **after** it was enabled.",
+            },
+            {
+              name: "All three agents stopped at the same moment",
+              text: "That is the shape of a lapsed licence rather than a configuration mistake. One agent breaking is a prompt or a setting; all three going silent together, with nothing in the audit log, is the platform declining to invoke the triggers.",
             },
             {
               name: "Tickets go to the wrong team",
@@ -549,7 +624,7 @@ export const aiTriage: AppDocs = {
             },
             {
               name: "Escalation never triggers",
-              text: "Common causes: **Enable Smart Escalation** is off for that project, the threshold is set to critical only, no action is ticked under **Escalation Actions**, no escalation user is set, or the comment was internal rather than from the customer.",
+              text: "Common causes: **Enable Smart Escalation** is off for that project, the threshold is set to critical only, no action is ticked under **Escalation Actions**, the JQL filter excludes the ticket, or the comment was internal rather than from the customer. If the label appears but nothing is reassigned, the desk has no escalation user — the reassign and watcher actions are skipped without one.",
             },
             {
               name: "Escalation triggers too often",
@@ -560,8 +635,12 @@ export const aiTriage: AppDocs = {
               text: "Raise the **Cluster Threshold**, shorten the **Time Window**, and add clustering instructions naming what must never be grouped.",
             },
             {
-              name: "Tickets are clustered but nothing is linked",
-              text: "**Link Type** is still on “-- Select link type --”. Pick a link type and save.",
+              name: "Incident Detection will not save",
+              text: "Two fields are required once it is enabled: **Link Type**, and **Which issue types are incidents**. The screen names whichever is missing.",
+            },
+            {
+              name: "A slow-building wave was caught late",
+              text: "The recurring scan runs hourly at its fastest, so a trickle of tickets that never trips the per-ticket check waits for the next scan. Widen the **Time Window** rather than expecting a shorter interval — an hour is the floor.",
             },
             {
               name: "The agent tabs are missing from the global page",
@@ -653,7 +732,11 @@ export const aiTriage: AppDocs = {
             },
             {
               name: "What happens when I uninstall?",
-              text: "The app's stored data is cleared and detached immediately, so nobody can read it any more — then Atlassian destroys it under its own retention policy, documented as 28 days. See [Where your data goes](/documentation/start-here/your-data). Assignments, comments, incidents and links the agents created stay in Jira, because they are ordinary Jira data.",
+              text: "The app erases what it holds: it empties the audit table, then sweeps its key-value store — configuration, the Teams API token, per-issue decisions, skills and statistics — until a pass finds nothing left. Whatever remains is detached by Atlassian immediately and destroyed under its own retention policy. See [Where your data goes](/documentation/start-here/your-data). Assignments, labels, watchers and incident links the agents set stay in Jira, because they are ordinary Jira data.",
+            },
+            {
+              name: "What happens if our licence lapses?",
+              text: "Triage stops and nothing else does. New tickets are not routed, comments are not scored and no clusters are detected, because the platform stops invoking the app's triggers entirely. Every screen stays open and editable — configuration, statistics, the audit log, the Connection tab, and every decision already recorded — and a banner says triage is paused so nobody spends an afternoon looking for a broken prompt. Renewing resumes it on the next ticket, with nothing to reconfigure.",
             },
           ],
         },
