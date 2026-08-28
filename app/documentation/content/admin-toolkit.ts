@@ -567,6 +567,7 @@ export const adminToolkit: AppDocs = {
             ["`read:jira-user`", "Resolve users and groups for the user tools."],
             ["`read:board-scope:jira-software`, `read:board-scope.admin:jira-software`", "Read boards, so offboarding can report board ownership."],
             ["`storage:app`", "Store job progress, results and tool settings."],
+            ["`report:personal-data`", "Report to Atlassian the account IDs held in job results, so a closed account can be erased from them."],
           ],
         },
         {

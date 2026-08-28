@@ -412,6 +412,7 @@ export const workflowToolkit: AppDocs = {
             ["`manage:jira-configuration`", "Required by Jira for an app that plugs into the workflow editor and evaluates Jira expressions."],
             ["`send:notification:jira`", "The **Send Notification** tool."],
             ["`storage:app`", "Store the app's own audit trail."],
+            ["`report:personal-data`", "Declared for Atlassian's Personal Data Reporting cycle. The app stores no account ID, so the cycle runs and reports nothing."],
           ],
         },
         {

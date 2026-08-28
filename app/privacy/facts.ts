@@ -27,7 +27,7 @@ export interface PrivacyFacts {
   external: string[];
 }
 
-export const UPDATED = "19 August 2026";
+export const UPDATED = "28 August 2026";
 export const VENDOR = "SynapseOasis";
 export const CONTACT_EMAIL = "support@synapseoasis.com";
 export const SUPPORT_PORTAL = "https://synapseoasis.atlassian.net/servicedesk/customer/portals";
@@ -67,22 +67,20 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "**Chat messages are stored as written.** If a customer types personal data into the chat, that text is retained in the conversation record until the conversation is deleted or the app is uninstalled.",
       "Atlassian account IDs are stored when the app records an agent skill profile, an audit entry, or an action it performed on a request. They are the identifiers Atlassian itself uses and are meaningless outside your tenant.",
       "Attachments are not retained by the app: they are uploaded to the Jira request and then follow that issue.",
+      "Once a day the app sends Atlassian the account IDs it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. Both stores are read and both are erased: in the key-value store a closed account's skill profile and the records keyed on it are removed, and in the audit table its rows are **deleted** — the row itself, not just the name on it, because an audit row carries an open metadata record about what happened.",
       "The app does not collect passwords, end-user credentials or payment data.",
     ],
     scopes: [
       "read:servicedesk-request",
       "write:servicedesk-request",
-      "read:servicedesk:jira-service-management",
-      "read:requesttype:jira-service-management",
-      "write:request:jira-service-management",
       "manage:servicedesk-customer",
       "read:jira-user",
       "read:jira-work",
       "write:jira-work",
-      "manage:jira-configuration",
       "search:confluence",
       "read:space:confluence",
       "storage:app",
+      "report:personal-data",
     ],
     storageTech:
       "Forge app storage (key-value store) and Forge SQL, both hosted by Atlassian",
@@ -121,20 +119,16 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "Atlassian account IDs are stored in agent skill profiles, audit entries and routing decisions.",
       "Issue and comment text is read to make a decision. The stored result keeps the decision and a short justification, not a copy of the issue.",
       "The **Atlassian API token** used for the Teams connection is a credential you provide, stored inside your own tenant. Create it for this purpose and rotate it on your usual schedule.",
+      "Once a day the app sends Atlassian the account IDs it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. Both stores are read and both are erased: in the key-value store a closed account's skill profile and the records keyed on it are removed, and in the audit table its rows are **deleted** — the row itself, not just the name on it, because an audit row carries an open metadata record about what happened.",
       "The app does not collect email addresses, passwords or payment data.",
     ],
     scopes: [
       "read:servicedesk-request",
-      "write:servicedesk-request",
-      "read:servicedesk:jira-service-management",
-      "read:requesttype:jira-service-management",
-      "write:request:jira-service-management",
-      "manage:servicedesk-customer",
       "read:jira-user",
       "read:jira-work",
       "write:jira-work",
-      "manage:jira-configuration",
       "storage:app",
+      "report:personal-data",
     ],
     storageTech:
       "Forge app storage (key-value store) and Forge SQL, both hosted by Atlassian",
@@ -172,8 +166,6 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "read:jira-work",
       "write:jira-work",
       "read:jira-user",
-      "manage:jira-project",
-      "manage:jira-configuration",
       "storage:app",
       "report:personal-data",
     ],
@@ -249,6 +241,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
     personal: [
       "The results of the tools that work on people — a permission audit, an offboarding scan, a user analysis, a mirror operation — contain Atlassian account IDs, display names, email addresses (where the CSV you uploaded contains them) and group names, because that is the output you asked for. They are stored as part of the job result and removed when the job is reset or the app is uninstalled.",
       "CSV files uploaded to User Analysis are parsed to produce the analysis; the resulting aggregated report is stored, and the analysis is cleared when you start over.",
+      "Once a day the app sends Atlassian the account IDs it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. When an account comes back as closed, the cycle walks the whole store and removes it: a record keyed on that person is deleted, and a record that merely names them has the name taken out.",
       "The app does not collect passwords, authentication tokens, API keys or payment data.",
     ],
     scopes: [
@@ -261,6 +254,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "read:board-scope:jira-software",
       "read:board-scope.admin:jira-software",
       "storage:app",
+      "report:personal-data",
     ],
     storageTech: "Forge app storage (key-value store)",
     external: ["`api.atlassian.com` — the Atlassian REST APIs of your own site"],
@@ -318,15 +312,14 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "That data is stored only inside your own Atlassian tenant and is used exclusively to show licence utilisation, evaluate your rules and provide an audit trail of the actions taken.",
       "The **organisation API key** is a credential you provide. It grants organisation-admin level access, is stored inside your own tenant, is masked in the interface, and can be removed at any time with **Disconnect**.",
       "Snapshots are replaced by newer scans and can be deleted from the app. Audit records — the entry and its per-user detail together — are kept for **90 days** and then deleted automatically, so a record is either fully answerable or gone; you can also delete them yourself, and uninstalling erases them.",
+      "Once a day the app sends Atlassian the account IDs it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. A closed account's snapshot rows — the account, its group memberships and its product access — and its per-user audit detail are **deleted**. The audit entry itself survives without them: what ran, when, by which rule and how many accounts it affected, which is what the trail is for.",
       "The app does not collect passwords or payment data.",
     ],
     scopes: [
       "read:jira-user",
       "read:jira-work",
-      "write:jira-work",
-      "manage:jira-project",
-      "manage:jira-configuration",
       "storage:app",
+      "report:personal-data",
     ],
     storageTech: "Forge app storage (key-value store) and Forge SQL, both hosted by Atlassian",
     external: ["`api.atlassian.com` — the Atlassian REST APIs of your own site and the Atlassian organisation admin API"],
@@ -353,17 +346,15 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "Exports and imports process the content you select. During a job, that content — including any personal data your pages happen to contain — is held in app storage inside your tenant until the job finishes and its data is cleared.",
       "Macro content is stored as written by the page author.",
       "Your Atlassian account ID is stored while an export or import runs, as the key that keeps your job separate from anyone else's. The record is removed when the job is cleared. The app does not collect email addresses, display names, passwords, authentication tokens, API keys or payment data.",
+      "Once a day the app sends Atlassian the account ID on each job record it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. A closed account's job records are deleted, and the account ID on a job record is the only thing about that person the app has to clean up.",
     ],
     scopes: [
       "read:confluence-content.all",
       "read:confluence-content.summary",
-      "write:confluence-content",
       "read:space:confluence",
       "read:page:confluence",
-      "read:confluence-space.summary",
-      "read:confluence-props",
-      "read:confluence-user",
       "storage:app",
+      "report:personal-data",
     ],
     storageTech: "Forge app storage (key-value store)",
     external: [],

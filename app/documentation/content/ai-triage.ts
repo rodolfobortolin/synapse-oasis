@@ -488,17 +488,17 @@ export const aiTriage: AppDocs = {
           type: "table",
           head: ["Scope", "Why it is needed"],
           rows: [
-            ["`read:servicedesk-request`, `write:servicedesk-request`", "Read tickets and comments, and post internal comments."],
             [
-              "`read:servicedesk:jira-service-management`, `read:requesttype:jira-service-management`",
-              "List service desks and request types for the configuration screens.",
+              "`read:servicedesk-request`",
+              "List service desks and request types for the configuration screens, and read the request being triaged and its participants.",
             ],
-            ["`write:request:jira-service-management`", "Act on requests: assignment and escalation actions."],
-            ["`manage:servicedesk-customer`", "Identify the customer on a request."],
-            ["`read:jira-work`, `write:jira-work`", "Read issue data, create the incident issue, create issue links."],
+            [
+              "`read:jira-work`, `write:jira-work`",
+              "Read issue data, comments and change history; assign, transition and escalate; create the incident issue and its links.",
+            ],
             ["`read:jira-user`", "Resolve agents, teams and escalation users."],
-            ["`manage:jira-configuration`", "Read configuration needed by the admin screens."],
             ["`storage:app`", "Store configuration, decisions, statistics and the audit trail."],
+            ["`report:personal-data`", "Report to Atlassian the account IDs the app holds, so a closed account's records can be erased."],
           ],
         },
         {

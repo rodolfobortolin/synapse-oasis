@@ -65,8 +65,8 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "callout",
           variant: "info",
-          title: "The organisation API key is required to change anything",
-          text: "Without it the app still reads what Jira exposes and will show you a licence inventory, but it cannot act: you lose last-active dates, and every group change and suspension is skipped with a message telling you why. This is not a choice we made. Changing group membership needs organisation admin rights, and an app's own token does not have them — Jira answers 403 whatever permissions the app is granted. The organisation API key does have them, which is why it is the one credential this app asks for. Apps built on a personal user token need two.",
+          title: "The organisation API key is required — to read as well as to act",
+          text: "Every user, group membership and product-access read goes through the organisation admin API, so without a key a scan finds nobody: no inventory, no last-active dates, and every group change and suspension skipped with a message telling you why. This is not a choice we made. Changing group membership needs organisation admin rights, and an app's own token does not have them — Jira answers 403 whatever permissions the app is granted. Reading membership with the app's own token was possible, but only for the price of `manage:jira-configuration`, which the Marketplace listing shows every prospective customer as full Jira administration. That is too much to ask of a licence-hygiene app, so the read moved to the organisation API alongside the writes. One key does both, which is why it is the one credential this app asks for. Apps built on a personal user token need two.",
         },
 
         { type: "h", level: 2, text: "The five tabs" },
@@ -368,7 +368,7 @@ export const licenseWasteManager: AppDocs = {
             ["Visibility across your organisation's sites", "Yes", "No"],
             ["Automatic licence-group detection", "Yes", "No"],
             ["Suspend accounts", "Yes", "No — the app says so instead of failing"],
-            ["Group and product data from Jira", "Yes", "Yes"],
+            ["Group membership and product access", "Yes", "No — both are read through the organisation API"],
           ],
         },
         {
@@ -423,10 +423,10 @@ export const licenseWasteManager: AppDocs = {
           type: "table",
           head: ["Scope", "Why it is needed"],
           rows: [
-            ["`read:jira-user`", "Read users, groups and product access."],
-            ["`read:jira-work`, `write:jira-work`", "Read project and issue metadata used to judge activity, and store job state."],
-            ["`manage:jira-project`, `manage:jira-configuration`", "Read configuration for the admin screens and apply group changes."],
+            ["`read:jira-user`", "Look up users and groups by name, so you can pick the accounts and groups to protect."],
+            ["`read:jira-work`", "Check that the caller holds Jira administration before a resolver acts, and identify which site the app is installed on."],
             ["`storage:app`", "Store configuration, job state and snapshots."],
+            ["`report:personal-data`", "Report to Atlassian the account IDs held in snapshots and audit records, so a closed account can be erased."],
           ],
         },
         {

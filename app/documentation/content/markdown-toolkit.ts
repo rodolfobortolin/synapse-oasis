@@ -257,13 +257,11 @@ export const markdownToolkit: AppDocs = {
           rows: [
             ["`read:confluence-content.all`, `read:confluence-content.summary`", "Read page content and metadata in order to convert it."],
             [
-              "`read:page:confluence`, `read:space:confluence`, `read:confluence-space.summary`",
+              "`read:page:confluence`, `read:space:confluence`",
               "Read the page tree and space information for the selectors.",
             ],
-            ["`write:confluence-content`", "Create pages and attachments on import."],
-            ["`read:confluence-props`", "Read content properties needed during conversion."],
-            ["`read:confluence-user`", "Resolve authors and mentions."],
-            ["`storage:app`", "Hold macro content and in-flight export or import jobs."],
+            ["`storage:app`", "Hold macro content and in-flight job data."],
+            ["`report:personal-data`", "Report to Atlassian the account ID on each job record, so a closed account's jobs can be erased."],
           ],
         },
         {

@@ -406,11 +406,14 @@ text ~ "BEGIN RSA PRIVATE KEY" OR text ~ "connectionString"`,
           type: "table",
           head: ["Scope", "Why it is needed"],
           rows: [
-            ["`read:jira-work`", "Read issue fields, comments, change history and attachments in order to scan them."],
+            [
+              "`read:jira-work`",
+              "Read issue fields, comments, change history and attachments in order to scan them, and read the project and field lists the settings screens offer you.",
+            ],
             ["`write:jira-work`", "Create remediation issues, and apply auto-redaction when you enable it."],
             ["`read:jira-user`", "Resolve the comment author and the person who dismissed a finding."],
-            ["`manage:jira-project`, `manage:jira-configuration`", "Read project and field configuration for the settings screens."],
             ["`storage:app`", "Store findings, configuration, the audit log and scan progress."],
+            ["`report:personal-data`", "Report to Atlassian the account IDs held on findings and dismissals, so a closed account can be erased."],
           ],
         },
         {

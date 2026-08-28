@@ -422,18 +422,16 @@ export const aiPortalChat: AppDocs = {
           type: "table",
           head: ["Scope", "Why it is needed"],
           rows: [
-            ["`read:servicedesk-request`, `write:servicedesk-request`", "Read the customer's requests and create new ones."],
             [
-              "`read:servicedesk:jira-service-management`, `read:requesttype:jira-service-management`",
-              "List service desks and request types, and read which fields each one has.",
+              "`read:servicedesk-request`, `write:servicedesk-request`",
+              "List service desks and request types, read which fields each one has, read the customer's requests, and create new ones.",
             ],
-            ["`write:request:jira-service-management`", "Create the request and attach files to it."],
             ["`manage:servicedesk-customer`", "Identify the portal customer in the conversation."],
-            ["`read:jira-work`, `write:jira-work`", "Read and write the underlying issue."],
+            ["`read:jira-work`, `write:jira-work`", "Read and write the underlying issue, and attach the customer's files to it."],
             ["`read:jira-user`", "Resolve names of users and agents."],
             ["`search:confluence`, `read:space:confluence`", "Search the knowledge base spaces you listed."],
-            ["`manage:jira-configuration`", "Read configuration needed by the admin screens."],
             ["`storage:app`", "Store the app's own data inside your site."],
+            ["`report:personal-data`", "Report to Atlassian the account IDs the app holds, so a closed account's records can be erased."],
           ],
         },
         {
