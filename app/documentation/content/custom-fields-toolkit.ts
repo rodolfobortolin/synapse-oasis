@@ -5,7 +5,7 @@ export const customFieldsToolkit: AppDocs = {
   name: "Custom Fields Toolkit for Jira",
   shortName: "Custom Fields Toolkit",
   tagline:
-    "Three field types Jira does not ship: a picker whose options come from a JQL query, a checklist with statuses and a transition validator, and a text field that formats and validates as you type. Plus select list options that project admins can manage themselves.",
+    "Three field types Jira does not ship: a picker whose options come from a JQL query, a checklist with statuses and a transition validator, and a text field that formats and validates as you type. Plus select list options that project admins can manage themselves. Holds no personal data at all.",
   products: "Jira · Jira Service Management",
   color: "#3B9FE3",
   icon: "/cf-toolkit.png",
@@ -40,7 +40,7 @@ export const customFieldsToolkit: AppDocs = {
             ],
             [
               "**[Masked Input](/documentation/custom-fields-toolkit/masked-input)**",
-              "A text field that formats while the user types and refuses values that do not match the format. 21 ready-made presets.",
+              "A text field that formats while the user types and refuses values that do not match the format. 19 ready-made presets.",
             ],
             [
               "**Checklist Completion Validator**",
@@ -48,7 +48,7 @@ export const customFieldsToolkit: AppDocs = {
             ],
             [
               "**[Select list options](/documentation/custom-fields-toolkit/select-list-options)**",
-              "Lets a project administrator add and edit the options of their own select field, without giving them Jira administration rights.",
+              "Lets a project administrator add, edit, reorder and retire the options of their own select field, without giving them Jira administration rights.",
             ],
           ],
         },
@@ -97,10 +97,54 @@ export const customFieldsToolkit: AppDocs = {
           ],
         },
 
+        { type: "h", level: 2, text: "Where the fields appear" },
+        {
+          type: "p",
+          text: "All three field types are declared for the **issue view**, the **create screen**, **transition screens**, and the **Jira Service Management customer portal** — both for a customer filling in a request and for reading one back. A checklist on a portal request form works the same way it does on an issue.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "One place they fall back to Jira's plain editor",
+          text: "On surfaces Jira renders itself — boards, the issue navigator, bulk edit — an app field can get Jira's default editor for its underlying data type rather than the app's. The Checklist field guards that case with a rule that every line must be a checklist item, a description line or the meta line, so free-typed text is refused rather than saved and silently dropped. Masked Input can only guard a length there, because the mask lives in per-context configuration and no static rule can see it. **Edit these fields on the issue view** and the real editors apply.",
+        },
+
         { type: "h", level: 2, text: "Where the data lives" },
         {
           type: "p",
-          text: "Field values — selected issues, checklist items, masked text — are stored by **Jira** as ordinary custom field values on the issue. They follow the issue's permissions, exports and backups. The app's own storage holds only configuration. See the [privacy policy](/privacy/custom-fields-toolkit).",
+          text: "Field values — selected issues, checklist items, masked text — are stored by **Jira** as ordinary custom field values on the issue. So is every field's configuration: the JQL query, the checklist settings, the mask pattern all live in Jira's own field-context configuration, which is why they travel with a field export and follow the field's own permissions.",
+        },
+        {
+          type: "p",
+          text: "The app's own storage holds **one value**: the list of which field contexts are delegated to project administrators. That is the whole of it. See the [privacy policy](/privacy/custom-fields-toolkit).",
+        },
+
+        { type: "h", level: 2, text: "What happens without an app licence" },
+        {
+          type: "p",
+          text: "**Your fields keep working.** The three field types render, edit and save exactly as before, on every issue and every portal request. That is deliberate: a licence lapse should cost the customer new configuration, not the contents of their issues, and blanking a field out would break a transition somebody is halfway through.",
+        },
+        {
+          type: "table",
+          head: ["Still works", "Stops until the licence is active"],
+          rows: [
+            [
+              "Viewing and editing all three field types on issues, create screens, transition screens and the portal.",
+              "**Adding, editing, reordering and deleting select list options** — the four writes behind the delegation feature.",
+            ],
+            [
+              "Reading fields, contexts and the options already configured; changing which contexts are delegated.",
+              "**Creating issue links for a picker value set on the create screen.** Links made by editing an existing issue still work — it is the background trigger that is gated.",
+            ],
+            [
+              "Values already stored on your issues, untouched.",
+              "**Refreshing the `Checklist-*` values that JQL searches.** Existing values stay; they stop being updated when a checklist changes.",
+            ],
+          ],
+        },
+        {
+          type: "p",
+          text: "Both admin screens show a warning — *“No active licence”* — saying which of the above applies, and the option buttons carry a **Needs an active licence** note. A site administrator can start a trial or renew from the Atlassian Marketplace.",
         },
       ],
     },
@@ -161,6 +205,12 @@ export const customFieldsToolkit: AppDocs = {
         {
           type: "p",
           text: "A field value is data. An issue link is something Jira understands everywhere: in the issue view, in JQL, in reports. **Add an Issue Link towards the selected Issue** makes the app create a real link of the type you choose whenever a selection is made, including on the create screen.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "Links for a value set at creation arrive a moment later",
+          text: "On an existing issue the link is made as you save. On the **create** screen there is no issue to link to yet, so a background trigger picks it up once the issue exists — normally within a second or two. That trigger is the one part of this feature that needs an active app licence.",
         },
         {
           type: "fields",
@@ -278,6 +328,24 @@ export const customFieldsToolkit: AppDocs = {
         },
         { type: "mock", id: "cft-validator-config" },
         {
+          type: "diagram",
+          label: "flowchart",
+          caption: "Two switches in two different places, and the transition only blocks when both are set. The left-hand branch is what almost every support question about this field turns out to be.",
+          text: `flowchart TD
+    T[User attempts the transition] --> V{validator on<br/>this transition?}
+    V -->|no| OK[Transition allowed.<br/>Nothing is enforced.]
+    V -->|yes| M{Validation Mode<br/>on the field context}
+    M -->|None| OK
+    M -->|At least N / Mandatory only / All items| C{items satisfied?}
+    C -->|yes| OK
+    C -->|no| NO[Blocked, naming the<br/>checklist and the open items]
+
+    classDef good fill:#DFFCF0,stroke:#216E4E
+    classDef bad fill:#FFECEB,stroke:#AE2A19
+    class OK good
+    class NO bad`,
+        },
+        {
           type: "callout",
           variant: "warning",
           title: "Setting a Validation Mode on its own does nothing",
@@ -335,7 +403,7 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
         { type: "h", level: 2, text: "Start from a preset" },
         {
           type: "p",
-          text: "The **Template Library** ships **21 presets**: US phone (local, with country code, with extension), international phone, ZIP and ZIP+4, asset tag, project code, cost centre, serial number, hostname, SKU, purchase order, order reference, invoice number, contract number, IPv4 address, MAC address, UUID and others.",
+          text: "The **Template Library** ships **19 presets**, and this is all of them: US phone (local and with country code), phone extension, international phone, ZIP and ZIP+4, asset tag, project code, cost centre, serial number, hostname, SKU or part number, purchase order, order reference, invoice number, contract number, IPv4 address, MAC address and UUID.",
         },
         {
           type: "p",
@@ -392,6 +460,12 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
           title: "Masking is formatting, not encryption",
           text: "This field keeps values in a consistent shape. The value is stored as an ordinary Jira custom field value and is visible to anyone who can see the issue. Do not use it for passwords or keys. To find credentials that are already in your issues, see [Secret Scanner](/documentation/secret-scanner/overview).",
         },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "The mask applies where the app draws the editor",
+          text: "That is the issue view, the create screen, transition screens and the portal — which is everywhere a person normally types into the field. It is **not** enforced on surfaces Jira renders with its own text editor, such as bulk edit or the issue navigator, nor on a write through the public REST API. The only rule that reaches those is a 255-character cap. If clean data matters more than convenience, say so in the **Helper Text** and check the field periodically rather than assuming the mask is a constraint on the database.",
+        },
       ],
     },
 
@@ -420,15 +494,23 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
         {
           type: "steps",
           items: [
-            "Make sure the select list field has a **field context limited to one project**. Create one in **Settings → Issues → Custom fields → *field* → Contexts** if needed.",
+            "Make sure the field has a **field context limited to one project**. Create one in **Settings → Issues → Custom fields → *field* → Contexts** if needed.",
             "Open **Jira → Apps → Custom Fields Toolkit → Select List Option Management**.",
-            "Find the field and context in the table and switch **Enabled** on. Single-select and multi-select lists are both supported.",
+            "Find the field and context in the table and switch **Delegate** on.",
           ],
+        },
+        {
+          type: "p",
+          text: "**Four field types can be delegated**, not only the two the name suggests: **Select List (single)**, **Select List (multiple)**, **Checkboxes** and **Radio Buttons**. They all hold a list of options and they are all edited the same way.",
+        },
+        {
+          type: "p",
+          text: "The table is searchable and paginated, and **Only fields with a delegable context** filters it down by probing each field's contexts — it reports progress as it goes, because on a site with thousands of custom fields that check takes a moment. Each row links straight out to the field's and the context's own Jira configuration screens.",
         },
         {
           type: "callout",
           variant: "warning",
-          text: "If the table is empty, no select list on your site has a project-scoped context yet. That is the prerequisite, not a bug.",
+          text: "If the table is empty, no field on your site has a project-scoped context yet. That is the prerequisite, not a bug. And if your site has more custom fields than can be read in one request, the screen says so above the list and asks you to narrow it with the search box — it does not present a partial list as the whole.",
         },
 
         { type: "h", level: 2, text: "Step 2 — the project admin manages the options" },
@@ -436,9 +518,10 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
         {
           type: "list",
           items: [
-            "The page is at **Project settings → Select List Options**, and lists only the fields enabled for that project.",
-            "**Add Option** adds a value. **Edit** renames one. **Delete** removes it after a confirmation.",
-            "An option can be **disabled** instead of deleted. Disabling keeps it on the issues that already use it, while removing it from the dropdown for new work.",
+            "The page is at **Project settings → Select List Options**, and lists only the fields delegated for that project. If none are, it says a Jira administrator has to enable one first.",
+            "**Add Option** adds a value. Click a value to rename it. **Delete** removes it after a confirmation that says the action cannot be undone.",
+            "An option can be switched from **Enabled** to **Disabled** instead of deleted. Disabling keeps it on the issues that already use it, while removing it from the dropdown for new work.",
+            "**Move up** and **Move down** reorder the list, which is the order users see in the dropdown. Long lists are paginated.",
           ],
         },
         {
@@ -452,8 +535,8 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
           head: ["Action", "Who can do it"],
           rows: [
             ["Enable a field for delegation", "Jira administrator"],
-            ["Add, rename, disable or delete an option of an enabled field", "Anyone with **Administer projects** on that project"],
-            ["Anything else about the field", "Jira administrator only"],
+            ["Add, rename, reorder, disable or delete an option of a delegated field", "Anyone with **Administer projects** on that project"],
+            ["Anything else about the field — its contexts, screens, type or name", "Jira administrator only"],
           ],
         },
       ],
@@ -481,10 +564,14 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
         },
         {
           type: "p",
-          text: "The app declares **no external network access at all**. There is nothing outside Atlassian for it to call.",
+          text: "The app declares **no external network access at all**. There is nothing outside Atlassian for it to call. It also does not declare `report:personal-data`, and that is not an omission — see below.",
         },
 
         { type: "h", level: 2, text: "What is stored where" },
+        {
+          type: "p",
+          text: "Almost everything belongs to Jira. The app's own storage holds a single value.",
+        },
         {
           type: "table",
           head: ["Data", "Stored by", "What that means"],
@@ -496,21 +583,47 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
             ],
             ["Checklist progress values used by JQL", "**Jira**", "Stored as an issue property so Jira can search them."],
             [
-              "Field configuration and delegation settings",
+              "Field configuration: the JQL query, checklist settings, mask patterns, custom statuses, default items",
+              "**Jira**",
+              "Held in the field's own context configuration, per context. It travels with the field, not with the app.",
+            ],
+            [
+              "Which field contexts are delegated to project admins",
               "**The app**",
-              "Deleted when the app is uninstalled.",
+              "One key-value record, and the only thing the app stores. Deleted when the app is uninstalled.",
             ],
           ],
         },
+
+        { type: "h", level: 2, text: "Personal data: there is none" },
         {
           type: "p",
-          text: "The [privacy policy](/privacy/custom-fields-toolkit) is the authoritative version.",
+          text: "This app stores **no Atlassian account ID anywhere**, no display name, no email address and no user-generated content. The one record it keeps is a map of custom field ids to context ids — configuration identifiers, with no person attached.",
+        },
+        {
+          type: "p",
+          text: "That is why it declares no `report:personal-data` scope and runs no Personal Data Reporting cycle: an app that holds no account identifier has nothing to report and nothing to erase on a closed-account request. A checklist assignee or a picker column showing somebody's avatar is read from Jira when the field renders and thrown away; it is never written to the app's storage.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          text: "The consequence for your privacy review: a subject access request against this app has no records to return, and a deletion request has nothing to delete. What holds a person's data is the **issue**, and that is Jira's to answer for. The [privacy policy](/privacy/custom-fields-toolkit) is the authoritative version.",
         },
 
         { type: "h", level: 2, text: "Uninstalling" },
         {
           type: "p",
-          text: "Uninstalling deletes the app's configuration. Field values stay in Jira, because Jira owns them, but the app's field types stop rendering. If you are removing the app from a production site, export the values you need first.",
+          text: "Uninstalling runs a handler that empties the app's storage — in practice, that one delegation record. It sweeps repeatedly until a pass finds nothing left, because deleting under a cursor leaves keys behind and “no more pages” is not the same statement as “the store is empty”. Independently, Atlassian detaches the installation's data and destroys it under its own retention policy; see [Where your data goes](/documentation/start-here/your-data).",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "This only became true recently",
+          text: "The handler existed for months wired to `avi:forge:uninstalled:app`, an event Forge does not publish, so it had never run once. It is a `preUninstall` module now, and it actually deletes.",
+        },
+        {
+          type: "p",
+          text: "Field values stay in Jira, because Jira owns them, but the app's field types stop rendering — so if you are removing the app from a production site, export the values you need to keep readable first.",
         },
 
         { type: "h", level: 2, text: "Troubleshooting" },
@@ -535,7 +648,15 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
             },
             {
               name: "Checklist JQL returns nothing",
-              text: "Put the name in quotes: `\"Checklist-Progress\" >= 80`. Also, the values only exist for issues whose checklist has been saved at least once since the app was installed.",
+              text: "Put the name in quotes: `\"Checklist-Progress\" >= 80`. Also, the values only exist for issues whose checklist has been saved at least once since the app was installed — and they stop being refreshed while the app has no active licence.",
+            },
+            {
+              name: "The mask let a bad value through",
+              text: "Check where it was typed. The mask is enforced where the app draws the editor — the issue view, create, transition screens and the portal. A bulk edit, the issue navigator or a REST write gets Jira's plain editor, which only enforces a length cap.",
+            },
+            {
+              name: "An option button says it needs a licence",
+              text: "The four option writes — add, edit, reorder, delete — are the only things in this app gated on the licence. Your fields and their values are unaffected.",
             },
             {
               name: "The field behaves differently in two projects",
@@ -572,12 +693,20 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
               text: "No.",
             },
             {
+              name: "Does the app store any personal data?",
+              text: "No. It holds no Atlassian account ID, no name, no email address and no issue content. Its entire storage is one record listing which field contexts are delegated to project administrators — which is why it requests no personal-data reporting scope and has nothing to erase when an account is closed.",
+            },
+            {
               name: "Is the Masked Input field encrypted?",
               text: "No. It formats and validates input. The value is a normal Jira field value, visible to anyone who can see the issue. Do not store secrets in it.",
             },
             {
               name: "What happens to my data if I uninstall?",
-              text: "Field values stay in Jira, because Jira owns them. The app's configuration is cleared and detached immediately, and its field types stop rendering — so export anything you need to keep readable first. See [Where your data goes](/documentation/start-here/your-data).",
+              text: "Field values stay in Jira, because Jira owns them, and so does every field's configuration. The app runs an uninstall handler that empties its own storage — the one delegation record — before Atlassian detaches the installation's data and destroys it under its own retention policy. The field types stop rendering, so export anything you need to keep readable first. See [Where your data goes](/documentation/start-here/your-data).",
+            },
+            {
+              name: "What stops working if our licence lapses?",
+              text: "Four things, all of them administrative: adding, editing, reordering and deleting select list options. Plus two background jobs — issue links for a picker value set on the **create** screen, and the refresh of the `Checklist-*` values JQL searches. The fields themselves keep rendering and saving everywhere, and nothing already on an issue is touched.",
             },
           ],
         },
@@ -592,7 +721,7 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
             },
             {
               name: "Do the fields work on the create screen?",
-              text: "Yes, if you add them to the create screen. The Issue Picker even creates its issue links for values set at creation time.",
+              text: "Yes, if you add them to the create screen — and on transition screens, and in the **Jira Service Management customer portal**, both for filling a request in and for reading it back. The Issue Picker even creates its issue links for values set at creation time, a moment after the issue exists.",
             },
             {
               name: "Do they appear in exports and reports?",
@@ -604,7 +733,7 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
             },
             {
               name: "Does it work with team-managed projects?",
-              text: "The field types are created and configured centrally, which is a company-managed concept. Use company-managed projects for the full feature set.",
+              text: "The field types are created and configured centrally, through field contexts, which is a company-managed concept — so use company-managed projects for the full feature set. The **Checklist Completion Validator** is the exception: it is declared for team-managed projects as well as company-managed ones.",
             },
           ],
         },
@@ -619,7 +748,7 @@ project = OPS AND "Checklist-Has-Mandatory-Incomplete" = 1
             },
             {
               name: "Why is my select field not in the list?",
-              text: "It has no project-scoped context. Create one, then it appears.",
+              text: "Most likely it has no project-scoped context — create one and it appears. Two other possibilities: the site has more custom fields than could be read in one request, in which case the screen says so and the search box will find it; or the field is not one of the four supported types (Select List single or multiple, Checkboxes, Radio Buttons).",
             },
             {
               name: "Can I see who changed an option?",

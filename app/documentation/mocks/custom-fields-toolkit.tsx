@@ -289,7 +289,7 @@ const maskedConfig = (
         <Btn>Serial number</Btn>
         <Btn>IPv4 address</Btn>
         <Btn>MAC address</Btn>
-        <Btn variant="subtle">+ 12 more</Btn>
+        <Btn variant="subtle">+ 13 more</Btn>
       </Row>
       <div className="text-[11px] mt-2" style={{ color: ATL.subtle }}>
         Clicking a preset preloads the mask, regex and algorithm. You can edit any of them afterwards.
@@ -327,15 +327,20 @@ const globalSettings = (
   <Screen where="Jira → Apps → Custom Fields Toolkit → Select List Option Management">
     <PageTitle>Select List Option Management</PageTitle>
     <Sub>
-      Enable Project Admins to manage options for select list fields that have a project-scoped field context.
+      Delegate select list option management to Project Admins. Select a field to see its contexts and enable
+      project-scoped ones.
     </Sub>
+    <Row gap={8}>
+      <Field placeholder="Search fields..." width={240} />
+      <Checkbox on label="Only fields with a delegable context" />
+    </Row>
     <Table
-      head={["Field", "Type", "Context", "Project", "Enabled"]}
+      head={["Field", "Type", "Context", "Project", "Delegate"]}
       rows={[
         [
           "Affected Service",
           <Lozenge key="t" tone="info">
-            Select list (single)
+            Select List (single)
           </Lozenge>,
           "OPS context",
           "Operations (OPS)",
@@ -344,7 +349,7 @@ const globalSettings = (
         [
           "Environment",
           <Lozenge key="t" tone="info">
-            Select list (single)
+            Select List (single)
           </Lozenge>,
           "Platform context",
           "Platform (PLAT)",
@@ -353,14 +358,26 @@ const globalSettings = (
         [
           "Vendor",
           <Lozenge key="t" tone="purple">
-            Select list (multiple)
+            Select List (multiple)
           </Lozenge>,
           "Procurement context",
           "Procurement (PROC)",
           <Toggle key="e" on={false} label="" />,
         ],
+        [
+          "Compliance checks",
+          <Lozenge key="t" tone="teal">
+            Checkboxes
+          </Lozenge>,
+          "Risk context",
+          "Risk (RISK)",
+          <Toggle key="e" on={false} label="" />,
+        ],
       ]}
     />
+    <div className="text-[11px] mt-2" style={{ color: ATL.subtle }}>
+      Showing 1-4 of 4
+    </div>
   </Screen>
 );
 
@@ -374,13 +391,31 @@ const projectSettings = (
     <Select label="Field" value="Affected Service" width={280} />
 
     <Table
-      head={["Option Value", "Status", "Actions"]}
+      head={["Option Value", "Status", "Order", "Actions"]}
       rows={[
-        ["Checkout API", <Lozenge key="s" tone="success">Enabled</Lozenge>, <Row key="a" gap={6}><Btn>Edit</Btn><Btn variant="subtle">Delete</Btn></Row>],
-        ["Payments", <Lozenge key="s" tone="success">Enabled</Lozenge>, <Row key="a" gap={6}><Btn>Edit</Btn><Btn variant="subtle">Delete</Btn></Row>],
-        ["Legacy billing", <Lozenge key="s" tone="default">Disabled</Lozenge>, <Row key="a" gap={6}><Btn>Edit</Btn><Btn variant="subtle">Delete</Btn></Row>],
+        [
+          "Checkout API",
+          <Lozenge key="s" tone="success">Enabled</Lozenge>,
+          <Row key="o" gap={4}><Btn variant="subtle">Move up</Btn><Btn variant="subtle">Move down</Btn></Row>,
+          <Row key="a" gap={6}><Btn>Edit</Btn><Btn variant="subtle">Delete</Btn></Row>,
+        ],
+        [
+          "Payments",
+          <Lozenge key="s" tone="success">Enabled</Lozenge>,
+          <Row key="o" gap={4}><Btn variant="subtle">Move up</Btn><Btn variant="subtle">Move down</Btn></Row>,
+          <Row key="a" gap={6}><Btn>Edit</Btn><Btn variant="subtle">Delete</Btn></Row>,
+        ],
+        [
+          "Legacy billing",
+          <Lozenge key="s" tone="default">Disabled</Lozenge>,
+          <Row key="o" gap={4}><Btn variant="subtle">Move up</Btn><Btn variant="subtle">Move down</Btn></Row>,
+          <Row key="a" gap={6}><Btn>Edit</Btn><Btn variant="subtle">Delete</Btn></Row>,
+        ],
       ]}
     />
+    <div className="text-[11px] mt-2" style={{ color: ATL.subtle }}>
+      Showing 1-3 of 3
+    </div>
   </Screen>
 );
 
