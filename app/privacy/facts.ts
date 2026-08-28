@@ -84,7 +84,8 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "read:space:confluence",
       "storage:app",
     ],
-    storageTech: "Forge app storage (key-value store)",
+    storageTech:
+      "Forge app storage (key-value store) and Forge SQL, both hosted by Atlassian",
     external: ["`api.atlassian.com` — the Atlassian REST APIs of your own site"],
   },
 
@@ -135,7 +136,8 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "manage:jira-configuration",
       "storage:app",
     ],
-    storageTech: "Forge app storage (key-value store)",
+    storageTech:
+      "Forge app storage (key-value store) and Forge SQL, both hosted by Atlassian",
     external: ["`api.atlassian.com` — the Atlassian REST APIs of your own site and, for team routing, the Atlassian Teams API"],
   },
 
@@ -173,7 +175,8 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "manage:jira-configuration",
       "storage:app",
     ],
-    storageTech: "Forge app storage (key-value store)",
+    storageTech:
+      "Forge app storage (key-value store) and Forge SQL, both hosted by Atlassian",
     external: [],
   },
 
@@ -192,7 +195,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "for a post function, the context sources you enable on top of that: up to the 50 most recent change history entries, the 20 most recent comments, attachment metadata (name, MIME type, size, uploader and upload date — never file contents), and the custom fields you select together with their allowed values",
     ],
     persisted: [
-      "**Audit events**, in one bucket per day: what ran, when, the issue key, the transition name and counts of the actions taken. Retained for **90 days**, with a maximum of **800 events per day**.",
+      "**Audit events**, one row each: what ran, when, the issue key, the transition name, the counts of the actions taken, the Atlassian account ID of whoever performed the transition, and — for a validator — the AI-written reason for its verdict. Retained for **90 days**.",
       "**The generated expression and its AI-written title**, recorded each time you use *Generate Expression*.",
       "**Token usage** — the prompt, completion and total token counts of each AI call.",
       "Your **rule configuration** is *not* stored by the app. The rule description, rule text, generated expression, selected fields, context sources and enabled tools are stored by **Jira**, inside the workflow definition, exactly like the configuration of any built-in condition, and are covered by Atlassian's own data handling.",
@@ -203,8 +206,8 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "Jira is read with the app's own access rather than the acting user's",
     ],
     personal: [
-      "Issue content is read to evaluate a rule or run a post function, and is not retained. The audit events keep an issue key, a timestamp, the transition name and counts — **no copy of the issue and no justification text**.",
-      "**No Atlassian account IDs or display names are stored** by this app. The audit events do not identify who performed the transition.",
+      "Issue content is read to evaluate a rule or run a post function, and **no copy of the issue is retained**. An audit event does keep the validator's written reason for blocking a transition, which the AI derived from the issue — that is what answers \"why was this blocked?\" in the audit log.",
+      "**Atlassian account IDs are stored** on audit events, to record who performed a transition. They are the identifiers Atlassian itself uses and are meaningless outside your tenant. No display names or email addresses are stored: a name shown in the audit log is fetched from Jira when the page is drawn.",
       "Attachment **contents are never read**; only file metadata is included, and only when that context source is enabled.",
       "The app does not collect email addresses, passwords, authentication tokens, API keys or payment data.",
     ],
@@ -216,7 +219,8 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "send:notification:jira",
       "storage:app",
     ],
-    storageTech: "Forge app storage (key-value store)",
+    storageTech:
+      "Forge app storage (key-value store) and Forge SQL, both hosted by Atlassian",
     external: [],
   },
 
@@ -309,7 +313,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "This app is about user accounts, so it necessarily processes personal data: **account IDs, display names, email addresses, avatar URLs, group membership, product access and last activity dates** are stored in the snapshots and in the audit log.",
       "That data is stored only inside your own Atlassian tenant and is used exclusively to show licence utilisation, evaluate your rules and provide an audit trail of the actions taken.",
       "The **organisation API key** is a credential you provide. It grants organisation-admin level access, is stored inside your own tenant, is masked in the interface, and can be removed at any time with **Disconnect**.",
-      "Snapshots are replaced by newer scans and can be deleted from the app. Audit records are retained so you keep evidence of what was changed, until you delete them or uninstall the app.",
+      "Snapshots are replaced by newer scans and can be deleted from the app. Audit records — the entry and its per-user detail together — are kept for **90 days** and then deleted automatically, so a record is either fully answerable or gone; you can also delete them yourself, and uninstalling erases them.",
       "The app does not collect passwords or payment data.",
     ],
     scopes: [
@@ -355,6 +359,48 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "read:confluence-space.summary",
       "read:confluence-props",
       "read:confluence-user",
+      "storage:app",
+    ],
+    storageTech: "Forge app storage (key-value store)",
+    external: [],
+  },
+  {
+    slug: "health-hub",
+    name: "Health Hub for Jira",
+    products: "Jira · Jira Service Management",
+    icon: "/health-hub.png",
+    summary:
+      "Health Hub for Jira audits your instance against best practice. Sixty-seven analyzers examine projects, schemes, screens, custom fields, workflows, users and automation, and report what they find with a severity and a suggested fix.",
+    ai: true,
+    aiData: [
+      "the names and descriptions of the automation rules or custom fields an AI analyzer is judging, so it can say whether a description is meaningful or a rule looks like it exposes a secret",
+    ],
+    persisted: [
+      "**Analyzer findings** — for each analyzer: what it found, a severity, a description, suggestions, and the list of affected items (project, scheme, screen, field, board, dashboard or user).",
+      "**Analyzer status** — when each analyzer last ran, how many findings it produced, and whether the sweep covered the whole instance or stopped at a limit.",
+      "**Instance metrics** — counts of projects, users, custom fields, workflows and other objects, kept as a history so the Growth Tracker can chart change over time.",
+      "**Dismissed findings** — which findings an administrator chose to hide, so they stay hidden.",
+      "**Links to issues** the app created from a finding, so a finding can show its ticket.",
+    ],
+    transient: [
+      "project, scheme, screen, field, workflow, board, dashboard and user configuration read from Jira while a scan runs",
+      "Jira is read with the app's own access rather than the acting user's",
+    ],
+    personal: [
+      "**Atlassian account IDs and display names appear in findings that are about people or ownership** — an inactive user who leads a project, the owner of a dashboard nobody uses, the owner of a board whose filter is broken. That is the finding itself: naming the owner is what makes it actionable.",
+      "Those findings are stored so the report survives between scans, and they are included when you export findings to CSV.",
+      "The app does not collect email addresses, passwords, authentication tokens, API keys or payment data.",
+      "Everything is stored inside your own Atlassian tenant and is erased when the app is uninstalled.",
+    ],
+    scopes: [
+      "read:jira-work",
+      "write:jira-work",
+      "read:jira-user",
+      "manage:jira-configuration",
+      "manage:jira-project",
+      "read:project:jira",
+      "read:board-scope:jira-software",
+      "read:board-scope.admin:jira-software",
       "storage:app",
     ],
     storageTech: "Forge app storage (key-value store)",
