@@ -364,48 +364,6 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
     storageTech: "Forge app storage (key-value store)",
     external: [],
   },
-  {
-    slug: "health-hub",
-    name: "Health Hub for Jira",
-    products: "Jira · Jira Service Management",
-    icon: "/health-hub.png",
-    summary:
-      "Health Hub for Jira audits your instance against best practice. Sixty-seven analyzers examine projects, schemes, screens, custom fields, workflows, users and automation, and report what they find with a severity and a suggested fix.",
-    ai: true,
-    aiData: [
-      "the names and descriptions of the automation rules or custom fields an AI analyzer is judging, so it can say whether a description is meaningful or a rule looks like it exposes a secret",
-    ],
-    persisted: [
-      "**Analyzer findings** — for each analyzer: what it found, a severity, a description, suggestions, and the list of affected items (project, scheme, screen, field, board, dashboard or user).",
-      "**Analyzer status** — when each analyzer last ran, how many findings it produced, and whether the sweep covered the whole instance or stopped at a limit.",
-      "**Instance metrics** — counts of projects, users, custom fields, workflows and other objects, kept as a history so the Growth Tracker can chart change over time.",
-      "**Dismissed findings** — which findings an administrator chose to hide, so they stay hidden.",
-      "**Links to issues** the app created from a finding, so a finding can show its ticket.",
-    ],
-    transient: [
-      "project, scheme, screen, field, workflow, board, dashboard and user configuration read from Jira while a scan runs",
-      "Jira is read with the app's own access rather than the acting user's",
-    ],
-    personal: [
-      "**Atlassian account IDs and display names appear in findings that are about people or ownership** — an inactive user who leads a project, the owner of a dashboard nobody uses, the owner of a board whose filter is broken. That is the finding itself: naming the owner is what makes it actionable.",
-      "Those findings are stored so the report survives between scans, and they are included when you export findings to CSV.",
-      "The app does not collect email addresses, passwords, authentication tokens, API keys or payment data.",
-      "Everything is stored inside your own Atlassian tenant and is erased when the app is uninstalled.",
-    ],
-    scopes: [
-      "read:jira-work",
-      "write:jira-work",
-      "read:jira-user",
-      "manage:jira-configuration",
-      "manage:jira-project",
-      "read:project:jira",
-      "read:board-scope:jira-software",
-      "read:board-scope.admin:jira-software",
-      "storage:app",
-    ],
-    storageTech: "Forge app storage (key-value store)",
-    external: [],
-  },
 ];
 
 export function findPrivacy(slug: string): PrivacyFacts | undefined {
