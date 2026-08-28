@@ -444,7 +444,7 @@ export const licenseWasteManager: AppDocs = {
           type: "callout",
           variant: "warning",
           title: "Entries are kept for 90 days, and there is no way to keep them longer",
-          text: "The audit trail is swept at the end of every scan: an entry older than 90 days is deleted, **and so is its per-user detail, on the same horizon**. That pairing is deliberate. The two used to expire separately, which left entries saying “504 users affected” with no way to see who they were — an audit trail decaying into a number. One horizon means a row is either fully answerable or gone.",
+          text: "The audit trail is swept at the end of every scan: an entry older than 90 days is deleted, **and so is its per-user detail, on the same horizon**. That pairing is deliberate. An entry that outlived its detail would say “504 users affected” with no way left to see who they were — an audit trail decaying into a number. One horizon means a row is either fully answerable or gone.",
         },
         {
           type: "callout",

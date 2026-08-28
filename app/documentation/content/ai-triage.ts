@@ -292,10 +292,10 @@ export const aiTriage: AppDocs = {
           ],
         },
 
-        { type: "h", level: 2, text: "The four actions" },
+        { type: "h", level: 2, text: "The actions" },
         {
           type: "p",
-          text: "There are three, and all three work — including from a per-project configuration, which was not true of earlier versions. Tick as many as you want, or none.",
+          text: "Three, and they work from a global configuration or a per-project one. Tick as many as you want, or none.",
         },
         {
           type: "table",
@@ -321,8 +321,8 @@ export const aiTriage: AppDocs = {
         {
           type: "callout",
           variant: "info",
-          title: "There is no comment action, and there is no longer a setting that suggests there is",
-          text: "Earlier versions offered **Add internal comment with analysis** and an **Always add analysis comment** toggle. Neither ever posted anything, because the app has no code path that writes to an issue, and both have been removed rather than left on the screen looking configurable. The score, the reasoning and the key phrases are in the **AI Triage** panel on the issue and in the audit log.",
+          title: "The app does not comment on issues",
+          text: "Nothing it does writes to an issue. The score, the reasoning and the key phrases appear in the **AI Triage** panel on the issue itself and in the audit log, where they are attached to the analysis rather than mixed into the conversation the requester is reading.",
         },
 
         { type: "h", level: 2, text: "The other settings" },
@@ -541,12 +541,6 @@ export const aiTriage: AppDocs = {
           ],
         },
         {
-          type: "callout",
-          variant: "info",
-          title: "Six scopes were dropped",
-          text: "Earlier versions asked for six more than the list above: three that nothing called, and three granular service-desk scopes already covered by the classic one next to them. If your security review is holding an older listing, this is why the two do not match.",
-        },
-        {
           type: "p",
           text: "The only outside address is `api.atlassian.com`: your own site's APIs and, for team routing, the Atlassian Teams API.",
         },
@@ -595,7 +589,7 @@ export const aiTriage: AppDocs = {
         { type: "h", level: 2, text: "Uninstalling" },
         {
           type: "p",
-          text: "Uninstalling now erases. Earlier versions registered cleanup against a Forge event that does not exist, so the handler was never once invoked; it is a `preUninstall` module now, and it runs. It empties the audit table and sweeps the key-value store — configuration, the Teams API token, per-issue decisions, skills and statistics — repeating until a pass finds nothing left, to a 45-second budget.",
+          text: "Uninstalling erases what the app holds. A `preUninstall` handler empties the audit table first, then sweeps the key-value store — configuration, the Teams API token, per-issue decisions, skills and statistics — repeating until a pass finds nothing left, to a 45-second budget.",
         },
         {
           type: "p",

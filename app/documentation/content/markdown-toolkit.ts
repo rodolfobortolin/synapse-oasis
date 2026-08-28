@@ -965,7 +965,7 @@ ZIP,Download,92`,
           items: [
             {
               name: "Can I import Markdown files and turn them into Confluence pages?",
-              text: "No. The app exports; it does not import. Earlier versions had an import tab and it has been removed, along with the write permission that made it possible.",
+              text: "No. The app exports Confluence to Markdown; it does not create pages. It holds no write permission for Confluence content at all, which is also why it cannot alter a page it exports.",
             },
             {
               name: "Can I export a whole space?",

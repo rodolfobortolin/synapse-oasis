@@ -611,14 +611,14 @@ export const workflowToolkit: AppDocs = {
         {
           type: "callout",
           variant: "info",
-          title: "There is no “who did it” column, and that is honest",
-          text: "Every event here is written by a background handler running inside a transition, not by a person clicking something in the app. The column that used to print “App (automated)” on every single row has been removed rather than left there implying the app knows who acted.",
+          title: "There is no “who did it” column",
+          text: "Every event here is written by a background handler running inside a transition, not by a person clicking something in the app. Jira does not hand the handler the acting user, so the log records what ran and on which issue rather than implying it knows who triggered it. The transition itself is in the issue history, with the person attached.",
         },
 
         { type: "h", level: 2, text: "Uninstalling" },
         {
           type: "p",
-          text: "Uninstalling now erases. Earlier versions registered cleanup against a Forge event that does not exist, so the handler was never once invoked; it is a `preUninstall` module now, and it runs. It empties the audit table and deletes every key the app wrote, working to a 45-second budget and attempting each store even if the other fails.",
+          text: "Uninstalling erases what the app holds. A `preUninstall` handler empties the audit table and deletes every key the app wrote, working to a 45-second budget and attempting each store even if the other fails.",
         },
         {
           type: "p",

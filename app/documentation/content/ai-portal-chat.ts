@@ -506,7 +506,7 @@ export const aiPortalChat: AppDocs = {
         { type: "h", level: 2, text: "Uninstalling" },
         {
           type: "p",
-          text: "Uninstalling now erases. Earlier versions registered cleanup against a Forge event that does not exist, so the handler was never once invoked; it is a `preUninstall` module now, and it runs. It empties the audit table first, then sweeps the key-value store — conversations, configuration at all three levels, branding, the API token and statistics — repeating until a pass finds nothing left, to a 45-second budget.",
+          text: "Uninstalling erases what the app holds. A `preUninstall` handler empties the audit table first, then sweeps the key-value store — conversations, configuration at all three levels, branding, the API token and statistics — repeating until a pass finds nothing left, to a 45-second budget.",
         },
         {
           type: "p",

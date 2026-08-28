@@ -404,7 +404,7 @@ text ~ "BEGIN RSA PRIVATE KEY" OR text ~ "connectionString"`,
         },
         {
           type: "p",
-          text: "Events are stored one row per event in **Forge SQL** and deleted after 90 days. There is no cap on how many a day may hold: an earlier version kept a bucket per day with an entry limit, which meant the log stopped recording exactly on the day something was going wrong.",
+          text: "Events are stored one row per event in **Forge SQL** and deleted after 90 days. There is no cap on how many a day may hold — a busy day is exactly when the log has to keep recording.",
         },
         {
           type: "p",
@@ -462,13 +462,6 @@ text ~ "BEGIN RSA PRIVATE KEY" OR text ~ "connectionString"`,
           type: "p",
           text: "The app declares no outbound network access at all. Nothing leaves your Atlassian tenant.",
         },
-        {
-          type: "callout",
-          variant: "info",
-          title: "Two Jira administration scopes were dropped",
-          text: "Earlier versions requested `manage:jira-project` and `manage:jira-configuration`. Nothing in the app ever called them: they had been declared for a large block of vendored client code — schemes, screens, project roles and groups — that no screen and no resolver could reach. The code is gone and so are the scopes, which is worth knowing if your security review looked at an older listing.",
-        },
-
         { type: "h", level: 2, text: "What the app stores" },
         {
           type: "fields",
@@ -504,7 +497,7 @@ text ~ "BEGIN RSA PRIVATE KEY" OR text ~ "connectionString"`,
         { type: "h", level: 2, text: "Uninstalling" },
         {
           type: "p",
-          text: "Uninstalling now erases. Earlier versions registered cleanup against a Forge event that does not exist, so the handler was never once invoked; it is a `preUninstall` module now, and it runs. It empties the audit table first — that is the store holding account IDs — then sweeps the key-value store until a pass finds nothing left, working to a 45-second budget and attempting each store even if the other fails. Remediation tickets stay in Jira, because they are ordinary Jira issues.",
+          text: "Uninstalling erases what the app holds. A `preUninstall` handler empties the audit table first — that is the store holding account IDs — then sweeps the key-value store until a pass finds nothing left, working to a 45-second budget and attempting each store even if the other fails. Remediation tickets stay in Jira, because they are ordinary Jira issues.",
         },
 
         { type: "h", level: 2, text: "Troubleshooting" },
