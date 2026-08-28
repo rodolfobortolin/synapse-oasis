@@ -334,7 +334,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "Markdown Toolkit for Confluence exports Confluence content as Markdown — single pages, page trees or entire spaces — and provides an in-page macro that renders Markdown with code highlighting, Mermaid diagrams and math expressions. It holds no write permission and creates no content in Confluence.",
     ai: false,
     persisted: [
-      "**Macro content** — the Markdown you type into a Markdown macro, stored per macro instance so the macro can render it.",
+      "**Macro content is not stored by the app.** The Markdown you type into a Markdown macro is Forge macro configuration, which Confluence keeps with the page itself — the same place a built-in macro's settings live. The app reads it when it draws the macro and writes nothing of its own; it is covered by your Confluence data handling, not ours, and it goes with the page when the page goes.",
       "**Export jobs** — a manifest of what a job covers and the converted page content held in chunks while the job runs and until you download, reset or discard it.",
     ],
     transient: [

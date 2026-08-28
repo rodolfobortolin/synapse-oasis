@@ -309,8 +309,8 @@ export const startHere: AppDocs = {
         {
           type: "callout",
           variant: "warning",
-          title: "Nothing happens automatically after installing",
-          text: "Every app ships switched off or unconfigured on purpose. Secret Scanner scans nothing until you enable it. AI Triage routes nothing until you pick a service desk. That is deliberate: an app that started changing your issues the moment it was installed would be a bad app.",
+          title: "Nothing changes your issues until you say so",
+          text: "No app here modifies anything until it is configured. AI Triage routes nothing until you pick a service desk; every bulk action asks first. That is deliberate: an app that started changing your issues the moment it was installed would be a bad app. **One app does start working immediately, and on purpose:** Secret Scanner begins scanning as soon as it is installed, because a security app that waits is a security app that misses the week you forgot to switch it on. Scanning only reads — it flags findings for you and changes nothing — and the master switch on its Scanning Rules tab turns it off.",
         },
 
         { type: "h", level: 2, text: "Try it somewhere safe first" },
