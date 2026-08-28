@@ -32,7 +32,7 @@ export const aiPortalChat: AppDocs = {
         { type: "h", level: 2, text: "What the customer sees" },
         {
           type: "p",
-          text: "The assistant is offered in the Help Center, above your normal request types. Nothing else about the portal changes.",
+          text: "The assistant is offered in the portal header — on the Help Center above your normal request types, and on the individual portals underneath it — plus an entry in the customer's own menu. Nothing else about the portal changes.",
         },
         { type: "mock", id: "ap-portal-trigger", caption: "The banner trigger in the Help Center, above the usual request type list." },
         {
@@ -409,7 +409,9 @@ export const aiPortalChat: AppDocs = {
             ["Attachment size, per conversation", "10 MB"],
             ["Attachments at all", "Only when the request type accepts them"],
             ["Knowledge base scope", "Only the Confluence spaces you list, and only what the customer can already see"],
+            ["Audit retention", "90 days, one row per event, no per-day cap"],
             ["Where AI runs", "Forge LLM, inside Atlassian, with Atlassian-hosted models"],
+            ["Outbound network access", "None. The manifest declares no external address at all."],
           ],
         },
 
@@ -430,13 +432,16 @@ export const aiPortalChat: AppDocs = {
             ["`read:jira-work`, `write:jira-work`", "Read and write the underlying issue, and attach the customer's files to it."],
             ["`read:jira-user`", "Resolve names of users and agents."],
             ["`search:confluence`, `read:space:confluence`", "Search the knowledge base spaces you listed."],
-            ["`storage:app`", "Store the app's own data inside your site."],
-            ["`report:personal-data`", "Report to Atlassian the account IDs the app holds, so a closed account's records can be erased."],
+            ["`storage:app`", "Store conversations, configuration, branding and statistics. The audit log itself is **Forge SQL**, one row per event."],
+            [
+              "`report:personal-data`",
+              "Atlassian's Personal Data Reporting cycle. Once a day the app reports the account IDs it holds — walking both stores, the key-value store **and the SQL audit table** — and erases what belongs to an account Atlassian reports as closed.",
+            ],
           ],
         },
         {
           type: "p",
-          text: "The only outside address the app may contact is `api.atlassian.com`, which is Atlassian itself.",
+          text: "The app declares **no external network access at all** — there is no `external.fetch` block in its manifest, so there is no address anywhere it is permitted to reach. Everything, the AI included, happens inside Atlassian.",
         },
 
         { type: "h", level: 2, text: "What the app stores" },
@@ -448,7 +453,11 @@ export const aiPortalChat: AppDocs = {
               text: "The messages, the status, the desks and spaces the session could search, timestamps and any feedback. **Chat text is stored as written**, so if a customer types personal data into the chat, it is kept until the conversation is deleted or the app is uninstalled.",
             },
             { name: "Configuration", text: "Your instructions at all three levels, knowledge base spaces, branding, and the API token." },
-            { name: "Statistics and audit entries", text: "Daily counters and a record of what the app did." },
+            { name: "Statistics", text: "Daily counters of conversations, tickets created and feedback." },
+            {
+              name: "Audit entries",
+              text: "One row per event in Forge SQL, kept for **90 days**: what happened, on which desk and conversation, who acted, and the token usage of each AI call. Filterable and exportable as CSV from the **Audit Log** tab.",
+            },
           ],
         },
         {
@@ -478,6 +487,32 @@ export const aiPortalChat: AppDocs = {
           text: "Conversations minus tickets created is roughly your deflection: questions the assistant answered without adding to your queue. The app does not calculate it for you, but the two counters sit side by side. Track the ratio month to month, because that is the figure that justifies the app.",
         },
 
+        { type: "h", level: 2, text: "What happens without an active licence" },
+        {
+          type: "p",
+          text: "Exactly three things stop, and they are the three that end in a model call: **starting a conversation**, **sending a message** and **confirming a ticket**. Everything else stays open — reading a conversation back, deleting one, leaving feedback on an answer already given, attaching a file to a request that already exists, and the whole admin surface of configuration, branding, the API tab, statistics and the audit log.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "The customer is not the person who let the licence lapse",
+          text: "A portal customer meeting this gate is somebody trying to raise a support request. They cannot renew a subscription and should never be shown one failing. So the refusal is not an error: the chat window renders a calm note — *“The assistant is unavailable”*, explaining that they can still raise the request the usual way from the help centre — and hides the composer. It is the same treatment the portal already gives a desk that has not been enabled.",
+        },
+        {
+          type: "p",
+          text: "The gate is on the resolvers rather than on a trigger, and that is not an implementation detail: a resolver is an endpoint, reachable by anyone with an account on the site without going near the portal, so it is the right place for the check. Nothing is deleted, every conversation already held stays readable, and renewing restores the assistant with no reconfiguration.",
+        },
+
+        { type: "h", level: 2, text: "Uninstalling" },
+        {
+          type: "p",
+          text: "Uninstalling now erases. Earlier versions registered cleanup against a Forge event that does not exist, so the handler was never once invoked; it is a `preUninstall` module now, and it runs. It empties the audit table first, then sweeps the key-value store — conversations, configuration at all three levels, branding, the API token and statistics — repeating until a pass finds nothing left, to a 45-second budget.",
+        },
+        {
+          type: "p",
+          text: "Requests the assistant created stay in Jira, because they are ordinary Jira issues. See [Where your data goes](/documentation/start-here/your-data).",
+        },
+
         { type: "h", level: 2, text: "Troubleshooting" },
         {
           type: "fields",
@@ -485,6 +520,10 @@ export const aiPortalChat: AppDocs = {
             {
               name: "The chat does not appear in the portal",
               text: "The desk is not enabled. Open **Portal Assistant**, select that service desk, and check **Enable AI Portal Chat**. Also confirm you are looking at the desk you configured.",
+            },
+            {
+              name: "Customers see “The assistant is unavailable”",
+              text: "Two causes look identical from the portal: the desk is not enabled, or **the installation has no active licence**. Check the desk first, then Atlassian Marketplace. The admin screens give no warning about the licence, so this note in the chat window is the signal — and the customer sees it before you do.",
             },
             {
               name: "It never uses the knowledge base",
@@ -522,7 +561,7 @@ export const aiPortalChat: AppDocs = {
           items: [
             {
               name: "Does customer data leave Atlassian?",
-              text: "No. The app runs on Atlassian Forge and the only outside address it may contact is `api.atlassian.com`. See [Where your data goes](/documentation/start-here/your-data).",
+              text: "No. The app runs on Atlassian Forge and declares no outbound network access whatsoever — not one address. See [Where your data goes](/documentation/start-here/your-data).",
             },
             {
               name: "Which AI provider do you use? Do I need an API key?",
@@ -534,7 +573,7 @@ export const aiPortalChat: AppDocs = {
             },
             {
               name: "Where are the conversations stored, and for how long?",
-              text: "In the app's storage inside your own Atlassian site, until the conversation is deleted or the app is uninstalled. Everything is deleted on uninstall.",
+              text: "In the app's storage inside your own Atlassian site, until the conversation is deleted or the app is uninstalled. Uninstalling erases them — the app runs a `preUninstall` handler that sweeps its storage rather than leaving that to the platform.",
             },
             {
               name: "Can the assistant show a customer something they should not see?",
@@ -557,7 +596,7 @@ export const aiPortalChat: AppDocs = {
             },
             {
               name: "Which languages does it handle?",
-              text: "It answers in the customer's language when you tell it to in the global instructions. The admin interface itself ships in English, Portuguese, Spanish, French, German, Italian and Japanese.",
+              text: "It answers in the customer's language, and the **Ticket & Knowledge Base language** setting decides which language the ticket itself is written in. The admin interface ships in seven languages across nine locales: English (US and UK), Portuguese (Brazil and Portugal), Spanish, French, German, Italian and Japanese.",
             },
             {
               name: "Can it update an existing request instead of creating a new one?",
@@ -584,7 +623,11 @@ export const aiPortalChat: AppDocs = {
             },
             {
               name: "What happens when I uninstall?",
-              text: "The app's stored data is cleared and detached immediately, so nobody can read it any more — then Atlassian destroys it under its own retention policy, documented as 28 days. See [Where your data goes](/documentation/start-here/your-data). That includes the conversations. Issues and comments the assistant created stay in Jira.",
+              text: "The app erases what it holds: it empties the audit table, then sweeps its key-value store — conversations, configuration, branding, the API token and statistics — until a pass finds nothing left. Whatever remains is detached by Atlassian immediately and destroyed under its own retention policy. See [Where your data goes](/documentation/start-here/your-data). Issues the assistant created stay in Jira.",
+            },
+            {
+              name: "What happens if our licence lapses?",
+              text: "The assistant stops answering. Customers who open it get a calm note saying it is unavailable and that they can still raise the request the usual way — not an error, because the customer is not the person who can fix it. Conversations already held stay readable, feedback and attachments to existing requests keep working, and every admin screen stays open and editable. Nothing is deleted, and renewing brings it back with nothing to reconfigure.",
             },
             {
               name: "Do customers need a licence?",
