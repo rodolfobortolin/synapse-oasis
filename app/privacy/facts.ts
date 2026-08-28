@@ -209,6 +209,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "Issue content is read to evaluate a rule or run a post function, and **no copy of the issue is retained**. An audit event does keep the validator's written reason for blocking a transition, which the AI derived from the issue — that is what answers \"why was this blocked?\" in the audit log.",
       "**Atlassian account IDs are stored** on audit events, to record who performed a transition. They are the identifiers Atlassian itself uses and are meaningless outside your tenant. No display names or email addresses are stored: a name shown in the audit log is fetched from Jira when the page is drawn.",
       "Attachment **contents are never read**; only file metadata is included, and only when that context source is enabled.",
+      "Once a day the app sends Atlassian the account IDs it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. When an account comes back as closed, its audit events are **deleted** — the row itself, not just the name on it, because the reason text on a row can describe the same person.",
       "The app does not collect email addresses, passwords, authentication tokens, API keys or payment data.",
     ],
     scopes: [
@@ -218,6 +219,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "manage:jira-configuration",
       "send:notification:jira",
       "storage:app",
+      "report:personal-data",
     ],
     storageTech:
       "Forge app storage (key-value store) and Forge SQL, both hosted by Atlassian",
