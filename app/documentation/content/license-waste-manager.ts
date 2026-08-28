@@ -5,7 +5,7 @@ export const licenseWasteManager: AppDocs = {
   name: "License Waste Manager for Jira",
   shortName: "License Waste Manager",
   tagline:
-    "Finds the licensed accounts nobody uses across Jira, Jira Service Management, Confluence and Jira Product Discovery. Shows what they cost, lets you act in bulk or on a schedule, and records every change.",
+    "Finds the licensed accounts nobody uses across Jira, Jira Service Management, Confluence, Jira Product Discovery and Bitbucket. Shows how many seats are dormant, lets you act in bulk or on a schedule, and records every change. Needs an organisation API key.",
   products: "Jira · JSM · Confluence · Product Discovery",
   color: "#9B59B6",
   icon: "/license-waste.png",
@@ -26,19 +26,19 @@ export const licenseWasteManager: AppDocs = {
         },
         {
           type: "p",
-          text: "**Who uses it.** A [Jira administrator](/documentation/start-here/jira-words) opens the app. To unlock the full feature set you also need an **organisation administrator** to create an API key, once.",
+          text: "**Who uses it.** A [Jira administrator](/documentation/start-here/jira-words) opens the app. Before it can do anything at all you also need an **organisation administrator** to create an API key, once — this is a prerequisite, not an upgrade.",
         },
 
         { type: "h", level: 2, text: "What it does" },
         {
           type: "list",
           items: [
-            "**Scans** your users and their product access into a snapshot, with last-activity dates.",
-            "**Shows** licence utilisation per product: seats you pay for, seats in use, seats going to waste.",
-            "**Filters** every user by product, activity, how long they have been inactive, group, email domain and name.",
-            "**Acts in bulk**: remove people from access groups, revoke every licence a person holds, add people to a group, or suspend accounts — from the Users tab or from a scheduled rule. See [Browsing and acting on users](/documentation/license-waste-manager/users).",
-            "**Automates** the same actions on a weekly, fortnightly or monthly schedule.",
-            "**Records** every action, per user, with the result and any error.",
+            "**Scans** your organisation's users, their product access and their group membership into a snapshot, with last-activity dates per product.",
+            "**Shows** licence utilisation per product, how inactivity is distributed across your seats, and a breakdown by email domain.",
+            "**Filters** every user by product, account status, how long they have been inactive, whether they hold a licence, email domain and name.",
+            "**Acts in bulk**: remove people from access groups, revoke the product licences you pick, grant access back, add people to a group, suspend an account or restore one — from the Users tab or from a scheduled rule. See [Browsing and acting on users](/documentation/license-waste-manager/users).",
+            "**Automates** the same actions daily, weekly, every two weeks or monthly.",
+            "**Records** every action, per user, with the result, the reason it was skipped, and who or what asked for it.",
           ],
         },
 
@@ -58,7 +58,7 @@ export const licenseWasteManager: AppDocs = {
             "Go to **Settings** and connect the **Organization API**: paste your organisation ID and an API key created at **admin.atlassian.com → Settings → API keys**, then click **Test Connection**.",
             "Set the **Default Inactivity Threshold**. 90 days is a sensible start.",
             "Fill in **Protected Entities**: your admin accounts, the `org-admins` and `site-admins` groups, service accounts, and any domain that must never be touched.",
-            "Go to **Dashboard** and run a **License Scan (fast)**.",
+            "Go to **Dashboard** and click **Scan Users**, with the scope left on **Licensed users only**.",
             "Read the numbers. Then go to the **Users** tab and look at the actual names before you act on anything.",
           ],
         },
@@ -66,7 +66,32 @@ export const licenseWasteManager: AppDocs = {
           type: "callout",
           variant: "info",
           title: "The organisation API key is required — to read as well as to act",
-          text: "Every user, group membership and product-access read goes through the organisation admin API, so without a key a scan finds nobody: no inventory, no last-active dates, and every group change and suspension skipped with a message telling you why. This is not a choice we made. Changing group membership needs organisation admin rights, and an app's own token does not have them — Jira answers 403 whatever permissions the app is granted. Reading membership with the app's own token was possible, but only for the price of `manage:jira-configuration`, which the Marketplace listing shows every prospective customer as full Jira administration. That is too much to ask of a licence-hygiene app, so the read moved to the organisation API alongside the writes. One key does both, which is why it is the one credential this app asks for. Apps built on a personal user token need two.",
+          text: "Every user, group membership and product-access read goes through the organisation admin API, so without a key there is nothing to show: the **Scan Users** button is disabled and the Dashboard says why. This is not a choice we made. Changing group membership needs organisation admin rights, and an app's own token does not have them — Jira answers 403 whatever permissions the app is granted. Reading membership with the app's own token was possible, but only for the price of `manage:jira-configuration`, which the Marketplace listing shows every prospective customer as full Jira administration. That is too much to ask of a licence-hygiene app, so the read moved to the organisation API alongside the writes. One key does both, which is why it is the one credential this app asks for. Apps built on a personal user token need two.",
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "If the key is removed while a scan is running, the licence-group phase is skipped whole",
+          text: "It is not degraded, and it does not report empty groups. Fanning out without the credential would visit every group, read nobody, and write a snapshot in which every licence group has no members — which reads as *nobody holds a seat* rather than *we could not look*, and that is the one answer a licence tool must never give. So the phase is dropped and the scan goes straight to finalising. Reconnect the key in **Settings** and scan again.",
+        },
+
+        { type: "h", level: 2, text: "What happens without an app licence" },
+        {
+          type: "p",
+          text: "Three things need an active licence: **starting a scan**, **running a bulk action**, and **running a rule** (by schedule or with **Run Now**). Everything else stays open, on purpose — a lapsed subscription should not lock an administrator out of data they already collected.",
+        },
+        {
+          type: "list",
+          items: [
+            "The **snapshot you already have** stays readable: the dashboard, every filter on the Users tab, and **Export CSV**.",
+            "The **audit log** stays readable, including the per-user detail behind each entry.",
+            "**Settings** stay editable: the API connection, the inactivity threshold and the protected lists.",
+            "**Force Unlock** still works, so a job interrupted on the last day of a trial does not leave you stuck.",
+          ],
+        },
+        {
+          type: "p",
+          text: "An unlicensed installation shows a warning at the top of the page — *“This app does not have an active licence”* — and greys out the three buttons above, each with a line under it saying why. A site administrator can start a trial or renew from the Atlassian Marketplace.",
         },
 
         { type: "h", level: 2, text: "The five tabs" },
@@ -93,7 +118,7 @@ export const licenseWasteManager: AppDocs = {
     {
       slug: "dashboard",
       title: "Dashboard and scans",
-      description: "The two scan types, what the numbers mean, and how to unstick a stalled scan.",
+      description: "The two scan scopes, what the numbers mean, and how to unstick a stalled scan.",
       blocks: [
         {
           type: "p",
@@ -101,20 +126,24 @@ export const licenseWasteManager: AppDocs = {
         },
         { type: "mock", id: "lwm-dashboard" },
 
-        { type: "h", level: 2, text: "The two scans" },
+        { type: "h", level: 2, text: "One button, two scopes" },
+        {
+          type: "p",
+          text: "There is a single **Scan Users** button with a scope picker beside it. Both scopes run the same phases; the difference is which population they read.",
+        },
         {
           type: "table",
-          head: ["Scan", "What it reads", "When to use it"],
+          head: ["Scope", "Who it reads", "When to use it"],
           rows: [
             [
-              "**License Scan (fast)**",
-              "Users, product access and group membership. Builds a fresh snapshot.",
+              "**Licensed users only**",
+              "The people who hold a product licence — the seats you are billed for.",
               "Routine use. Run it before every review.",
             ],
             [
-              "**Deep Reconciliation Scan**",
-              "The same, plus reconciling activity data and directory details across the organisation. Takes longer.",
-              "Before a licence renewal or a formal audit.",
+              "**Everyone in the directory**",
+              "The same, plus accounts in your directory that hold no licence: guests, external accounts and leftovers from an integration. Noticeably slower on a large organisation.",
+              "Before a licence renewal, a formal audit, or a directory clean-up.",
             ],
           ],
         },
@@ -123,20 +152,55 @@ export const licenseWasteManager: AppDocs = {
           text: "Scans run in the background in phases and report progress. **Only one scan or bulk action runs at a time.** If a run was interrupted, **Force Unlock** releases the lock so you can start a new one.",
         },
 
+        { type: "h", level: 2, text: "The phases a scan goes through" },
+        {
+          type: "p",
+          text: "The progress panel names the phase it is on. Two of them depend on the organisation API key, and one only runs for the wider scope — which is why the same scan can look different on two sites.",
+        },
+        {
+          type: "diagram",
+          label: "flowchart",
+          caption: "Reading everyone in the directory is skipped for the narrower scope. Collecting group membership is skipped whole if the organisation key has gone away mid-run — no empty groups are written.",
+          text: `flowchart TD
+    A[Preparing the snapshot] --> B[Reading licensed users]
+    B --> Q{scope}
+    Q -->|Everyone in the directory| C[Reading everyone in the directory]
+    Q -->|Licensed users only| D
+    C --> D{organisation key present?}
+    D -->|yes| E[Collecting group membership]
+    D -->|no| F
+    E --> F[Finalising]
+
+    classDef p fill:#E9F2FF,stroke:#0055CC
+    class A,B,C,E,F p`,
+        },
+        {
+          type: "callout",
+          variant: "tip",
+          title: "If the bar stops moving",
+          text: "After ten minutes the dashboard says so itself and offers **Force Unlock**. The lock carries a heartbeat, so an invocation killed by the platform is detected rather than leaving you on a spinner for ever.",
+        },
+
         { type: "h", level: 2, text: "What the four numbers mean" },
         {
           type: "fields",
           items: [
-            { name: "Total Billable Users", text: "Accounts that consume a paid seat on at least one product. This is the number on your invoice." },
             {
-              name: "Inactive (90d+)",
-              text: "Billable accounts with no activity for longer than your inactivity threshold. These are your candidates.",
+              name: "Billable Seats",
+              text: "Seats you are billed for, **counted once per product**. Somebody with Jira and Confluence is two seats. This is the number that lines up with your invoice.",
             },
             {
-              name: "Recovery Potential",
-              text: "The **share of tracked seats that are dormant, as a percentage** — not a monetary figure. The app has no price data. Multiply the percentage, or the inactive count, by your own per-seat price before quoting a saving to anybody.",
+              name: "Licensed People",
+              text: "How many *people* hold at least one product, out of everyone the scan read. The same population as above, counted as colleagues rather than as seats — both are correct, and they answer different questions.",
             },
-            { name: "Total Users Scanned", text: "Everything in the snapshot, including unlicensed and suspended accounts." },
+            {
+              name: "Dormant Seats",
+              text: "Seats with no activity for longer than your inactivity threshold. These are your candidates.",
+            },
+            {
+              name: "Seats Dormant",
+              text: "The dormant share **as a percentage** — not a monetary figure. The app has no price data. Multiply it, or the dormant seat count, by your own per-seat price before quoting a saving to anybody.",
+            },
           ],
         },
 
@@ -152,6 +216,21 @@ export const licenseWasteManager: AppDocs = {
             "**Utilisation is low because you bought a bigger tier than you need** — reduce the subscription with Atlassian. Reclaiming seats will not save you anything until you do.",
           ],
         },
+
+        { type: "h", level: 2, text: "Two more views under the tiles" },
+        {
+          type: "fields",
+          items: [
+            {
+              name: "Inactivity Distribution",
+              text: "Seats bucketed by how long they have sat idle: active (under 30 days), 30–60, 60–90, 90–180, 180+ and never active. This is the picture that tells you whether you have a slow drift or a cliff, and it is what makes the case for a threshold.",
+            },
+            {
+              name: "Users by email domain",
+              text: "People, licence holders, dormant seats and the share of seats, grouped by email domain — the fastest way to see a contractor population or an acquired company. Atlassian withholds the email address on many accounts; those are grouped as **Email not visible** rather than dropped.",
+            },
+          ],
+        },
         {
           type: "callout",
           variant: "tip",
@@ -164,7 +243,7 @@ export const licenseWasteManager: AppDocs = {
     {
       slug: "users",
       title: "Browsing and acting on users",
-      description: "The filters, saved filters, CSV export, and the four bulk actions ranked by risk.",
+      description: "The filters, the CSV export, and the six bulk actions ranked by risk.",
       blocks: [
         {
           type: "p",
@@ -177,26 +256,42 @@ export const licenseWasteManager: AppDocs = {
           type: "table",
           head: ["Filter", "What it answers"],
           rows: [
-            ["**Product**", "“Who has Confluence but never opens it?”"],
             [
-              "**Status**: All, Active Only, Inactive Only, **Never Active**",
-              "*Never Active* is your highest-confidence group: a licence that was assigned and never used at all.",
+              "**Product**",
+              "“Who has Confluence but never opens it?” Pick several and choose **Holds any of these** or **Holds all of these**.",
             ],
-            ["**Inactive For**", "Separates 90 days from a year. Use it to prioritise."],
-            ["**Domain**", "Contractors, an acquired company, a partner."],
+            [
+              "**Status**: All, Enabled accounts, Suspended accounts, **Never signed in**",
+              "*Never signed in* is your highest-confidence group: a licence that was assigned and never used at all.",
+            ],
+            ["**Inactive For**", "A slider from 0 to 365 days, defaulting to the threshold you set in Settings. Separates 90 days from a year."],
+            ["**Licence**", "Any, **Holds a licence**, or **No licence — costs nothing**. Useful after a directory-wide scan, to set aside the accounts you are not paying for."],
+            ["**Domain**", "Contractors, an acquired company, a partner. Each domain carries its own count."],
             ["**Search**", "One person by name or email."],
           ],
         },
         {
           type: "p",
-          text: "A combination you use often can be **saved** and recalled. **Export CSV** hands the current list to a spreadsheet, which is still how most licence reviews actually happen.",
+          text: "**Reset** clears them all. **Export CSV** hands the current list to a spreadsheet — the file uses exactly the filters on screen, which is still how most licence reviews actually happen.",
         },
 
-        { type: "h", level: 2, text: "The four bulk actions, least risky first" },
+        { type: "h", level: 2, text: "The six bulk actions, least risky first" },
         {
           type: "table",
           head: ["Action", "What it does", "Reversible?", "Use when"],
           rows: [
+            [
+              "**Add to Group**",
+              "Adds the selected people to a group. Most often used to grant access back, or to tag a set of people you have just acted on.",
+              "Yes — remove them from the group.",
+              "Marking a set of users for follow-up.",
+            ],
+            [
+              "**Grant Product Access**",
+              "Adds the selected people to the groups that grant the products you pick. The dialog says plainly that each product they gain becomes a seat you are billed for.",
+              "Yes — revoke it again.",
+              "Putting access back after a reclaim went too far, or onboarding a set of people at once.",
+            ],
             [
               "**Remove from Group…**",
               "Removes the selected people from the group you pick. Groups managed by your identity provider are skipped, because it would put everyone back on its next sync. A person who was not in the group is recorded as skipped, not as a success.",
@@ -204,22 +299,22 @@ export const licenseWasteManager: AppDocs = {
               "You want to free the seats a specific group grants, and you know which group grants them.",
             ],
             [
-              "**Revoke All Access…**",
-              "Works out every licence group the person belongs to and removes them from all of them, so you do not have to know which group grants which product. The account stays active and keeps its Atlassian identity, so access can be granted again later.",
-              "Yes — add them back to the groups they held. The audit log lists them.",
+              "**Revoke Product Access…**",
+              "You tick which licences to revoke; the app works out which groups grant them and removes the person from those, so you do not have to know the mapping. The account stays active and keeps its Atlassian identity, so access can be granted again later. Tick nothing and it tells you nothing would be revoked rather than running empty.",
+              "Yes — grant the products back. The audit log lists who was affected.",
               "You want the seats back but the person may return, or you do not know which groups to name.",
-            ],
-            [
-              "**Add to Group…**",
-              "Adds the selected people to a group. Most often used to grant access back, or to tag a set of people you have just acted on.",
-              "Yes — remove them from the group.",
-              "Restoring access, or marking a set of users for follow-up.",
             ],
             [
               "**Suspend Users**",
               "Suspends the accounts at organisation level. Requires the organisation API connection **and a directory ID**, which is detected during a successful scan.",
-              "Yes, but not from this app — restore the account at admin.atlassian.com.",
+              "Yes — with **Restore Users**, below.",
               "Genuine leavers, after HR has confirmed.",
+            ],
+            [
+              "**Restore Users**",
+              "Lifts a suspension and hands the account back its access.",
+              "Yes — suspend again.",
+              "A suspension that turned out to be wrong, or somebody returning from a long absence.",
             ],
           ],
         },
@@ -266,19 +361,33 @@ export const licenseWasteManager: AppDocs = {
               text: "What it does and why. The next administrator reads this, not your filter settings.",
             },
             {
-              name: "Filter",
-              text: "Products, active or inactive or never-active, minimum days inactive, groups, email domains, and a search term. The rule shows how many people currently match.",
+              name: "Scope",
+              text: "Who the rule can touch: **All users** matching the condition, **Users in selected group**, or **External users** on the email domains you name.",
             },
             {
               name: "Action",
-              text: "Remove from group, add to group, remove all product access, or suspend the user — with the target group where one is needed.",
+              text: "**Remove user from selected access groups**, **Remove every product licence the user holds**, or **Change user status to deactivated**. Groups your identity provider synchronises are locked out of the picker and badged *Managed externally*.",
+            },
+            {
+              name: "Condition",
+              text: "Last active more than N days ago, or **Users who have never been active** — which the rule processes first, because they are the safest.",
+            },
+            {
+              name: "Then also add the affected users to a group",
+              text: "Optional, and the most useful setting on the page. Everyone the rule acts on is added to a group you pick, so that group becomes the list of who was affected — and putting a licence back is a matter of removing them from it.",
             },
             {
               name: "Schedule",
-              text: "**Weekly** with a day, **fortnightly**, or **monthly** with a day of the month, plus the hour in UTC.",
+              text: "**Daily**, **Weekly** with a day, **Every 2 weeks**, or **Monthly** with a day of the month, plus the hour in UTC. A day-of-month past the end of a short month clamps to the last day. The panel previews the **next scheduled runs** so you can see what you have actually asked for.",
             },
             { name: "Enabled", text: "A rule can exist and be switched off. New rules should start off." },
           ],
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "Two things a rule refuses to do",
+          text: "It will not act on a snapshot more than **seven days old** — stale data is how somebody back from leave loses their licence. And if its group scope resolves to no known membership, it fails rather than treating “nobody matched” as “act on everybody”. Rules also need the organisation API connection, and an active app licence, both to run on schedule and to **Run Now**.",
         },
 
         { type: "h", level: 2, text: "How to roll out a rule without breaking anything" },
@@ -320,21 +429,28 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "list",
           items: [
-            "**When** it ran and **what** the action was.",
-            "**Triggered by**: `manual` for something an administrator did, or `rule` with the rule's name.",
-            "**Per-person outcome**: account ID, display name, success or failure, and the error text when it failed.",
-            "**Counts** of successes and failures, so a partial run is obvious at a glance.",
+            "**When** it ran and **what** the action was — removed from group, added to group, revoked product access, suspended account, restored account.",
+            "**Triggered by**: **Manual**, with the administrator's name and avatar, or **Automated**, with the rule's name. An action whose actor could not be resolved says *Actor not recorded* rather than guessing.",
+            "**Per-person outcome**: account ID, display name, success, failure or **skipped**, and the reason text in either of the last two cases — including which protection list spared somebody.",
+            "**Counts** of successes, failures and skips, so a partial run is obvious at a glance.",
+            "**The groups** the action targeted.",
           ],
         },
         {
           type: "p",
-          text: "Entries are grouped by month. You can clear a month, and delete individual entries. Both are deliberate acts, so decide your retention policy before anyone starts tidying up.",
+          text: "Filter by month, by action and by trigger. **Show details** expands one entry into its per-person rows.",
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "Entries are kept for 90 days, and there is no way to keep them longer",
+          text: "The audit trail is swept at the end of every scan: an entry older than 90 days is deleted, **and so is its per-user detail, on the same horizon**. That pairing is deliberate. The two used to expire separately, which left entries saying “504 users affected” with no way to see who they were — an audit trail decaying into a number. One horizon means a row is either fully answerable or gone.",
         },
         {
           type: "callout",
           variant: "info",
-          title: "Keep the evidence before you clear anything",
-          text: "The audit entry is your proof that the seats you stopped paying for were released on a specific date. Record or export it for a licence-reduction cycle before deleting the month.",
+          title: "Keep the evidence before it ages out",
+          text: "The audit entry is your proof that the seats you stopped paying for were released on a specific date. If a licence-reduction cycle or a compliance review is more than three months behind your clean-up, record the entry somewhere outside the app while it is still there.",
         },
       ],
     },
@@ -364,24 +480,36 @@ export const licenseWasteManager: AppDocs = {
           type: "table",
           head: ["", "With the connection", "Without it"],
           rows: [
-            ["Last-active dates", "Yes", "No"],
+            ["Running a scan at all", "Yes", "**No** — the button is disabled and the Dashboard says why"],
+            ["Last-active dates, per product", "Yes", "No"],
             ["Visibility across your organisation's sites", "Yes", "No"],
             ["Automatic licence-group detection", "Yes", "No"],
-            ["Suspend accounts", "Yes", "No — the app says so instead of failing"],
             ["Group membership and product access", "Yes", "No — both are read through the organisation API"],
+            ["Suspend and restore accounts", "Yes", "No — the app says so instead of failing"],
+            ["Automation rules", "Yes", "No — rules will not fire, and the scheduler says so in the log"],
           ],
         },
         {
           type: "callout",
           variant: "warning",
           title: "The API key is a powerful credential",
-          text: "An organisation admin key can change access across your whole organisation. The app stores it inside your own Atlassian site and masks it on screen, but treat it like any other admin credential: create it for this purpose, rotate it on your normal schedule, and use **Disconnect** when the app no longer needs it. It is listed as stored data in the [privacy policy](/privacy/license-waste-manager).",
+          text: "An organisation admin key can change access across your whole organisation. The app keeps it in Forge's **encrypted secret store** rather than alongside the rest of its configuration, and masks it on screen — but treat it like any other admin credential: create it for this purpose, rotate it on your normal schedule, and use **Disconnect** when the app no longer needs it. It is listed as stored data in the [privacy policy](/privacy/license-waste-manager).",
+        },
+        {
+          type: "p",
+          text: "If the key is revoked, expires, or stops being an organisation admin key, the app notices the first time a call is rejected and marks the connection as disconnected rather than retrying against a dead credential.",
         },
 
         { type: "h", level: 2, text: "Default inactivity threshold" },
         {
           type: "p",
-          text: "The number of days after which an account counts as inactive. It drives the dashboard's inactive count and the default filters. Ninety days is a common starting point; a quarterly business rhythm may justify more.",
+          text: "The number of days after which an account counts as inactive, set on a slider from 7 to 365. It drives the dashboard's dormant-seat count and the default position of the **Inactive For** filter. Ninety days is a common starting point; a quarterly business rhythm may justify more.",
+        },
+
+        { type: "h", level: 2, text: "Product licence groups" },
+        {
+          type: "p",
+          text: "A read-only list of the groups the app believes grant each product, detected from your organisation when the screen opens. It is here to be read, not edited — it is what every **Revoke Product Access** and every licence-group rule acts on, so it is worth checking once. Groups your identity provider synchronises are badged, because membership changes there would be overwritten on the next sync.",
         },
 
         { type: "h", level: 2, text: "Protected entities — the most important screen in the app" },
@@ -436,25 +564,45 @@ export const licenseWasteManager: AppDocs = {
 
         { type: "h", level: 2, text: "What the app stores" },
         {
+          type: "p",
+          text: "Two stores, because the two shapes are different. Everything that grows with the size of your organisation — users, group membership, per-product activity, audit rows — is **Forge SQL**, one row per thing. Configuration and job state are key-value records.",
+        },
+        {
           type: "fields",
           items: [
             {
-              name: "User snapshots",
-              text: "Per account: account ID, display name, **email address** and domain, active flag, account type, managed status, whether the seat is billable, last-active date, date added to the organisation, product access, licence groups and avatar URL.",
+              name: "User snapshots (SQL)",
+              text: "Per account: account ID, display name, **email address** and domain, active flag, account type, managed status, whether the seat is billable, last-active date, date added to the organisation, product access, licence groups and avatar URL. One further row per account per product, carrying that product's own last-active date.",
             },
-            { name: "Groups", text: "Group IDs, names and kinds, and who belongs to which group in a snapshot." },
-            { name: "Jobs", text: "Scan and action jobs: type, status, phase, who requested them, timings, metrics and errors." },
+            { name: "Groups (SQL)", text: "Group IDs, names and kinds, and who belongs to which group in a snapshot." },
+            { name: "Jobs (SQL)", text: "Scan and action jobs: type, status, phase, who requested them, timings, metrics and errors." },
+            { name: "Audit log (SQL)", text: "Every action with its per-user outcome, kept for **90 days** — the entry and its detail on the same horizon." },
             { name: "Rules", text: "Your automation rules and their run state." },
-            { name: "Audit log", text: "Every action with its per-user outcome." },
             {
               name: "Configuration",
-              text: "Inactivity threshold, protected entities, detected licence groups, and the organisation ID and **API key**.",
+              text: "Inactivity threshold, protected entities, detected licence groups and the organisation ID. The **API key** is held separately, in Forge's encrypted secret store.",
             },
           ],
         },
         {
           type: "p",
-          text: "All of it lives in your own Atlassian site and is deleted when the app is uninstalled. The [privacy policy](/privacy/license-waste-manager) is the authoritative statement.",
+          text: "Only the current snapshot and the one before it are kept; older ones are deleted at the end of every scan, along with finished jobs more than 30 days old.",
+        },
+
+        { type: "h", level: 2, text: "What happens when you uninstall" },
+        {
+          type: "p",
+          text: "The app runs an uninstall handler that empties both stores before it goes. It deletes the SQL tables' contents **most sensitive first** — audit detail and user snapshots before jobs and metadata — so if the handler runs out of its 45-second budget on a very large organisation, what survives longest is configuration rather than names and email addresses. Then it sweeps the key-value store, repeating whole passes until a pass finds nothing, because deleting under a cursor leaves keys behind.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "This only became true recently",
+          text: "The handler existed for months wired to a Forge event that does not exist, so it had never run once. It is a `preUninstall` module now, and it actually deletes. Independently of it, Atlassian detaches the installation's data on uninstall and destroys it under its own retention policy — see [Where your data goes](/documentation/start-here/your-data).",
+        },
+        {
+          type: "p",
+          text: "The [privacy policy](/privacy/license-waste-manager) is the authoritative statement on all of the above.",
         },
 
         { type: "h", level: 2, text: "Troubleshooting" },
@@ -462,8 +610,12 @@ export const licenseWasteManager: AppDocs = {
           type: "fields",
           items: [
             {
-              name: "“No scan data available”",
+              name: "“No user data to browse yet”",
               text: "Run a scan on the **Dashboard**. The Users, Automation and Audit tabs all read from a snapshot.",
+            },
+            {
+              name: "The Scan Users button is greyed out",
+              text: "Either the organisation API is not connected — the Dashboard says so above the button — or the app has no active licence, in which case a warning sits at the top of the page. They are two different problems with two different fixes.",
             },
             { name: "Last-active dates are empty", text: "That data comes from the organisation API. Connect it in **Settings**." },
             {
@@ -506,11 +658,15 @@ export const licenseWasteManager: AppDocs = {
           items: [
             {
               name: "Why do you need an organisation API key?",
-              text: "Because Jira does not expose last-activity data for other products, and it cannot suspend an organisation account. Only the organisation API can. Without the key the app still works, with less information.",
+              text: "Because every read this app does — users, group membership, product access, last activity — goes through the organisation admin API, and so does every write. Jira's own APIs cannot supply them at an acceptable permission cost. **Without the key there is no app**: the scan button is disabled and there is nothing to browse. This is the one credential it asks for, and it is asked for once.",
+            },
+            {
+              name: "Can I try it without a key, just to see?",
+              text: "Not usefully. You can install it, open it and read the Settings screen, but the Dashboard will refuse to scan. If your security policy will not allow the key, use [Admin Toolkit's User Analysis](/documentation/admin-toolkit/users) instead — it reads CSV files you download yourself.",
             },
             {
               name: "Where is the key stored?",
-              text: "In the app's storage inside your own Atlassian site, masked in the interface. We never see it. You can remove it any time with **Disconnect**.",
+              text: "In Forge's encrypted secret store, inside your own Atlassian site, and masked in the interface. We never see it. You can remove it any time with **Disconnect**.",
             },
             {
               name: "Can I use a key with fewer permissions?",
@@ -530,6 +686,14 @@ export const licenseWasteManager: AppDocs = {
             {
               name: "Does the app store email addresses?",
               text: "Yes. A licence review needs to identify people, so snapshots include names, email addresses, domains, group membership and last-activity dates. Everything stays inside your Atlassian site and is deleted on uninstall.",
+            },
+            {
+              name: "How long do you keep the audit log?",
+              text: "**90 days**, for the entry and for the per-user detail behind it alike. There is no setting; older rows are deleted at the end of every scan.",
+            },
+            {
+              name: "Does a closed Atlassian account get erased?",
+              text: "Yes. The app reports the account IDs it holds to Atlassian daily, and when Atlassian answers that an account is closed, that person's snapshot rows, per-product rows, group membership and audit detail are deleted. The audit *entry* survives without them, so “what ran, when, and to how many accounts” stays answerable without keeping a closed person's name.",
             },
             {
               name: "Does any of it leave Atlassian?",
@@ -568,8 +732,12 @@ export const licenseWasteManager: AppDocs = {
               text: "It frees the seat. Whether your bill drops depends on your subscription tier and billing cycle with Atlassian. Check the tier as well as the seat count.",
             },
             {
+              name: "What happens if the app licence lapses?",
+              text: "You can still read everything: the last snapshot, every filter, the CSV export, the audit log and all your settings. What stops is starting a new scan, running a bulk action, and running a rule — by schedule or by hand. A warning at the top of the page says so, and the three buttons are greyed out with a line explaining why.",
+            },
+            {
               name: "What happens when I uninstall?",
-              text: "The app's stored data is cleared and detached immediately, so nobody can read it any more — then Atlassian destroys it under its own retention policy, documented as 28 days. See [Where your data goes](/documentation/start-here/your-data). That includes the snapshots, the rules, the audit log and the API key — so export the audit evidence first. Access changes already applied stay applied, because they were made in Atlassian.",
+              text: "The app runs an uninstall handler that empties both of its stores — the SQL tables most sensitive first, then the key-value store — before Atlassian detaches the installation's data and destroys it under its own retention policy. That covers the snapshots, the rules, the audit log and the API key, so **export the audit evidence first**. See [Where your data goes](/documentation/start-here/your-data). Access changes already applied stay applied, because they were made in Atlassian.",
             },
           ],
         },

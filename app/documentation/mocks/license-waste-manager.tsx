@@ -30,8 +30,8 @@ const dashboard = (
     <PageTitle
       action={
         <Row gap={8}>
-          <Btn variant="primary">License Scan (fast)</Btn>
-          <Btn>Deep Reconciliation Scan</Btn>
+          <Btn variant="primary">Scan Users</Btn>
+          <Select value="Licensed users only" width={190} />
         </Row>
       }
     >
@@ -40,10 +40,10 @@ const dashboard = (
     <Tabs items={TABS} active="Dashboard" />
 
     <Row gap={10}>
-      <Stat value="412" label="Total Billable Users" />
-      <Stat value="87" label="Inactive (90d+)" tone={ATL.red} />
-      <Stat value="$18,270/yr" label="Recovery Potential" tone={ATL.green} />
-      <Stat value="486" label="Total Users Scanned" tone={ATL.subtle} />
+      <Stat value="486" label="Billable Seats" />
+      <Stat value="412" label="Licensed People" tone={ATL.subtle} />
+      <Stat value="87" label="Dormant Seats" tone={ATL.red} />
+      <Stat value="18%" label="Seats Dormant" tone={ATL.yellow} />
     </Row>
 
     <div className="text-[11px] mt-2" style={{ color: ATL.subtle }}>
@@ -70,9 +70,29 @@ const dashboard = (
       ))}
     </Panel>
 
+    <SectionLabel>Inactivity Distribution</SectionLabel>
+    <Panel tone="plain">
+      {[
+        ["Active (< 30 days)", 71],
+        ["30-60 days", 9],
+        ["60-90 days", 6],
+        ["90-180 days", 8],
+        ["180+ days", 4],
+        ["Never active", 2],
+      ].map(([label, pct]) => (
+        <div key={label as string} className="mb-2">
+          <div className="flex items-center justify-between text-[11.5px] mb-1">
+            <span>{label}</span>
+            <span style={{ color: ATL.subtle }}>{pct as number}% of seats</span>
+          </div>
+          <Bar pct={pct as number} tone={(label as string).startsWith("Active") ? ATL.green : ATL.red} />
+        </div>
+      ))}
+    </Panel>
+
     <Panel tone="subtle" title="Scan in progress">
       <Row gap={10}>
-        <Bar pct={38} label="Phase: reconciling group membership (2 of 5)" />
+        <Bar pct={38} label="Collecting group membership" />
         <Btn variant="subtle">Force Unlock</Btn>
       </Row>
     </Panel>
@@ -88,10 +108,11 @@ const users = (
 
     <Row gap={10}>
       <Select label="Product" value="Jira Software" width={160} />
-      <Select label="Status" value="Inactive Only" width={140} />
-      <Select label="Inactive For" value="90+ days" width={130} />
-      <Select label="Domain" value="All Domains" width={150} />
-      <Field label="Search" placeholder="Name or email..." width={190} />
+      <Select label="Status" value="Enabled accounts" width={150} />
+      <Select label="Inactive For" value="90 days" width={120} />
+      <Select label="Licence" value="Holds a licence" width={150} />
+      <Select label="Domain" value="All Domains" width={140} />
+      <Field label="Search" placeholder="Search by name or email..." width={190} />
     </Row>
     <Row gap={8}>
       <Btn variant="subtle">Reset</Btn>
@@ -159,11 +180,13 @@ const users = (
     <div className="mt-4">
       <Panel tone="subtle" title="Bulk actions — 4 users selected">
         <Row gap={8}>
+          <Btn>Add to Group</Btn>
+          <Btn>Grant Product Access…</Btn>
           <Btn>Remove from Group…</Btn>
-          <Btn>Add to Group…</Btn>
-          <Btn>Remove all product access</Btn>
+          <Btn>Revoke Product Access…</Btn>
+          <Btn>Restore Users</Btn>
           <Btn variant="danger">Suspend Users</Btn>
-          <Btn variant="subtle">Clear selection</Btn>
+          <Btn variant="subtle">Clear</Btn>
         </Row>
       </Panel>
     </div>
@@ -293,7 +316,7 @@ const settings = (
       <Row gap={8}>
         <Lozenge tone="success">Connected</Lozenge>
         <span className="text-[11.5px] self-center" style={{ color: ATL.subtle }}>
-          Enables real-time last-active tracking, cross-site visibility and user suspension.
+          Required. Every user, group membership and product-access read goes through it, as does every change.
         </span>
       </Row>
       <div className="mt-3">
