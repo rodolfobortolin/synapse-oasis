@@ -18,7 +18,15 @@ export type Block =
   | { type: "code"; text: string; label?: string }
   | { type: "callout"; variant: "info" | "warning" | "tip"; title?: string; text: string }
   /** Renders a simulated app screen from the mock registry (see ./mocks). */
-  | { type: "mock"; id: string; caption?: string };
+  | { type: "mock"; id: string; caption?: string }
+  /**
+   * A Mermaid diagram, drawn in the browser by ../components/DiagramBlock.
+   *
+   * `text` is the diagram source exactly as it would sit inside a ```mermaid
+   * fence in the app's macro, so the page shows the reader the same thing they
+   * would type. `label` names the diagram type in the panel header.
+   */
+  | { type: "diagram"; text: string; caption?: string; label?: string };
 
 export interface DocPage {
   slug: string;

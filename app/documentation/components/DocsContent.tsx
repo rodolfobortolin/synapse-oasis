@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import DiagramBlock from "./DiagramBlock";
 import { MOCKS } from "../mocks";
 import { headingAnchors } from "../lib";
 import type { Block } from "../types";
@@ -279,6 +280,9 @@ export default function DocsContent({
               </div>
             );
           }
+
+          case "diagram":
+            return <DiagramBlock key={i} text={b.text} caption={b.caption} label={b.label} />;
 
           case "mock": {
             const mock = MOCKS[b.id];

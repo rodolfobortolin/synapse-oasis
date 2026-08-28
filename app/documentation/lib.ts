@@ -107,6 +107,11 @@ export function searchIndex(): SearchItem[] {
         case "code":
           parts.push(b.text);
           break;
+        // The diagram source itself is left out: it is mostly arrows and node
+        // ids, and every byte of this index is shipped to the browser.
+        case "diagram":
+          parts.push(b.label ?? "", b.caption ?? "");
+          break;
       }
     }
     return {

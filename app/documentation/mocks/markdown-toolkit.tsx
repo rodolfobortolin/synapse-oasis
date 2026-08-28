@@ -4,9 +4,6 @@ import {
   Bar,
   Btn,
   Checkbox,
-  Code,
-  Field,
-  Lozenge,
   PageTitle,
   Panel,
   Row,
@@ -17,12 +14,12 @@ import {
   Tabs,
 } from "./ui";
 
-/* ── Space page: export tab ────────────────────────────────────────────── */
+/* ── Space settings: the export screen ─────────────────────────────────── */
+/* No tab strip: import is gone, and a tab strip with one tab is just chrome. */
 
 const exportTab = (
-  <Screen where="Confluence space → Markdown Toolkit → Export">
+  <Screen where="Confluence space settings → Markdown Toolkit">
     <PageTitle>Markdown Toolkit</PageTitle>
-    <Tabs items={["Export", "Import"]} active="Export" />
 
     <Select label="Select a space" value="Engineering Handbook (ENG)" width={320} />
 
@@ -90,60 +87,6 @@ const contentAction = (
         <Row gap={8}>
           <Btn variant="primary">Download</Btn>
           <Btn variant="subtle">New Export</Btn>
-        </Row>
-      </Panel>
-    </div>
-  </Screen>
-);
-
-/* ── Import tab ────────────────────────────────────────────────────────── */
-
-const importTab = (
-  <Screen where="Confluence space → Markdown Toolkit → Import">
-    <PageTitle>Import Markdown</PageTitle>
-    <Tabs items={["Export", "Import"]} active="Import" />
-
-    <Row gap={16}>
-      <Select label="Target space" value="Engineering Handbook (ENG)" width="50%" />
-      <Select label="Parent page (optional)" value="Runbooks" width="50%" />
-    </Row>
-
-    <div
-      className="rounded-lg text-center py-8 px-4 my-3"
-      style={{ border: `2px dashed ${ATL.border}`, background: ATL.bgSubtle }}
-    >
-      <div className="text-[13px] font-medium">Drag and drop files here, or click to browse</div>
-      <div className="text-[11px] mt-1" style={{ color: ATL.subtle }}>
-        Supported: .md, .zip
-      </div>
-    </div>
-
-    <SectionLabel>Files to import:</SectionLabel>
-    <Panel tone="subtle">
-      {[
-        ["incident-response.md", "8 KB"],
-        ["oncall-rotation.md", "3 KB"],
-        ["postmortem-template.md", "5 KB"],
-      ].map(([f, s]) => (
-        <div key={f} className="flex items-center justify-between py-1">
-          <Code>{f}</Code>
-          <span className="text-[11px]" style={{ color: ATL.subtle }}>
-            {s}
-          </span>
-        </div>
-      ))}
-    </Panel>
-
-    <Row gap={8}>
-      <Btn variant="primary">Import</Btn>
-      <Btn variant="subtle">Cancel</Btn>
-    </Row>
-
-    <div className="mt-4">
-      <Panel tone="success" title="Import complete! Created 3 pages.">
-        <Row gap={6}>
-          <Lozenge tone="success">3 pages created</Lozenge>
-          <Lozenge tone="default">0 pages failed</Lozenge>
         </Row>
       </Panel>
     </div>
@@ -262,7 +205,6 @@ const macroRendered = (
 export const MARKDOWN_TOOLKIT_MOCKS: Record<string, ReactNode> = {
   "md-export-tab": exportTab,
   "md-content-action": contentAction,
-  "md-import-tab": importTab,
   "md-macro-editor": macroEditor,
   "md-macro-rendered": macroRendered,
 };

@@ -331,21 +331,20 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
     products: "Confluence",
     icon: "/markdown-toolkit.png",
     summary:
-      "Markdown Toolkit for Confluence exports and imports Confluence content as Markdown — single pages, page trees or entire spaces — and provides an in-page macro that renders Markdown with code highlighting, Mermaid diagrams and math expressions.",
+      "Markdown Toolkit for Confluence exports Confluence content as Markdown — single pages, page trees or entire spaces — and provides an in-page macro that renders Markdown with code highlighting, Mermaid diagrams and math expressions. It holds no write permission and creates no content in Confluence.",
     ai: false,
     persisted: [
       "**Macro content** — the Markdown you type into a Markdown macro, stored per macro instance so the macro can render it.",
-      "**Export and import jobs** — a manifest of what a job covers and the converted page content held in chunks while the job runs and until you download, reset or discard it.",
+      "**Export jobs** — a manifest of what a job covers and the converted page content held in chunks while the job runs and until you download, reset or discard it.",
     ],
     transient: [
       "page and space content, titles, labels and attachments read from Confluence during an export",
-      "the file content you upload during an import, converted to Confluence storage format",
-      "space and user metadata needed to place and label content",
+      "space and page metadata needed to name the files and rebuild the hierarchy",
     ],
     personal: [
-      "Exports and imports process the content you select. During a job, that content — including any personal data your pages happen to contain — is held in app storage inside your tenant until the job finishes and its data is cleared.",
+      "An export processes the content you select. During a job, that content — including any personal data your pages happen to contain — is held in app storage inside your tenant until the job finishes and its data is cleared.",
       "Macro content is stored as written by the page author.",
-      "Your Atlassian account ID is stored while an export or import runs, as the key that keeps your job separate from anyone else's. The record is removed when the job is cleared. The app does not collect email addresses, display names, passwords, authentication tokens, API keys or payment data.",
+      "Your Atlassian account ID is stored while an export runs, as the key that keeps your job separate from anyone else's. The record is removed when the job is cleared. The app does not collect email addresses, display names, passwords, authentication tokens, API keys or payment data.",
       "Once a day the app sends Atlassian the account ID on each job record it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. A closed account's job records are deleted, and the account ID on a job record is the only thing about that person the app has to clean up.",
     ],
     scopes: [

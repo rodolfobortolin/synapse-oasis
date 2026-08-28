@@ -239,9 +239,9 @@ export default function Home() {
                 icon: "/markdown-toolkit.png",
                 title: "Markdown Toolkit",
                 doc: "markdown-toolkit",
-                desc: "Export and import Confluence content as Markdown. Supports single pages, page trees, and full spaces. Includes an in-page macro that renders Markdown with code highlighting, Mermaid diagrams, and math expressions.",
+                desc: "Export Confluence content as Markdown — single pages, page trees, and full spaces. Includes an in-page macro that renders Markdown with code highlighting, 21 kinds of Mermaid diagram, and math expressions.",
                 color: "#2B9F6F",
-                checks: ["Page & Space Export", "Markdown Import", "Mermaid Diagrams", "Code Highlighting"],
+                checks: ["Page & Space Export", "Mermaid Diagrams", "KaTeX Math", "Code Highlighting"],
               },
             ].map((card, i) => (
               <ScrollReveal key={card.title} delay={i * 100}>

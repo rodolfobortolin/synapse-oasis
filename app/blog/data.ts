@@ -81,13 +81,13 @@ const posts: Omit<BlogPost, "content">[] = [
   },
   {
     slug: "confluence-runs-on-markdown",
-    title: "The AI Era Runs on Markdown. Confluence Doesn't. Here's the Bridge.",
+    title: "The AI Era Runs on Markdown. Your Confluence Is Written in Something Else.",
     subtitle:
-      "Every LLM reads and writes Markdown — Confluence doesn't. Markdown Toolkit makes Confluence speak Markdown both ways: AI writes your pages, diagrams render natively, and exports stay token-light for models.",
-    kicker: "AI writes · Markdown renders",
+      "Every LLM reads and writes Markdown — Confluence doesn't. Markdown Toolkit renders Markdown, diagrams and maths inside the page, and gets your knowledge back out token-light for models.",
+    kicker: "21 diagram types render",
     tag: "AI-NATIVE DOCS",
     tagColor: "#51A2E7",
-    readTime: "7 min read",
+    readTime: "6 min read",
     app: "Markdown Toolkit for Confluence",
     date: "2026-04-22",
   },

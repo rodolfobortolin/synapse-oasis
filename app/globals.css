@@ -37,6 +37,14 @@
   --green: #1B4332;
   --green-accent: #2BC48A;
   --hero-gradient: linear-gradient(214.8deg, #171757 12.76%, #3133BD 94.91%);
+  /* Surface a Mermaid diagram is drawn on. Named separately from --white so a
+     dark palette only has to move this one value, and the diagram never has to
+     guess what colour it is sitting on. */
+  --diagram-surface: #FFFFFF;
+}
+
+:root[data-theme="dark"] {
+  --diagram-surface: #1D2125;
 }
 
 * {
@@ -335,4 +343,22 @@ h3 {
   border-color: var(--blue-cta);
   box-shadow: 0 8px 30px rgba(43, 46, 216, 0.06);
   transform: translateY(-2px);
+}
+
+
+/* ── Mermaid diagrams in the documentation ─── */
+/*
+ * Mermaid is configured with useMaxWidth:false so a diagram keeps its natural
+ * size instead of being squeezed into this column until the labels stop being
+ * readable. The overflow therefore has to go somewhere: it scrolls inside this
+ * container, and the page never scrolls sideways.
+ */
+.docs-diagram {
+  overflow-x: auto;
+  padding: 16px;
+}
+.docs-diagram svg {
+  max-width: none;
+  height: auto;
+  display: block;
 }
