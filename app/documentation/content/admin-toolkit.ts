@@ -5,7 +5,7 @@ export const adminToolkit: AppDocs = {
   name: "Admin Toolkit for Jira",
   shortName: "Admin Toolkit",
   tagline:
-    "Twelve tools for the Jira administration jobs that have no screen in Jira: bulk project management, custom field assessment and merging, scheme and filter cleanup, copying a user's access, offboarding a leaver, and cleaning up after a migration.",
+    "Fourteen tools for the Jira administration jobs that have no screen in Jira: bulk project management, custom field assessment and merging, scheme, workflow and filter cleanup, copying a user's access, offboarding a leaver, and cleaning up after a migration.",
   products: "Jira · Jira Service Management",
   color: "#EC8546",
   icon: "/admin-toolkit.png",
@@ -14,11 +14,11 @@ export const adminToolkit: AppDocs = {
     {
       slug: "overview",
       title: "Overview and setup",
-      description: "The twelve tools, how they all work the same way, and what to do first.",
+      description: "The fourteen tools, how they all work the same way, and what to do first.",
       blocks: [
         {
           type: "p",
-          text: "**What it is.** A collection of separate tools on one admin page. You use one at a time. Nothing runs on a schedule and nothing runs by itself.",
+          text: "**What it is.** A collection of separate tools on one admin page. You use one at a time. No tool runs on a schedule and none runs by itself — every one of them waits for you to click it.",
         },
         {
           type: "p",
@@ -30,28 +30,38 @@ export const adminToolkit: AppDocs = {
         },
         { type: "mock", id: "adm-tool-list" },
 
-        { type: "h", level: 2, text: "The twelve tools" },
+        { type: "h", level: 2, text: "The fourteen tools" },
         {
           type: "table",
           head: ["Group", "Tool", "What it does"],
           rows: [
             ["Projects", "**Projects Manager**", "Every project in one table. Edit names, keys and leads inline; archive and restore in bulk."],
             ["Projects", "**Project Activity**", "Issue creation per project over 12 months, so you can tell live projects from dormant ones."],
-            ["Configuration Cleanup", "**Unused Schemes Cleanup**", "Finds 16 kinds of unused configuration object — schemes, and also the workflows, statuses, screens, field configurations, work types, priorities and resolutions inside them — and deletes the ones you select."],
+            ["Configuration", "**Unused Schemes Cleanup**", "Finds 16 kinds of unused configuration object — schemes, and also the workflows, statuses, screens, field configurations, work types, priorities and resolutions inside them — and deletes the ones you select."],
             [
-              "Configuration Cleanup",
+              "Configuration",
               "**Custom Fields Health Assessment**",
-              "Grades every custom field for cleanup, duplication, naming, searchability and option quality. Exports a PDF.",
+              "Grades every custom field for cleanup, duplication, naming, searchability and option quality. Exports CSV and PDF.",
             ],
             [
-              "Configuration Cleanup",
+              "Configuration",
               "**Custom Field Merger**",
               "Merges duplicate fields: generates the CSV import for the values and replaces the field on every screen.",
             ],
-            ["Configuration Cleanup", "**Filter Hygiene**", "Audits every saved filter and how it is shared. Bulk reassign and unshare."],
-            ["Configuration Cleanup", "**Scheme Deduplication**", "Compares eight kinds of scheme and groups the ones with identical settings, so you can consolidate them."],
+            [
+              "Configuration",
+              "**Field Screens Migrator**",
+              "Swaps one field for another on every screen where it appears, in the same tab at the same position — then offers to trash the old one.",
+            ],
+            ["Configuration", "**Filter Management**", "Audits every listable saved filter and how it is shared. Bulk reassign, unshare, and find-and-replace inside the JQL."],
+            ["Configuration", "**Scheme Deduplication**", "Compares eleven kinds of scheme and groups the ones with identical settings, so you can consolidate them. Report only."],
+            [
+              "Configuration",
+              "**Workflow Health**",
+              "Scans workflows for bad practice: oversized ones, statuses nothing can reach, and start and end statuses in the wrong category. Report only.",
+            ],
             ["Users", "**Mirror User**", "Copies groups and project roles from one person to another, then verifies the result."],
-            ["Users", "**User Analysis**", "Turns the CSV exports from admin.atlassian.com into a 14-section licence and security report, exportable as PDF."],
+            ["Users", "**User Analysis**", "Turns the two CSV exports from admin.atlassian.com into a licence, activity and security report, with drill-down lists you can download."],
             ["Users", "**User Offboarding**", "Finds everything a departing person owns and transfers it to a replacement."],
             ["Migration", "**Migrated Fields Cleaner**", "Removes “(migrated)” from field names, descriptions and configurations."],
             [
@@ -91,7 +101,27 @@ export const adminToolkit: AppDocs = {
             "Jira Cloud and **Jira administrator** rights.",
             "For group membership changes: a **site administrator**. This is an Atlassian restriction, and no app can work around it.",
             "For **User Analysis**: the CSV exports you download from **admin.atlassian.com**. The app reads files you provide, so it needs no organisation API key.",
+            "An active app licence for anything that **starts work**. Reading, exporting and recovering stay available without one — see below.",
           ],
+        },
+
+        { type: "h", level: 2, text: "What happens without an app licence" },
+        {
+          type: "p",
+          text: "Twenty-six resolvers are gated, and they are all of one kind: the ones that start a scan or write to Jira. Everything else is deliberately left open, because locking an administrator out of results they already have — or out of the button that clears a stuck job — turns a lapsed subscription into a support ticket.",
+        },
+        {
+          type: "list",
+          items: [
+            "**Results you already have** stay readable, in every tool, along with their **CSV and PDF exports** — those are generated in your browser from data already fetched.",
+            "**Every user, group, project and field picker** still searches, so you can look something up.",
+            "**Cancel and start over** works in every tool. A job interrupted on the last day of a trial does not leave you stuck.",
+            "**User Analysis works in full.** It parses the CSVs you drop into it in the browser and calls no resolver at all, so it has no licence gate.",
+          ],
+        },
+        {
+          type: "p",
+          text: "An unlicensed installation shows a warning at the top of the page — *“This app does not have an active licence”* — and greys out the buttons that start work, each with a line under it saying why.",
         },
 
         { type: "h", level: 2, text: "Where to start" },
@@ -127,16 +157,21 @@ export const adminToolkit: AppDocs = {
         },
         { type: "mock", id: "adm-projects-manager" },
         {
+          type: "p",
+          text: "**Inline edits are staged, not applied.** Change a name, a key or a lead and the row is marked **Unsaved**, with an **Undo this change** beside it. Nothing reaches Jira until you click **Confirm changes** and read the from-and-to list in the dialog. That is the review step, and on this tool it is the only thing standing between a mistyped key and every issue in the project being renumbered.",
+        },
+        {
           type: "table",
           head: ["Bulk action", "What it does", "Reversible?"],
           rows: [
-            ["**Change Project Lead**", "Sets a new lead on the selected projects.", "Yes, set it back."],
+            ["**Change Lead**", "Sets a new lead on the selected projects.", "Yes, set it back."],
             [
-              "**Transfer Project Lead**",
+              "**Transfer Lead**",
               "Moves lead ownership from one person to another across the selection. The bulk version of somebody changing role.",
               "Yes.",
             ],
-            ["**Archive Projects**", "Archives the selected projects, hiding them from normal use.", "Yes, restore them."],
+            ["**Archive**", "Archives the selected projects, hiding them from normal use.", "Yes, with **Restore**."],
+            ["**Restore**", "Brings archived projects back. The table has an **Archived** filter to find them.", "Yes, archive again."],
           ],
         },
         {
@@ -218,7 +253,7 @@ export const adminToolkit: AppDocs = {
         },
         {
           type: "p",
-          text: "The assessment produces prioritised recommendations and **exports to PDF**. Send the PDF to whoever has to approve a cleanup: it makes the case without them opening an admin screen.",
+          text: "The assessment produces prioritised recommendations and exports as **CSV** or **PDF**. Send the PDF to whoever has to approve a cleanup: it makes the case without them opening an admin screen. Take the CSV if you want to sort and filter it yourself.",
         },
 
         { type: "h", level: 2, text: "Custom Field Merger" },
@@ -232,11 +267,27 @@ export const adminToolkit: AppDocs = {
           items: [
             "**Auto-Analyze** finds mergeable groups automatically, or use **Manual Select** to choose the fields yourself.",
             "Pick the **target** field — the one that survives — and confirm the source fields.",
-            "**Generate CSV.** The tool produces a CSV of the issue values plus a config file, split into batches.",
-            "Download both files. In Jira, use the CSV importer and choose **Select CSV as the import source**, with the generated config file. Repeat for each batch.",
+            "**Generate CSV.** The tool produces a CSV of the issue values plus a config file, split into batches — 4,000 rows each by default, adjustable between 2,000 and 7,000. **Download All as ZIP** takes every batch at once.",
+            "In Jira, go to **Settings → System → External System Import**, choose **Select CSV as the import source**, and point it at the CSV together with the generated config file. Repeat for each batch.",
             "**Preview screens** shows every screen and tab that references the source fields. **Replace on screens** swaps them for the target field.",
             "**Move source fields to trash** once the values and screens are done.",
           ],
+        },
+        {
+          type: "diagram",
+          label: "flowchart",
+          caption: "Six steps, and step three is not the app's. The tool writes the file; Jira performs the import; the tool picks the work up again afterwards.",
+          text: `flowchart TD
+    A[Auto-Analyze or Manual Select] --> B[Generate CSV + config file]
+    B --> C[Import in Jira:<br/>Settings, System,<br/>External System Import]
+    C --> D[Preview screens]
+    D --> E[Replace on screens]
+    E --> F[Move source fields to trash]
+
+    classDef app fill:#E9F2FF,stroke:#0055CC
+    classDef you fill:#FFF7D6,stroke:#946F00
+    class A,B,D,E,F app
+    class C you`,
         },
         {
           type: "callout",
@@ -249,13 +300,38 @@ export const adminToolkit: AppDocs = {
           variant: "info",
           text: "Source fields are moved to **trash**, not deleted outright, so a mistake is recoverable inside Jira's retention window.",
         },
+
+        { type: "h", level: 2, text: "Field Screens Migrator" },
+        {
+          type: "p",
+          text: "**What it does.** The screen half of a merge, on its own. You pick a field to remove from screens and a field to put in its place, and it does the swap everywhere the first one appears — same tab, same position.",
+        },
+        {
+          type: "p",
+          text: "**Use it when** the values do not need to move: a field being retired that was never filled in, a rename that turned into a replacement, or the tail end of a merge you did by hand. If the values matter, use the Custom Field Merger, which does this step as part of a longer sequence.",
+        },
+        {
+          type: "steps",
+          items: [
+            "Pick **Field to remove from screens** and **Field to put in its place**.",
+            "Optionally tick **Also mark which screens are used by workflow transitions** — a transition screen is the one where an unexpected change is noticed last.",
+            "**Preview Screens.** It lists every screen tab the source field sits on, and says for each whether the target is already there. The preview changes nothing.",
+            "Apply. Where the target is already present, only the source is removed; where it is not, it is added in the source's slot.",
+            "If the source field is now on no screen at all, the tool offers to **move it to trash** — restorable from the Custom fields admin page for 60 days.",
+          ],
+        },
+        {
+          type: "callout",
+          variant: "info",
+          text: "The result reports tabs checked, updated, skipped and failed. Failures are listed first; if there are more rows than it will show, it says how many it left out rather than quietly truncating.",
+        },
       ],
     },
 
     {
       slug: "schemes-and-filters",
-      title: "Schemes and filters",
-      description: "Delete schemes nothing uses, consolidate identical ones, and clean up saved filters.",
+      title: "Schemes, workflows and filters",
+      description: "Delete schemes nothing uses, consolidate identical ones, find bad practice in workflows, and clean up saved filters.",
       blocks: [
         {
           type: "p",
@@ -320,11 +396,25 @@ export const adminToolkit: AppDocs = {
         },
         {
           type: "p",
-          text: "It compares eight kinds of scheme: **Workflow**, **Screen**, **Issue Type Screen**, **Field Configuration**, **Issue Type**, **Priority**, **Permission** and **Notification** schemes.",
+          text: "It compares eleven kinds of object: **Issue Type**, **Workflow**, **Workflow Scheme**, **Screen**, **Screen Scheme**, **Issue Type Screen Scheme**, **Field Configuration**, **Field Configuration Scheme**, **Permission**, **Notification** and **Priority** schemes.",
         },
         {
           type: "p",
           text: "**Why bother.** Ten identical schemes means ten places to make the same change, and nine chances to forget one.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "It reports; it does not consolidate for you",
+          text: "There is no button here that repoints a project or deletes a scheme. You get the groups, the projects using each one, and a **CSV export** — the change itself is made in Jira, deliberately, because deciding which of two identical schemes survives is not a decision an app should make. Once you have repointed the projects the duplicates become unused, and **Unused Schemes Cleanup** can delete them.",
+        },
+        {
+          type: "p",
+          text: "Two settings decide how strict *identical* is. For **workflows**, you choose whether conditions, validators, post-functions and properties have to match as well as the transitions. For **screens**, whether the tabs have to match or only the set of fields. Loosen them and you find more groups that are harder to justify merging; tighten them and you find fewer, which you can act on with more confidence.",
+        },
+        {
+          type: "p",
+          text: "**Team-managed projects are excluded**, and that is not an oversight: a team-managed project keeps private copies of its own configuration, so its schemes are duplicates by design and cannot be consolidated. If the scan could not read everything within its budget it says **This scan did not read everything**, rather than presenting a partial sweep as a complete one.",
         },
         {
           type: "callout",
@@ -339,16 +429,59 @@ export const adminToolkit: AppDocs = {
           text: "Two teams may deliberately keep separate schemes so they can diverge later. Ask the project owners before consolidating a scheme that is actually in use.",
         },
 
-        { type: "h", level: 2, text: "Filter Hygiene" },
+        { type: "h", level: 2, text: "Workflow Health" },
         {
           type: "p",
-          text: "**What it does.** Lists every saved filter with its owner, its sharing scope and its JQL, and lets you act in bulk.",
+          text: "**What it does.** Reads your company-managed workflows and reports the three kinds of bad practice that make a workflow expensive to live with. It changes nothing.",
+        },
+        {
+          type: "table",
+          head: ["Check", "What it finds", "Why it matters"],
+          rows: [
+            [
+              "**Oversized workflows**",
+              "More statuses or transitions than the limits you set — 15 and 30 by default, adjustable from 5 to 40 and 5 to 80.",
+              "A workflow nobody can hold in their head is a workflow nobody will maintain correctly.",
+            ],
+            [
+              "**Broken reachability**",
+              "Orphaned statuses with no transition leading into them, and statuses that cannot be reached from the initial status at all.",
+              "An issue can never arrive there, so the status is a lie in every report that counts it.",
+            ],
+            [
+              "**Wrong status categories**",
+              "Final statuses that are not in **Done**, and initial statuses that are not in **To Do**.",
+              "An issue that ends outside Done never counts as completed — not on a board, not in a burndown, not in any `statusCategory` query.",
+            ],
+          ],
+        },
+        {
+          type: "p",
+          text: "Before it scans you choose whether to cover **all workflows** or **only active ones**, and set the two size limits. Results are searchable, filterable by finding type, show which projects use each workflow, and export as **CSV**. A workflow list that stopped before the end is reported as **This scan did not read everything**, not as a clean bill of health.",
+        },
+        {
+          type: "callout",
+          variant: "tip",
+          title: "Scan the active workflows first",
+          text: "An unreachable status in a workflow no project uses is a curiosity. The same finding in a workflow behind four hundred issues is a reporting bug somebody is already living with.",
+        },
+
+        { type: "h", level: 2, text: "Filter Management" },
+        {
+          type: "p",
+          text: "**What it does.** Lists saved filters with their owner, their sharing scope and their JQL, and lets you act in bulk. Search **By Name**, **By Owner**, **By Project** or **By JQL** — that last one finds every filter whose query mentions a given string — and narrow by sharing scope: All, Private, Project, Group or Global.",
         },
         {
           type: "p",
           text: "**Why it matters.** Saved filters are the configuration nobody audits, and the most common way Jira data ends up shared more widely than anyone intended.",
         },
         { type: "mock", id: "adm-filter-hygiene" },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "It cannot see other people's private filters, and it says so",
+          text: "Jira's API only exposes filters that are shared or that you own, so a private filter belonging to somebody else cannot be listed — by this app or any other. The tool states that above the results rather than presenting the list as complete. Read the audit as covering shared filters plus your own.",
+        },
         {
           type: "table",
           head: ["Action", "What it does", "Use it for"],
@@ -360,7 +493,12 @@ export const adminToolkit: AppDocs = {
             ],
             ["**Make Private**", "Removes all sharing from the selected filters.", "Filters that were shared by accident."],
             ["**Remove Global Share**", "Removes only the global scope, leaving other sharing intact.", "Reducing exposure without breaking a team's access."],
-            ["**Export CSV**", "Exports the current list.", "Evidence for an audit, and a before/after record."],
+            [
+              "**Replace in JQL**",
+              "Find-and-replace inside the JQL of the selected filters. Before you commit, it says how many filters would change and validates each result, naming any that would become invalid JQL — those are left untouched.",
+              "A project key that changed, a renamed custom field, a status that no longer exists. This is the alternative to opening two hundred filters by hand.",
+            ],
+            ["**Export CSV**", "Exports the current list, up to 20,000 rows.", "Evidence for an audit, and a before/after record."],
           ],
         },
         {
@@ -419,41 +557,68 @@ export const adminToolkit: AppDocs = {
         {
           type: "steps",
           items: [
-            "Download both CSVs from **admin.atlassian.com**: the **Managed Accounts** export and the **Users** export.",
+            "Download both CSVs from **admin.atlassian.com**: the **Managed Accounts** export and the **Users** export. The tool has the four-step instructions on screen, including which options to tick in the export dialog.",
             "Drop each file into its box. The tool validates the columns and names any that are missing.",
             "Set an **Inactivity Threshold** in days — minimum 30 — to decide what counts as dormant.",
-            "Click **Analyze**, then **Export PDF** when you want to send it to somebody.",
+            "Click **Analyze**.",
           ],
         },
         {
           type: "p",
-          text: "What comes back is not a summary, it is a **14-section report**. This is the part of the toolkit people underestimate, so here is what is actually in it:",
+          text: "What comes back is not a summary. It is a report you read top to bottom, and it is the part of the toolkit people underestimate.",
         },
         {
-          type: "table",
-          head: ["#", "Section", "What it answers"],
-          rows: [
-            ["1", "**Executive Summary**", "The headline numbers, for the person who will not read the rest."],
-            ["2", "**Activity Analysis**", "Who is active, who is not, and how long they have been quiet."],
-            ["3", "**Product Segmentation**", "Which products your users actually hold."],
-            ["4", "**License Waste**", "The seats you are paying for and nobody is using."],
-            ["5", "**Never-Accessed Users**", "Accounts that were licensed and never used once. The safest cleanup list you will get."],
-            ["6", "**Security Compliance**", "Accounts that fail your basic hygiene expectations."],
-            ["7", "**Site Activity**", "Activity broken down per site, for organisations with more than one."],
-            ["8", "**Org Admins**", "Who holds organisation administration. Usually more people than anyone expects."],
-            ["9", "**External Users**", "Accounts outside your own email domains."],
-            ["10", "**Group Analysis**", "Group membership, including users who belong to no group at all."],
-            ["11", "**Service Accounts**", "Integration and bot accounts, separated from real people so you do not deprovision a pipeline."],
-            ["12", "**Onboarding Timeline**", "When accounts were added, month by month — the shape of how you grew."],
-            ["13", "**License Overview**", "Your licensed products and seat counts, read live from Jira, alongside the CSV analysis."],
-            ["14", "**Recommendations**", "Prioritised actions derived from the sections above."],
+          type: "fields",
+          items: [
+            {
+              name: "The headline row",
+              text: "Product users, managed accounts, sites in the org, groups, org admins and Atlassian Guard billable seats — with a second line under each giving the number that qualifies it, such as how many of those accounts are disabled.",
+            },
+            {
+              name: "Three alerts, each of which opens a list",
+              text: "**Ghost seat holders** — active people holding billable seats who have never used any of them. **Paid seats idle** — the percentage unused past your threshold. **Stale group members** — suspended or deactivated users still sitting in groups, who regain access the instant somebody re-enables them. Click any of the three and the holder list loads at the bottom of the page.",
+            },
+            {
+              name: "License Optimization — paid seats only",
+              text: "The centre of the report: one row per product per site, with seats, active holders, a usage band breakdown, and a **Reclaimable** count. Filter by site and by product. A separate table lists what is **included with your plans** and therefore is not a seat you are paying for — Rovo, platform apps, features of a JSM tier — each with the reason.",
+            },
+            {
+              name: "Who holds paid seats",
+              text: "The people behind the numbers, with an onboarding note when a year's intake shows up as a wave of accounts that never signed in.",
+            },
+            {
+              name: "Directory activity",
+              text: "Last activity across the whole organisation directory, and how many accounts have never been active on any Atlassian product — usually provisioned-but-unused identities from a directory sync.",
+            },
+            {
+              name: "Security posture",
+              text: "From the managed-accounts export: how many accounts are under enforced SSO, how many sign in with an Atlassian password, how many of those passwords are weak, and how many email addresses are unverified.",
+            },
+            {
+              name: "Org admins, sites footprint and groups",
+              text: "Who holds organisation administration — with a badge counting the never-seen service accounts among them — how many sites the org contains including sandboxes and personal ones, and the group picture.",
+            },
+            {
+              name: "Recommended actions",
+              text: "Six, each with the number of users, seats, accounts or sites it would affect: reclaim never-used paid seats, trim idle access on the biggest products, clean groups of suspended users, review org-admin service accounts, close the non-SSO gap, and audit the site long tail.",
+            },
           ],
+        },
+        {
+          type: "p",
+          text: "Every drill-down list has **Download CSV**, and when the table shows only the first N rows it says so and confirms the CSV covers them all.",
         },
         {
           type: "callout",
           variant: "tip",
-          title: "Sections 5, 11 and 8 are the ones to read first",
-          text: "**Never-Accessed Users** is your cheapest win. **Service Accounts** is what stops you breaking an integration while chasing that win. **Org Admins** is the one that starts an uncomfortable but necessary conversation.",
+          title: "Ghost seat holders, service accounts, org admins — in that order",
+          text: "**Ghost seat holders** is your cheapest win: a seat bought and never once used. **Service accounts** is what stops you breaking an integration while chasing that win. **Org admins** is the one that starts an uncomfortable but necessary conversation.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "Everything here happens in your browser",
+          text: "The two CSVs are parsed and analysed in the page. Nothing is uploaded, nothing is stored by the app, and no resolver is called — which is also why this one tool keeps working when the app has no licence.",
         },
         {
           type: "callout",
@@ -476,18 +641,19 @@ export const adminToolkit: AppDocs = {
           type: "steps",
           items: [
             "Pick the **user to offboard**.",
-            "Select the **categories to scan**: project and component leads, dashboards, filters, permission schemes, project roles, assigned issues.",
+            "Select the **categories to scan**. There are nine — project leads, component leads, dashboards, filters, permission grants, project roles, notifications, security levels and boards — plus their assigned issues. **Select All** takes the lot.",
             "Click **Scan**. Results are grouped by category with a count for each.",
             "Choose the **replacement user**.",
-            "Tick **Reassign issues** if their open issues should move too. This is slow for large numbers, up to a maximum of 10,000.",
+            "Per section, choose **Transfer to the replacement user** or **Remove without a replacement**. They are not the same decision, and for a permission grant or a notification recipient the second is often the right one.",
+            "For issues, choose whether to **reassign them to the replacement user**. This is slow for large numbers, up to a maximum of 10,000.",
             "Click **Apply Transfer**. The tool reports what succeeded and what was skipped, per category.",
           ],
         },
         {
           type: "callout",
           variant: "info",
-          title: "It tells you what it cannot do",
-          text: "Some things cannot be transferred automatically: certain automation rules, permission grants that name the person directly, third-party app data. Those are listed as **info only — manual transfer required**, under a heading that says exactly that. A tool that silently skipped them would be worse than useless during an offboarding.",
+          title: "It tells you what it cannot do, and what it could not see",
+          text: "Some things cannot be transferred automatically: certain automation rules, permission grants that name the person directly, third-party app data. Those are listed as **info only — manual transfer required**, under a heading that says exactly that. Separately, a **What a scan cannot see** panel names the blind spots — among them private filters belonging to other people, which Jira's API does not expose to anybody. A tool that silently skipped either would be worse than useless during an offboarding.",
         },
         {
           type: "callout",
@@ -511,7 +677,7 @@ export const adminToolkit: AppDocs = {
         { type: "h", level: 2, text: "Migrated Fields Cleaner" },
         {
           type: "p",
-          text: "Choose the **Cleanup Mode** — any combination of **Field Names**, **Field Descriptions** and **Field Configurations** — then scan. The results table shows each field's ID, the configuration it belongs to, its **current value** and the **cleaned value** it will become.",
+          text: "Choose the **Cleanup Mode** — **Field Names**, **Field Descriptions** or **Field Configurations** — then scan. The results table shows each field's ID, the configuration it belongs to, its **current value** and the **cleaned value** it will become.",
         },
         {
           type: "p",
@@ -531,10 +697,17 @@ export const adminToolkit: AppDocs = {
         {
           type: "steps",
           items: [
-            "**Scan** to find migrated roles and their members across all projects.",
+            "Choose where to look: **permission schemes**, **projects**, **workflows**, or projects and permission schemes together. A migrated role can be referenced in all three, and they are worth clearing in that order.",
+            "**Scan** to find migrated roles and their members.",
+            "Decide what happens to the migrated role itself: **copy** leaves it in place with its members, or **move** empties it of the actors it can prove came from the migration. Copy first if you are not certain.",
             "Review which members will move into which original role.",
             "Apply the cleanup to the roles you selected.",
           ],
+        },
+        {
+          type: "callout",
+          variant: "info",
+          text: "If the scan or the cleanup could not cover everything in its budget, it says **This scan did not finish** or **This cleanup did not finish** and gives the numbers. A partial sweep is never reported as a complete one.",
         },
         {
           type: "callout",
@@ -572,7 +745,11 @@ export const adminToolkit: AppDocs = {
         },
         {
           type: "p",
-          text: "The only outside address is `api.atlassian.com`, which is your own site's API.",
+          text: "The app declares **no external network access at all** — there is no allowed-host list in its manifest, because it never calls anything outside the Atlassian APIs it is already running against. The PDF and CSV files are generated in your browser, not by a service.",
+        },
+        {
+          type: "p",
+          text: "It is available in nine locales: English (US and UK), Portuguese (Brazil and Portugal), Spanish, French, German, Italian and Japanese.",
         },
 
         { type: "h", level: 2, text: "What the app stores" },
@@ -585,7 +762,33 @@ export const adminToolkit: AppDocs = {
         },
         {
           type: "p",
-          text: "Results contain user names, account IDs and group names when that is what you asked the tool to analyse — a permission audit is a report about people. Everything is deleted when you reset the job or uninstall the app. See the [privacy policy](/privacy/admin-toolkit).",
+          text: "Results contain user names, account IDs and group names when that is what you asked the tool to analyse — a permission audit is a report about people. It is all in the app's own key-value storage inside your Atlassian site; there is no database and nothing leaves.",
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "There is no audit log, and no automatic expiry",
+          text: "This app keeps no record of what you did with it — the tools report their results and that is the whole of it. Nor is there a retention clock: a completed job's results sit in storage until you press **Start Over** in that tool, run it again, or uninstall the app. If a scan named people you would rather not keep on file, reset the tool when you are done with the results. The one thing that removes data on its own is the daily closed-account sweep below.",
+        },
+
+        { type: "h", level: 2, text: "Closed accounts, and uninstalling" },
+        {
+          type: "p",
+          text: "Once a day the app reports the Atlassian account IDs it is holding, so Atlassian can tell it which of those accounts have been closed. When one has been, the records naming that person are deleted. This runs whether or not the app is licensed, because it is a compliance obligation rather than a feature.",
+        },
+        {
+          type: "p",
+          text: "Uninstalling runs a handler that empties the app's storage before it goes, sweeping it repeatedly until a pass finds nothing — deleting under a cursor leaves keys behind, so one pass is not enough. Independently, Atlassian detaches the installation's data and destroys it under its own retention policy. See [Where your data goes](/documentation/start-here/your-data).",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "This only became true recently",
+          text: "The uninstall handler existed for months wired to a Forge event that does not exist, so it had never run once. It is a `preUninstall` module now, and it actually deletes.",
+        },
+        {
+          type: "p",
+          text: "The [privacy policy](/privacy/admin-toolkit) is the authoritative statement on all of the above.",
         },
 
         { type: "h", level: 2, text: "Troubleshooting" },
@@ -611,6 +814,10 @@ export const adminToolkit: AppDocs = {
             {
               name: "User Analysis rejects a CSV",
               text: "The tool names the **missing columns**. Re-export from admin.atlassian.com without opening the file in a spreadsheet first — that round-trip is the usual cause.",
+            },
+            {
+              name: "A button is greyed out and I do not know why",
+              text: "If there is a warning at the top of the page saying the app has no active licence, that is the reason — the actions that start work are gated, and there is a line under each disabled button saying so. Reads, exports and **Cancel and start over** are not gated.",
             },
             {
               name: "Offboarding did not move everything",
@@ -640,7 +847,7 @@ export const adminToolkit: AppDocs = {
             },
             {
               name: "Does anything run automatically?",
-              text: "No. There are no scheduled jobs and no triggers. Every tool runs when you click it.",
+              text: "No tool does. Nothing scans, deletes, merges or transfers unless you click it. There is exactly one scheduled job in the app and it touches nothing in your Jira: once a day it reports the account IDs it holds to Atlassian, so a closed account can be erased from its records.",
             },
             {
               name: "Can I undo a cleanup?",
@@ -648,7 +855,7 @@ export const adminToolkit: AppDocs = {
             },
             {
               name: "Does data leave Atlassian?",
-              text: "No. The app runs on Atlassian Forge and only contacts `api.atlassian.com`.",
+              text: "No. The app runs on Atlassian Forge and declares no external network access at all — there is no allowed-host list in its manifest for anything to be sent to. The CSVs and PDFs are built in your browser.",
             },
             {
               name: "Does it use AI?",
@@ -698,11 +905,15 @@ export const adminToolkit: AppDocs = {
             },
             {
               name: "Can I export the results?",
-              text: "Yes: PDF from the Custom Fields Health Assessment and User Analysis, CSV from Project Activity and Filter Hygiene.",
+              text: "Yes, and from more tools than you might expect. **CSV** from Project Activity, Custom Fields Health Assessment, Workflow Health, Scheme Deduplication, Filter Management, the Custom Field Merger and every User Analysis drill-down. **PDF** from the Custom Fields Health Assessment — that is the only one. Exports are generated in your browser, so they keep working even without an app licence.",
+            },
+            {
+              name: "What can I still do if the licence lapses?",
+              text: "Read every result you already have, export it, search for users and projects, and reset a stuck tool. What stops is starting a scan and writing to Jira. **User Analysis works in full**, because it never calls the backend at all.",
             },
             {
               name: "What happens when I uninstall?",
-              text: "The app's stored data is cleared and detached immediately, so nobody can read it any more — then Atlassian destroys it under its own retention policy, documented as 28 days. See [Where your data goes](/documentation/start-here/your-data). Changes the tools already made to your Jira configuration stay, because they are now part of Jira.",
+              text: "The app runs an uninstall handler that empties its storage before it goes — sweeping repeatedly until a pass finds nothing — and independently Atlassian detaches the installation's data and destroys it under its own retention policy. See [Where your data goes](/documentation/start-here/your-data). Changes the tools already made to your Jira configuration stay, because they are now part of Jira.",
             },
           ],
         },

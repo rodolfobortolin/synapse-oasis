@@ -43,13 +43,15 @@ const toolList = (
       <ToolCard title="Project Activity" desc="Visualise issue creation activity across all projects over the last 12 months." />
     </div>
 
-    <SectionLabel>Configuration Cleanup</SectionLabel>
+    <SectionLabel>Configuration</SectionLabel>
     <div className="grid grid-cols-3 gap-2.5">
       <ToolCard title="Unused Schemes Cleanup" desc="Find and remove unused configuration schemes to keep your instance clean." />
       <ToolCard title="Custom Fields Health Assessment" desc="Assess custom fields for cleanup, consolidation, naming, searchability and option quality." />
       <ToolCard title="Custom Field Merger" desc="Merge duplicate custom fields by generating CSV import files and replacing screen references." />
-      <ToolCard title="Filter Hygiene" desc="Audit saved filters, review sharing permissions and take bulk actions." />
+      <ToolCard title="Field Screens Migrator" desc="Swap one field for another on every screen where it appears — same tab, same position." />
+      <ToolCard title="Filter Management" desc="Audit saved filters, review sharing permissions and take bulk actions." />
       <ToolCard title="Scheme Deduplication" desc="Find duplicate schemes that share the same settings and can be consolidated." />
+      <ToolCard title="Workflow Health" desc="Scan workflows for bad practices — oversized workflows, unreachable statuses, and start/end statuses in the wrong category." />
     </div>
 
     <SectionLabel>Users</SectionLabel>
@@ -120,10 +122,11 @@ const projectsManager = (
     <div className="mt-4">
       <Panel tone="subtle" title="Bulk actions — 2 projects selected">
         <Row gap={8}>
-          <Btn>Change Project Lead</Btn>
-          <Btn>Transfer Project Lead</Btn>
-          <Btn variant="danger">Archive Projects</Btn>
-          <Btn variant="subtle">Restore</Btn>
+          <Btn>Change Lead</Btn>
+          <Btn>Transfer Lead</Btn>
+          <Btn variant="danger">Archive</Btn>
+          <Btn>Restore</Btn>
+          <Btn variant="subtle">Confirm changes</Btn>
         </Row>
       </Panel>
     </div>
@@ -171,7 +174,16 @@ const projectActivity = (
 
 const cfAssessment = (
   <Screen where="Admin Toolkit → Custom Fields Health Assessment" width={880}>
-    <PageTitle action={<Btn>Export PDF</Btn>}>Custom Fields Health Assessment</PageTitle>
+    <PageTitle
+      action={
+        <Row gap={8}>
+          <Btn>Export CSV</Btn>
+          <Btn>Export PDF</Btn>
+        </Row>
+      }
+    >
+      Custom Fields Health Assessment
+    </PageTitle>
     <Sub>Cleanup, consolidation, naming, searchability and option quality across every custom field.</Sub>
 
     <Row gap={10}>
@@ -255,11 +267,11 @@ const cfMerger = (
     <Panel tone="subtle">
       <div className="text-[12px] space-y-1.5">
         <div>
-          <strong>1.</strong> Generate CSV — <Code>1,391 rows generated</Code> · batch size 1,000
+          <strong>1.</strong> Generate CSV — <Code>1,391 rows generated</Code> · batch size 4,000
         </div>
         <div>
-          <strong>2.</strong> Download the CSV and its Config file, then import it in Jira with{" "}
-          <em>Select CSV as the import source</em>. Repeat for each batch.
+          <strong>2.</strong> Download the CSV and its Config file, then import them in Jira under{" "}
+          <em>Settings → System → External System Import</em>. Repeat for each batch.
         </div>
         <div>
           <strong>3.</strong> Replace screen references — <Code>4 screens to update</Code>
@@ -270,6 +282,7 @@ const cfMerger = (
       </div>
       <Row gap={8}>
         <Btn variant="primary">Generate CSV</Btn>
+        <Btn>Download All as ZIP</Btn>
         <Btn>Preview screens</Btn>
         <Btn>Replace on screens</Btn>
         <Btn variant="danger">Move to trash</Btn>
@@ -343,15 +356,17 @@ const unusedSchemes = (
 /* ── Filter Hygiene ────────────────────────────────────────────────────── */
 
 const filterHygiene = (
-  <Screen where="Admin Toolkit → Filter Hygiene" width={880}>
-    <PageTitle action={<Btn variant="primary">Scan Filters</Btn>}>Filter Hygiene</PageTitle>
+  <Screen where="Admin Toolkit → Filter Management" width={880}>
+    <PageTitle action={<Btn variant="primary">Search</Btn>}>Filter Management</PageTitle>
     <Sub>Audit saved filters, review sharing permissions and take bulk actions.</Sub>
 
     <Row gap={8}>
       <Btn variant="primary">By Name</Btn>
       <Btn>By Owner</Btn>
       <Btn>By Project</Btn>
-      <Field placeholder="Search by name, owner, or JQL..." width={260} />
+      <Btn>By JQL</Btn>
+      <Field placeholder="Enter filter name (substring match)..." width={240} />
+      <Select value="All" width={110} />
     </Row>
 
     <Row gap={10}>
@@ -395,6 +410,7 @@ const filterHygiene = (
           <Btn>Reassign Owner</Btn>
           <Btn>Make Private</Btn>
           <Btn>Remove Global Share</Btn>
+          <Btn>Replace in JQL</Btn>
           <Btn variant="subtle">Export CSV</Btn>
         </Row>
       </Panel>
