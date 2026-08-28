@@ -150,7 +150,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "Secret Scanner for Jira scans issue fields, comments, change history and text attachments for exposed credentials and PII — API keys, tokens, passwords, private keys and card numbers — and alerts administrators before the exposure spreads.",
     ai: false,
     persisted: [
-      "**Findings** — for each detection: the issue key and summary, the field it was found in, the pattern and category that matched, the **masked** matched text (first four characters followed by asterisks), a SHA-256 hash of the raw match used only for deduplication, the detection timestamp, and the comment author where applicable.",
+      "**Findings** — for each detection: the issue key and summary, the field it was found in, the pattern and category that matched, the **masked** matched text (first four characters followed by asterisks), a SHA-256 hash of the raw match used only for deduplication, the detection timestamp, and — where the field is one somebody signs, a comment or a change history entry — the Atlassian account ID of its author.",
       "**Triage metadata** — the Jira issue created to track a leak and its status, plus dismissal records: who dismissed a finding, when, and the reason given.",
       "**Scanner configuration** — enabled categories and rules, your custom regex patterns, whether attachments and change history are scanned, auto-redaction and dismissal settings, project exclusions, and the target project and issue type for remediation tickets.",
       "**Audit log** — app events, retained for 90 days.",
@@ -164,7 +164,8 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
     personal: [
       "**The app never stores the credential it finds.** Only a masked preview (the first four characters) and a one-way SHA-256 hash of the raw match are written to storage. The hash cannot be reversed and exists solely to recognise the same finding twice.",
       "Because the app detects PII patterns — card numbers, national identifiers, contact details — a finding records that such a value was present in a specific field, in masked form only.",
-      "Atlassian account IDs or display names are stored when they identify the author of a scanned comment or the administrator who dismissed a finding.",
+      "**Atlassian account IDs are stored** where a finding or a triage action names a person: the author of a scanned comment or change, and the administrator who dismissed or resolved a finding. They are the identifiers Atlassian itself uses and are meaningless outside your tenant. **No display names or email addresses are stored** — a name shown in the app is fetched from Jira when the page is drawn.",
+      "Once a day the app sends Atlassian the account IDs it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. When an account comes back as closed, its audit events are **deleted** — the row itself, not just the name on it, because an audit row carries an open metadata record about what happened — and its account ID is removed from the findings and dismissal records, which are kept: an exposed credential is still exposed, and a finding judged a false positive is still a false positive, once the person who wrote it has gone.",
       "Issue keys and issue summaries are stored so administrators can navigate to the affected issue.",
     ],
     scopes: [
@@ -174,6 +175,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "manage:jira-project",
       "manage:jira-configuration",
       "storage:app",
+      "report:personal-data",
     ],
     storageTech:
       "Forge app storage (key-value store) and Forge SQL, both hosted by Atlassian",
@@ -207,7 +209,7 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
     ],
     personal: [
       "Issue content is read to evaluate a rule or run a post function, and **no copy of the issue is retained**. An audit event does keep the validator's written reason for blocking a transition, which the AI derived from the issue — that is what answers \"why was this blocked?\" in the audit log.",
-      "**Atlassian account IDs are stored** on audit events, to record who performed a transition. They are the identifiers Atlassian itself uses and are meaningless outside your tenant. No display names or email addresses are stored: a name shown in the audit log is fetched from Jira when the page is drawn.",
+      "**Atlassian account IDs are stored** on audit events, to record who performed a transition. They are the identifiers Atlassian itself uses and are meaningless outside your tenant. No display name is stored **as a field** — the name you see in the audit log is fetched from Jira when the page is drawn. One exception, stated plainly: a validator's written reason is prose the AI composed over the issue, and that context names people (assignee, reporter, comment authors, attachment uploaders) by display name, so a name can appear inside that sentence. It is not attached to an account there, which is why a closed account's events are deleted whole rather than having a field cleared.",
       "Attachment **contents are never read**; only file metadata is included, and only when that context source is enabled.",
       "Once a day the app sends Atlassian the account IDs it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. When an account comes back as closed, its audit events are **deleted** — the row itself, not just the name on it, because the reason text on a row can describe the same person.",
       "The app does not collect email addresses, passwords, authentication tokens, API keys or payment data.",
