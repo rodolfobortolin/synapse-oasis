@@ -4,6 +4,7 @@ import {
   Bar,
   Btn,
   Checkbox,
+  Field,
   PageTitle,
   Panel,
   Row,
@@ -12,14 +13,17 @@ import {
   Select,
   Sub,
   Tabs,
+  Toggle,
 } from "./ui";
 
-/* ── The space page: the export screen ────────────────────────────────── */
-/* No tab strip: import is gone, and a tab strip with one tab is just chrome. */
+/* ── The space page: Export ────────────────────────────────── */
+/* The destination picker is the first control on purpose: it moves the two
+   switches under it, and it is what decides whether the archive opens at all
+   on the other side. */
 
 const exportTab = (
   <Screen where="Confluence space → Markdown Toolkit → Export">
-    <PageTitle>Markdown Toolkit</PageTitle>
+    <Tabs items={["Export", "Import"]} active="Export" />
 
     <Select label="Select a space" value="Engineering Handbook (ENG)" width={320} />
 
@@ -48,15 +52,29 @@ const exportTab = (
       </div>
     </Panel>
 
-    <SectionLabel>Options</SectionLabel>
-    <Checkbox on label="Include attachments" />
-    <Checkbox on label="Generate index file" />
+    <SectionLabel>Open the export in</SectionLabel>
+    <div style={{ maxWidth: 340 }}>
+      <Select value="Docusaurus" />
+    </div>
+    <div className="text-[11.5px] -mt-2 mb-3" style={{ color: ATL.subtle }}>
+      A folder gets index.md, and sidebar_position carries the page order.
+    </div>
+
+    <Row gap={20}>
+      <Toggle on label="Include attachments" />
+      <Toggle on label="Add YAML front matter" />
+    </Row>
+    <div className="mt-2">
+      <Row gap={20}>
+        <Toggle on={false} label="Number files to keep page order" />
+        <Toggle on label="Generate index file" />
+      </Row>
+    </div>
 
     <div className="mt-4">
       <Row gap={8}>
-        <Btn variant="primary">Export</Btn>
+        <Btn variant="primary">Bulk Export (14)</Btn>
         <Btn>Export Entire Space</Btn>
-        <Btn variant="subtle">Bulk Export</Btn>
       </Row>
     </div>
 
@@ -68,7 +86,80 @@ const exportTab = (
   </Screen>
 );
 
-/* ── Content action on a single page ───────────────────────────────────── */
+/* ── The space page: Import ────────────────────────────────── */
+/* The file list shows the folder depth, because the shape of the archive is
+   the thing people get wrong, and "+2" beside a page is how you see that the
+   images it refers to were found. */
+
+const importTab = (
+  <Screen where="Confluence space → Markdown Toolkit → Import">
+    <Tabs items={["Export", "Import"]} active="Import" />
+
+    <div
+      className="rounded-md text-center py-7 px-4 mb-4"
+      style={{ border: `2px dashed ${ATL.border}`, background: ATL.bgSubtle }}
+    >
+      <div className="text-[13px] font-medium">Drag and drop files here, or click to browse</div>
+      <div className="text-[11px] mt-1" style={{ color: ATL.subtle }}>
+        Supported: .md, .zip
+      </div>
+    </div>
+
+    <SectionLabel>Files to import: 5 · 2 attachments</SectionLabel>
+    <Panel tone="subtle">
+      {[
+        { t: "Guide", d: 0, att: 0 },
+        { t: "Install", d: 1, att: 1 },
+        { t: "Configure", d: 1, att: 0 },
+        { t: "Troubleshooting", d: 2, att: 1 },
+        { t: "Reference", d: 0, att: 0 },
+      ].map((f) => (
+        <div key={f.t} className="text-[12px] py-0.5" style={{ paddingLeft: f.d * 18 }}>
+          {"\u{1F4C4}"} {f.t}
+          {f.att > 0 && (
+            <span className="ml-1 text-[11px]" style={{ color: ATL.subtle }}>
+              + {f.att}
+            </span>
+          )}
+        </div>
+      ))}
+    </Panel>
+
+    <Field
+      label="Import everything under a page called"
+      value="Engineering Handbook (imported)"
+      help="Created first, in your name — which is also the permission check."
+      width={360}
+    />
+
+    <div style={{ maxWidth: 360 }}>
+      <Select label="When a page with that title already exists" value="Leave the existing page alone" />
+    </div>
+
+    <Row gap={20}>
+      <Toggle on label="Upload images and files the pages refer to" />
+    </Row>
+    <div className="mt-2">
+      <Row gap={20}>
+        <Toggle on label="Take the page title from the first heading" />
+      </Row>
+    </div>
+
+    <div className="mt-4">
+      <Btn variant="primary">Import (5)</Btn>
+    </div>
+
+    <div className="mt-5">
+      <Panel tone="success" title="Import complete. 4 created, 1 skipped, 2 attachments.">
+        <div className="text-[12px]" style={{ color: ATL.subtle }}>
+          One page was left alone because a page with that title already existed.
+        </div>
+      </Panel>
+    </div>
+  </Screen>
+);
+
+/* ── Content action on a single page ──────────────────────── */
 
 const contentAction = (
   <Screen where="Confluence page → ••• → Export to Markdown" width={560}>
@@ -78,8 +169,12 @@ const contentAction = (
     <Checkbox on label="This page only" />
     <Checkbox on={false} label="This page and all children" />
     <div className="mt-2">
-      <Checkbox on label="Export as single file" />
-      <Checkbox on={false} label="Include attachments" />
+      <Checkbox on={false} label="Export as single file" />
+      <Checkbox on label="Include attachments" />
+    </div>
+
+    <div className="mt-3" style={{ maxWidth: 260 }}>
+      <Select label="Open the export in" value="Obsidian" />
     </div>
 
     <div className="mt-4">
@@ -204,6 +299,7 @@ const macroRendered = (
 
 export const MARKDOWN_TOOLKIT_MOCKS: Record<string, ReactNode> = {
   "md-export-tab": exportTab,
+  "md-import-tab": importTab,
   "md-content-action": contentAction,
   "md-macro-editor": macroEditor,
   "md-macro-rendered": macroRendered,

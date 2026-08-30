@@ -246,6 +246,7 @@ export const markdownToolkit: AppDocs = {
           type: "p",
           text: "**Where it is.** The **Import** tab on the Markdown Toolkit page in the space sidebar. Drop a `.zip`, or one or more `.md` files, onto the drop zone.",
         },
+        { type: "mock", id: "md-import-tab" },
 
         { type: "h", level: 2, text: "How the archive should look" },
         {
