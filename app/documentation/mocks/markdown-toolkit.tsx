@@ -14,11 +14,11 @@ import {
   Tabs,
 } from "./ui";
 
-/* ── Space settings: the export screen ─────────────────────────────────── */
+/* ── The space page: the export screen ────────────────────────────────── */
 /* No tab strip: import is gone, and a tab strip with one tab is just chrome. */
 
 const exportTab = (
-  <Screen where="Confluence space settings → Markdown Toolkit">
+  <Screen where="Confluence space → Markdown Toolkit → Export">
     <PageTitle>Markdown Toolkit</PageTitle>
 
     <Select label="Select a space" value="Engineering Handbook (ENG)" width={320} />

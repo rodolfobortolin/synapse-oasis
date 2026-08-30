@@ -5,7 +5,7 @@ export const markdownToolkit: AppDocs = {
   name: "Markdown Toolkit for Confluence",
   shortName: "Markdown Toolkit",
   tagline:
-    "Export Confluence pages, page trees or whole spaces to Markdown files. Write Markdown directly on a page, with Mermaid diagrams, KaTeX maths and syntax-highlighted code rendered where the content lives.",
+    "Move content between Confluence and Markdown in both directions: export a page, a tree or a whole space as files that open in Obsidian or a docs site, and import a Markdown archive back as a page tree. Plus a macro that renders Markdown — Mermaid diagrams, KaTeX maths, highlighted code — where the content lives.",
   products: "Confluence",
   color: "#2B9F6F",
   icon: "/markdown-toolkit.png",
@@ -18,21 +18,21 @@ export const markdownToolkit: AppDocs = {
       blocks: [
         {
           type: "p",
-          text: "**What it is.** Two things. A way to get Confluence content out as Markdown files, and a macro that renders Markdown — diagrams, maths and highlighted code included — inside a Confluence page.",
+          text: "**What it is.** Three things. A way to get Confluence content **out** as Markdown files; a way to bring a Markdown archive **back in** as a tree of pages; and a macro that renders Markdown — diagrams, maths and highlighted code included — inside a Confluence page.",
         },
         {
           type: "p",
-          text: "**Why you would want it.** Documentation that also needs to live in a repository. Content you want to feed to a static site generator or an AI pipeline. Diagrams that must be editable as text by anyone who can edit the page, rather than uploaded as images nobody can correct.",
+          text: "**Why you would want it.** Documentation that also needs to live in a repository. Content you want to feed to a static site generator or an AI pipeline. A folder of Markdown that should become real Confluence pages without anyone pasting them one at a time. Diagrams that must be editable as text by anyone who can edit the page, rather than uploaded as images nobody can correct.",
         },
         {
           type: "p",
-          text: "**Who can use it.** The bulk export screen sits in a space's settings, so it needs space administrator rights. Exporting a single page from the **•••** menu, and writing in the macro, need nothing beyond your normal page permissions. There is no global admin screen and nothing to configure.",
+          text: "**Who can use it.** Anyone who can open the space. The **Markdown Toolkit** page sits in the space sidebar, not in space settings, and every read runs with your own Confluence permissions — a space export lists only the pages you can already open. Importing additionally needs permission to create pages in the target space, which Confluence checks for you. There is no global admin screen and nothing to configure.",
         },
         {
           type: "callout",
           variant: "info",
-          title: "The app reads. It does not write.",
-          text: "Markdown Toolkit requests no write permission of any kind, so it cannot create, edit or delete a Confluence page. Content goes **out** as Markdown files; Markdown files do not come back in. See [Permissions, data and limits](/documentation/markdown-toolkit/reference).",
+          title: "It cannot exceed your own permissions",
+          text: "Every read runs as you, so an export can only contain pages you can already open. An import writes only underneath a page **you** created, in your name — if you cannot create pages in that space, the import stops there and nothing else is written. See [Permissions, data and limits](/documentation/markdown-toolkit/reference).",
         },
 
         { type: "h", level: 2, text: "What the macro does to a page" },
@@ -63,9 +63,9 @@ export const markdownToolkit: AppDocs = {
           head: ["Feature", "Where", "What it does"],
           rows: [
             [
-              "**Markdown Toolkit** settings screen",
-              "**Space settings** in any space",
-              "Bulk export: pick pages from the tree, or take the whole space.",
+              "**Markdown Toolkit** page",
+              "The space sidebar, with Pages and Blogs",
+              "Export and Import, in two tabs: pick pages from the tree, take the whole space, or drop an archive back in.",
             ],
             [
               "**Export to Markdown**",
@@ -81,7 +81,7 @@ export const markdownToolkit: AppDocs = {
           type: "steps",
           items: [
             "Install **Markdown Toolkit for Confluence** from the Atlassian Marketplace.",
-            "Open a space, go to **Space settings**, and look for **Markdown Toolkit**.",
+            "Open a space and look for **Markdown Toolkit** in the sidebar.",
             "That is all. There is no setup screen, no credentials and no global settings.",
           ],
         },
@@ -103,7 +103,7 @@ export const markdownToolkit: AppDocs = {
     {
       slug: "export",
       title: "Exporting to Markdown",
-      description: "Single pages, page trees or whole spaces, with or without attachments.",
+      description: "What to export, where it is going, and what each setting changes in the files you get.",
       blocks: [
         {
           type: "p",
@@ -123,23 +123,76 @@ export const markdownToolkit: AppDocs = {
           ],
         },
 
-        { type: "h", level: 2, text: "The options that matter" },
+        { type: "h", level: 2, text: "Where the export is going" },
+        {
+          type: "p",
+          text: "This is the first choice, and it moves the others to match. Markdown is not one format — a file that reads perfectly in Obsidian is not what Docusaurus wants, and the difference is not cosmetic. It decides **where a page with children is written**, **what carries the page order**, and **how one file links to another**. Get it wrong and the archive opens with every link broken.",
+        },
+        {
+          type: "table",
+          head: ["Destination", "A page that has children", "Page order carried by", "Links between pages"],
+          rows: [
+            ["**Plain Markdown**", "`guide.md`, next to a `guide/` folder", "`01-` filename prefix", "relative — `./install.md`, `../api.md`"],
+            ["**Obsidian**", "same as plain", "`01-` filename prefix", "wikilinks — `[[folder/note|text]]`, images as `![[embeds]]`"],
+            ["**Docusaurus**", "`guide/index.md`", "`sidebar_position` in front matter", "relative"],
+            ["**MkDocs**", "`guide/index.md`", "`01-` filename prefix", "relative"],
+            ["**Hugo**", "`guide/_index.md`", "`weight` in front matter", "relative"],
+          ],
+        },
+        {
+          type: "p",
+          text: "**Why a page with children is the hinge.** In Confluence a page can be both a page and a parent. On a filesystem it has to be one or the other. Plain Markdown and Obsidian put the page *beside* the folder, which is the shape this app's own import reads back — so an export round-trips. Static site generators want the folder to own an index file instead, because that is what makes the folder a section that has a page of its own.",
+        },
+        {
+          type: "code",
+          label: "The same three pages, Plain on the left, Docusaurus on the right",
+          text: `01-Guide.md                    Guide/
+01-Guide/                        index.md
+  01-Install.md                  Install.md
+  02-Configure.md                Configure.md`,
+        },
+        {
+          type: "p",
+          text: "**Why the numbers appear or not.** A filesystem sorts alphabetically; Confluence does not. The `01-` prefix is the only thing that carries your page order onto disk — so it is on by default. Docusaurus and Hugo read the order from front matter instead, and there the prefix would only end up in the published URL, so choosing one of those turns it off for you. You can override that either way.",
+        },
+
+        { type: "h", level: 2, text: "The switches" },
         {
           type: "fields",
           items: [
             {
               name: "Include attachments",
-              text: "Downloads the files attached to the exported pages and rewrites the links to point at them, so the export is self-contained. **This is the setting that makes an export large.** A space full of design files behaves very differently from a text-only space.",
+              text: "Downloads the files attached to the exported pages and puts them in `<page>/attachments/`, with every image link rewritten to point at them — so the archive opens with its pictures, offline. **This is the setting that makes an export large.** With it off, images point at the file on your Confluence site instead, so the page still shows them for anyone with access rather than showing a broken image.",
+            },
+            {
+              name: "Add YAML front matter",
+              text: "Puts a block at the top of every file with the page **title** (the real one, including characters a filename cannot hold), the ordering key your destination needs, and where the page came from: `confluence_id`, `confluence_space` and a `confluence_url` you can click. That last one is what lets somebody open the original page from a file that has been sitting in a repository for six months.",
+            },
+            {
+              name: "Number files to keep page order",
+              text: "The `01-` prefix. On unless the destination reads the order from front matter. Turn it off if you want clean filenames and do not care that a directory listing shows them alphabetically.",
             },
             {
               name: "Generate index file",
-              text: "Adds an index listing the exported pages and their hierarchy. Useful when the target is a static site or a repository that expects an entry point.",
+              text: "Adds an `index.md` at the root of the archive listing every exported page and its hierarchy, in the link style of the destination you chose. Useful when the target is a repository that expects an entry point.",
             },
             {
               name: "Export as single file",
-              text: "Available from the page menu. Concatenates the page, and its children if selected, into one `.md` file instead of a file per page.",
+              text: "Concatenates everything into one `.md` instead of a file per page. There are no folders, so there is nowhere to put attachments and the option is switched off for you.",
             },
           ],
+        },
+
+        { type: "h", level: 2, text: "What you get" },
+        {
+          type: "p",
+          text: "A `.zip` named for the space, the destination and the day — `DOCS-docusaurus-2026-08-29.zip` — so a folder of exports made while trying settings is still readable a week later.",
+        },
+        {
+          type: "callout",
+          variant: "tip",
+          title: "Nothing in the archive points at a file that is not in it",
+          text: "Links between exported pages are rewritten relative to the file being written, not to the archive root, so they resolve from wherever the file sits. A link to a page **outside** the export points at the live Confluence page instead — never at a path the archive does not contain.",
         },
 
         { type: "h", level: 2, text: "Exporting one page from the page itself" },
@@ -161,11 +214,158 @@ export const markdownToolkit: AppDocs = {
             "Attachments, when you enable that option.",
           ],
         },
+        { type: "h", level: 2, text: "What it will not pretend" },
+        {
+          type: "list",
+          items: [
+            "An attachment over **25 MB**, or past **250 MB** in total, is left out — and the result lists which ones, so you know what to fetch by hand.",
+            "A page that cannot be read is skipped and counted, not exported as an empty file.",
+            "The file count in the result is what the archive holds, never what the job set out to fetch.",
+            "A Confluence macro with no Markdown equivalent leaves a comment naming it, so you can see where something dynamic used to be.",
+          ],
+        },
         {
           type: "callout",
           variant: "tip",
           title: "How to export a big space without pain",
           text: "Run a **Bulk Export** on one branch of the tree first and check the output. Then run the full space export. Exports are held in the app's storage until you download them, so download promptly and use **Reset** to clear a job you no longer need.",
+        },
+      ],
+    },
+
+    {
+      slug: "import",
+      title: "Importing Markdown",
+      description: "What the app expects inside the archive, what becomes a page, and what happens when you run it twice.",
+      blocks: [
+        {
+          type: "p",
+          text: "**What it does.** Turns a folder of Markdown into real Confluence pages, keeping the folder structure as the page tree, uploading the images the pages refer to, and rewriting the links between them so they point at the pages rather than at files.",
+        },
+        {
+          type: "p",
+          text: "**Where it is.** The **Import** tab on the Markdown Toolkit page in the space sidebar. Drop a `.zip`, or one or more `.md` files, onto the drop zone.",
+        },
+
+        { type: "h", level: 2, text: "How the archive should look" },
+        {
+          type: "p",
+          text: "There is one rule, and everything else follows from it: **a folder becomes a page when a Markdown file sits next to it with the same name.**",
+        },
+        {
+          type: "code",
+          label: "An archive the app reads as a three-level tree",
+          text: `01-Guide.md              ← becomes the page "Guide"
+01-Guide/                ← its children live here
+  01-Install.md          ← becomes "Install", under Guide
+  01-Install/
+    attachments/
+      screen.png         ← uploaded onto the Install page
+  02-Configure.md
+02-Reference.md`,
+        },
+        {
+          type: "p",
+          text: "`01-Guide.md` and `01-Guide/` are the same page: the file is its content, the folder holds its children. This is exactly the shape an export from this app produces, so an export imports back without losing the tree.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "A folder with no matching file still works",
+          text: "If `guide/` has no `guide.md` beside it, the app creates an empty page called **Guide** so the nesting is not lost and the children do not land at the top of the space. It is a placeholder, not a guess at content.",
+        },
+        {
+          type: "p",
+          text: "**A flat folder is fine too.** Ten `.md` files with no subfolders become ten pages side by side. Nesting is optional; the app only reproduces the structure you give it.",
+        },
+
+        { type: "h", level: 2, text: "Where the page title comes from" },
+        {
+          type: "p",
+          text: "In this order, first match wins:",
+        },
+        {
+          type: "steps",
+          items: [
+            "**The `title` in YAML front matter**, if the file has a front-matter block. This is the only source that survives a title a filename could not hold — a page called `Q3: goals / draft` exports as `Q3-goals-draft.md`, and only the front matter still knows what it was called.",
+            "**The first heading in the document** — `# Getting started`. When the title comes from here, the heading is removed from the body, because Confluence renders the page title above the content already and leaving it in reads as a stutter.",
+            "**The filename**, with its `01-` ordering prefix stripped and hyphens turned back into spaces.",
+          ],
+        },
+        {
+          type: "p",
+          text: "The front-matter block itself never appears on the page — it is metadata, and importing it as literal `--- title: … ---` text would visibly damage the content.",
+        },
+
+        { type: "h", level: 2, text: "Images and other files" },
+        {
+          type: "p",
+          text: "Anything in the archive that is **not** Markdown is a candidate attachment, and the app uploads it onto the page whose Markdown refers to it, then rewrites the link so Confluence renders the image.",
+        },
+        {
+          type: "p",
+          text: "**Referenced, not everything.** A file nothing points at is left out. A docs repository carries stylesheets, fonts and build output that have no business becoming Confluence attachments.",
+        },
+        {
+          type: "p",
+          text: "**Resolved from the file that links to it**, not matched by name — because two pages can each have an `attachments/diagram.png`, and matching on the filename would attach one page's picture to the other.",
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "If an upload fails, the page still arrives",
+          text: "The page is created and the failure is **counted**, because a page is worth having even without its diagram. The result says how many attachments could not be uploaded — which is the number that decides whether the import can be called complete.",
+        },
+
+        { type: "h", level: 2, text: "Links between the files" },
+        {
+          type: "p",
+          text: "A link to another `.md` in the archive becomes a Confluence link to the page that file became — resolved against the archive, so `[the installer](./guide/install.md)` points at **Install**, not at a page named after the link text. Links to anything outside the archive are left as they are.",
+        },
+
+        { type: "h", level: 2, text: "The settings" },
+        {
+          type: "fields",
+          items: [
+            {
+              name: "Import everything under a page called…",
+              text: "The name of the page the whole archive is created beneath. It is created first, **in your name** — and that is also the permission check: if you cannot create pages in this space, the import stops there and nothing else is written.",
+            },
+            {
+              name: "When a page with that title already exists",
+              text: "Confluence requires page titles to be unique within a space, so a second run of the same import has to be told what to do. **Leave the existing page alone** (the default) keeps it and counts it as skipped, and its children still go underneath it. **Replace the existing page** overwrites the body. **Create a second page** adds a suffix — `Guide (2)`.",
+            },
+            {
+              name: "Upload images and files the pages refer to",
+              text: "On by default. Turn it off to bring in the text only.",
+            },
+            {
+              name: "Take the page title from the first heading",
+              text: "On by default. Turn it off if your filenames are the titles you want and your headings are not.",
+            },
+          ],
+        },
+        {
+          type: "callout",
+          variant: "tip",
+          title: "Running the same import twice is safe",
+          text: "With the default conflict setting, the second run creates nothing and reports how many pages it left alone. The destructive choice is one you have to pick on purpose — not one you get by pressing the button again.",
+        },
+
+        { type: "h", level: 2, text: "What it reports" },
+        {
+          type: "p",
+          text: "When the job finishes: how many pages were **created**, **replaced** and **left alone**, how many **attachments** arrived, and how many pages or attachments **failed** — with the file path of each failure, so you can fix that one file rather than re-run the lot.",
+        },
+        {
+          type: "p",
+          text: "**One bad file does not stop the job.** A file that fails to convert or to create is counted and the import carries on, so a single malformed document does not cost you the other four hundred.",
+        },
+
+        { type: "h", level: 2, text: "A note on what comes back" },
+        {
+          type: "p",
+          text: "Markdown and Confluence are not the same language, and a round trip is a conversion in each direction. Headings, lists, tables, code blocks, task lists, links, images and GitHub-style alerts survive both ways. A Confluence macro that had no Markdown equivalent on the way out does not come back on the way in — the export left a comment where it was, and that comment is what returns.",
         },
       ],
     },
@@ -693,8 +893,8 @@ where $n$ is the number of pages and $B$ the total bytes of attachments.`,
           text: `journey
     title Exporting a whole space to Markdown
     section Discovery
-        Open the space settings: 4: User
-        Find Markdown Toolkit: 3: User
+        Open the space: 5: User
+        Find Markdown Toolkit: 4: User
     section Setup
         Pick the pages: 5: User
         Tick include attachments: 4: User
@@ -861,19 +1061,25 @@ ZIP,Download,92`,
               "`read:page:confluence`, `read:space:confluence`",
               "Read the page tree and space information for the selectors.",
             ],
+            [
+              "`write:confluence-content`",
+              "Create the pages an import produces, and replace a page's body when you choose that on a title collision.",
+            ],
+            ["`write:confluence-file`", "Upload the images and files an imported page refers to."],
+            ["`read:attachment:confluence`", "List a page's attachments so an export can fetch them."],
             ["`storage:app`", "Hold in-flight job data."],
             ["`report:personal-data`", "Report to Atlassian the account ID on each job record, so a closed account's jobs can be erased."],
           ],
         },
         {
           type: "p",
-          text: "There is no `write:` scope in the list, and that is not an omission: the app has no code path that creates or changes Confluence content. It also declares **no external network access** — conversion happens inside Forge.",
+          text: "The two `write:` scopes exist for the import and nothing else. Nothing in the export path can create or change a page. The app declares **no external network access** at all — every conversion happens inside Atlassian Forge, and no content is sent anywhere.",
         },
         {
           type: "callout",
           variant: "info",
-          title: "It cannot exceed your own permissions",
-          text: "Exports run with your Confluence permissions, so you can only export what you can read. A restricted page is skipped rather than exported empty.",
+          title: "How the write permission is kept honest",
+          text: "An import creates its root page **as you**, before anything else happens — so Confluence itself decides whether you may write in that space, rather than the app deciding on your behalf. Everything the job creates afterwards goes underneath that page. Reads work the same way: an export contains only pages you can already open, and a restricted page is skipped rather than exported empty.",
         },
 
         { type: "h", level: 2, text: "What the app stores" },
@@ -881,7 +1087,7 @@ ZIP,Download,92`,
           type: "list",
           items: [
             "**Macro content** — the Markdown of each macro, for as long as the macro exists on a page.",
-            "**Job data** — a manifest of what an export covers, plus the converted content in chunks while the job runs and until you download or reset it.",
+            "**Job data** — a manifest of what an export or import covers, plus the content in chunks while the job runs. Export data is held until you download it or reset the job; import data is released when the job finishes.",
           ],
         },
         {
@@ -903,7 +1109,23 @@ ZIP,Download,92`,
             },
             {
               name: "I cannot find the Markdown Toolkit screen",
-              text: "It is in **Space settings**, not the space sidebar, and it needs space administrator rights. To export a single page or a page tree without those rights, use **•••** → **Export to Markdown** on the page itself.",
+              text: "It is **Markdown Toolkit** in the space sidebar, alongside Pages and Blogs — not in space settings. Anyone who can open the space can open it. To export a single page or a page tree without leaving the page, use **•••** → **Export to Markdown**.",
+            },
+            {
+              name: "The import says I do not have permission",
+              text: "It failed to create the page everything else would go under, which means Confluence does not allow you to add pages to that space. Ask a space administrator for **Add page** permission, or import into a space where you already have it.",
+            },
+            {
+              name: "The import created nothing the second time",
+              text: "That is the default conflict setting doing its job: a page with that title already existed, so it was left alone. The result says how many. Choose **Replace the existing page** if you meant to overwrite.",
+            },
+            {
+              name: "An image is missing from an imported page",
+              text: "Either the file was not in the archive, or nothing in the Markdown pointed at it — the app only uploads files a page actually refers to. The result lists any upload that failed, with the path.",
+            },
+            {
+              name: "The exported archive opens with broken links",
+              text: "Check the destination you exported for. An Obsidian export uses wikilinks, which a plain Markdown viewer does not resolve; a Docusaurus export puts parent pages in `index.md`. Re-export with the destination that matches where the files are going.",
             },
             {
               name: "A Mermaid diagram does not render",
@@ -945,7 +1167,7 @@ ZIP,Download,92`,
             },
             {
               name: "Can the app change our pages?",
-              text: "No. It requests no write permission of any kind, so it cannot create, edit or delete a page or an attachment.",
+              text: "Only through an import you start, and only underneath a page you created yourself in that same run. Nothing in the export path writes anything. The app cannot delete a page at all.",
             },
             {
               name: "Where does an export file live before I download it?",
@@ -954,6 +1176,10 @@ ZIP,Download,92`,
             {
               name: "Can somebody export a space they cannot read?",
               text: "No. Exports run with your own Confluence permissions, and restricted pages are skipped.",
+            },
+            {
+              name: "Can somebody import into a space they cannot write to?",
+              text: "No. The import creates its root page as you, before anything is queued — if Confluence refuses that, the job stops and nothing else is written.",
             },
             { name: "Does it use AI?", text: "No. Conversion is deterministic." },
           ],
@@ -965,7 +1191,15 @@ ZIP,Download,92`,
           items: [
             {
               name: "Can I import Markdown files and turn them into Confluence pages?",
-              text: "No. The app exports Confluence to Markdown; it does not create pages. It holds no write permission for Confluence content at all, which is also why it cannot alter a page it exports.",
+              text: "Yes — the **Import** tab. Drop a `.zip` or loose `.md` files: the folder structure becomes the page tree, images the pages refer to are uploaded, and links between the files become links between the pages. See [Importing Markdown](/documentation/markdown-toolkit/import).",
+            },
+            {
+              name: "What is the difference between the five export destinations?",
+              text: "They decide where a page with children is written, what carries the page order, and how files link to each other — Obsidian gets wikilinks, Docusaurus and Hugo put parents in an index file and read the order from front matter. [The table is here](/documentation/markdown-toolkit/export).",
+            },
+            {
+              name: "Can I export from Confluence and import back later?",
+              text: "Yes, and the Plain Markdown destination is built for it: a page sits beside its children's folder, which is exactly the shape the import reads. Front matter carries the real page titles, so a title with characters a filename cannot hold survives the trip.",
             },
             {
               name: "Can I export a whole space?",
@@ -981,7 +1215,7 @@ ZIP,Download,92`,
             },
             {
               name: "Do I need to be an admin?",
-              text: "For the bulk export screen, yes — it lives in **Space settings**. For **•••** → **Export to Markdown** on a page, and for the macro, no.",
+              text: "No. The Markdown Toolkit page is in the space sidebar and anyone who can open the space can use it — you simply cannot export a page you could not already read. Importing needs permission to add pages to that space, which is a space permission, not administrator rights.",
             },
           ],
         },
