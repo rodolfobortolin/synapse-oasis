@@ -85,11 +85,11 @@ export default function PrivacyIndex() {
       <p className="text-[13px] mt-8" style={{ color: "var(--grey)" }}>
         Questions about any of these policies, or a data request?{" "}
         <a
-          href="mailto:support@synapseoasis.com"
+          href="mailto:contact@synapseoasis.com"
           className="underline underline-offset-2"
           style={{ color: "var(--blue-cta)" }}
         >
-          support@synapseoasis.com
+          contact@synapseoasis.com
         </a>
       </p>
     </div>

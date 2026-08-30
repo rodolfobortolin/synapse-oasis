@@ -189,8 +189,8 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
             Tell us in the support portal
           </a>{" "}
           or email{" "}
-          <a href="mailto:support@synapseoasis.com" className="underline underline-offset-2" style={{ color: "var(--blue-cta)" }}>
-            support@synapseoasis.com
+          <a href="mailto:contact@synapseoasis.com" className="underline underline-offset-2" style={{ color: "var(--blue-cta)" }}>
+            contact@synapseoasis.com
           </a>
           .
         </p>

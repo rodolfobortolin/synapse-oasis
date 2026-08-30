@@ -53,8 +53,8 @@ export default function PrivacyLayout({ children }: { children: React.ReactNode 
               SynapseOasis
             </span>
           </div>
-          <a href="mailto:support@synapseoasis.com" className="text-[11.5px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-            support@synapseoasis.com
+          <a href="mailto:contact@synapseoasis.com" className="text-[11.5px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+            contact@synapseoasis.com
           </a>
           <p className="text-[11px] m-0" style={{ color: "rgba(255,255,255,0.18)" }}>
             &copy; 2026 SynapseOasis

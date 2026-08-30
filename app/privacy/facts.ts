@@ -29,7 +29,7 @@ export interface PrivacyFacts {
 
 export const UPDATED = "28 August 2026";
 export const VENDOR = "SynapseOasis";
-export const CONTACT_EMAIL = "support@synapseoasis.com";
+export const CONTACT_EMAIL = "contact@synapseoasis.com";
 export const SUPPORT_PORTAL = "https://synapseoasis.atlassian.net/servicedesk/customer/portals";
 
 export const PRIVACY_FACTS: PrivacyFacts[] = [

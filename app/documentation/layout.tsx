@@ -78,8 +78,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             >
               Support
             </a>
-            <a href="mailto:support@synapseoasis.com" style={{ color: "rgba(255,255,255,0.5)" }}>
-              support@synapseoasis.com
+            <a href="mailto:contact@synapseoasis.com" style={{ color: "rgba(255,255,255,0.5)" }}>
+              contact@synapseoasis.com
             </a>
           </div>
           <p className="text-[11px] m-0" style={{ color: "rgba(255,255,255,0.18)" }}>
