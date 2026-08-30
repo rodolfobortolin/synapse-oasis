@@ -437,8 +437,9 @@ export const markdownToolkit: AppDocs = {
           text: "The `$$…$$` block below is from the app's own architecture note, where it costs an export job. It is typed as LaTeX and typeset by KaTeX in the browser — no image, no external service.",
         },
         {
-          type: "code",
-          label: "In the macro",
+          type: "math",
+          label: "in the macro",
+          caption: "Typeset in your browser as you read this, from the same delimiters the macro reads. Open Show source for the LaTeX behind it.",
           text: `The total time of an export is dominated by I/O, not by conversion:
 
 $$

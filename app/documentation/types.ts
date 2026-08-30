@@ -26,7 +26,13 @@ export type Block =
    * fence in the app's macro, so the page shows the reader the same thing they
    * would type. `label` names the diagram type in the panel header.
    */
-  | { type: "diagram"; text: string; caption?: string; label?: string };
+  | { type: "diagram"; text: string; caption?: string; label?: string }
+  /**
+   * A Markdown snippet containing LaTeX, typeset in the browser by KaTeX the
+   * way the macro typesets it. Use it where the page claims maths renders --
+   * showing the `$$…$$` source instead reads as the feature being broken.
+   */
+  | { type: "math"; text: string; caption?: string; label?: string };
 
 export interface DocPage {
   slug: string;
