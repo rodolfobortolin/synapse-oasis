@@ -331,20 +331,22 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
     products: "Confluence",
     icon: "/markdown-toolkit.png",
     summary:
-      "Markdown Toolkit for Confluence exports Confluence content as Markdown — single pages, page trees or entire spaces — and provides an in-page macro that renders Markdown with code highlighting, Mermaid diagrams and math expressions. It holds no write permission and creates no content in Confluence.",
+      "Markdown Toolkit for Confluence exports Confluence content as Markdown — single pages, page trees or entire spaces — and provides an in-page macro that renders Markdown with code highlighting, Mermaid diagrams and math expressions. It also imports a Markdown archive back as Confluence pages, which is the only thing it writes: the pages and attachments an import creates, underneath a page you created yourself in that same run. It cannot delete Confluence content.",
     ai: false,
     persisted: [
       "**Macro content is not stored by the app.** The Markdown you type into a Markdown macro is Forge macro configuration, which Confluence keeps with the page itself — the same place a built-in macro's settings live. The app reads it when it draws the macro and writes nothing of its own; it is covered by your Confluence data handling, not ours, and it goes with the page when the page goes.",
       "**Export jobs** — a manifest of what a job covers and the converted page content held in chunks while the job runs and until you download, reset or discard it.",
+      "**Import jobs** — the Markdown and the files you upload, held in chunks only while the job runs, plus a record of which page each file became so the hierarchy survives between batches. Both are released when the job finishes.",
     ],
     transient: [
       "page and space content, titles, labels and attachments read from Confluence during an export",
+      "the Markdown files and attachments you upload for an import, and the pages and attachments created from them",
       "space and page metadata needed to name the files and rebuild the hierarchy",
     ],
     personal: [
-      "An export processes the content you select. During a job, that content — including any personal data your pages happen to contain — is held in app storage inside your tenant until the job finishes and its data is cleared.",
+      "An export processes the content you select, and an import processes the files you upload. During a job, that content — including any personal data your pages happen to contain — is held in app storage inside your tenant until the job finishes and its data is cleared.",
       "Macro content is stored as written by the page author.",
-      "Your Atlassian account ID is stored while an export runs, as the key that keeps your job separate from anyone else's. The record is removed when the job is cleared. The app does not collect email addresses, display names, passwords, authentication tokens, API keys or payment data.",
+      "Your Atlassian account ID is stored while an export or an import runs, as the key that keeps your job separate from anyone else's. The record is removed when the job is cleared. The app does not collect email addresses, display names, passwords, authentication tokens, API keys or payment data.",
       "Once a day the app sends Atlassian the account ID on each job record it holds, through Atlassian's **Personal Data Reporting** API, and Atlassian answers with the accounts that have been closed. Nothing else tells an app that a person left. A closed account's job records are deleted, and the account ID on a job record is the only thing about that person the app has to clean up.",
     ],
     scopes: [
@@ -352,6 +354,9 @@ export const PRIVACY_FACTS: PrivacyFacts[] = [
       "read:confluence-content.summary",
       "read:space:confluence",
       "read:page:confluence",
+      "read:attachment:confluence",
+      "write:confluence-content",
+      "write:confluence-file",
       "storage:app",
       "report:personal-data",
     ],
