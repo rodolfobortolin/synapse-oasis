@@ -13,14 +13,44 @@ export function generateStaticParams() {
   return allApps().flatMap((app) => app.pages.map((p) => ({ slug: [app.slug, p.slug] })));
 }
 
+const SITE_URL = "https://synapseoasis.com";
+
+/**
+ * Per-page metadata, including the social card.
+ *
+ * Without the `openGraph` block a documentation link falls back to the site's
+ * own card from the root layout, so every page pasted into a ticket, a chat or
+ * a support reply looked identical and said nothing about what it was. These
+ * pages travel that way far more than they arrive from a search.
+ */
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const { slug } = await params;
   const found = slug.length === 2 ? findPage(slug[0], slug[1]) : undefined;
   if (!found) return { title: "Documentation" };
+
+  const href = pageHref(found.app.slug, found.page.slug);
+  const title = `${found.page.title} — ${found.app.name}`;
+
   return {
-    title: `${found.page.title} — ${found.app.name}`,
+    title,
     description: found.page.description,
-    alternates: { canonical: pageHref(found.app.slug, found.page.slug) },
+    alternates: { canonical: href },
+    openGraph: {
+      type: "article",
+      url: `${SITE_URL}${href}`,
+      // The page's own title, not the one with the app name appended: the card
+      // shows the site name underneath already, so repeating it wastes the line.
+      title: found.page.title,
+      description: found.page.description,
+      siteName: "SynapseOasis",
+      images: [{ url: `${SITE_URL}/og-image.png`, width: 1200, height: 630, alt: found.app.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: found.page.title,
+      description: found.page.description,
+      images: [`${SITE_URL}/og-image.png`],
+    },
   };
 }
 

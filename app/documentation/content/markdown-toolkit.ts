@@ -10,6 +10,7 @@ export const markdownToolkit: AppDocs = {
   color: "#2B9F6F",
   icon: "/markdown-toolkit.png",
   ai: false,
+  updated: "2026-08-29",
   pages: [
     {
       slug: "overview",

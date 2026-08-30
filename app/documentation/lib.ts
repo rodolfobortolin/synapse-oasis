@@ -4,6 +4,14 @@ import type { AppDocs, Block, DocPage } from "./types";
 
 export const DOCS_ROOT = "/documentation";
 
+/**
+ * Fallback `lastmod` for an app whose docs carry no `updated` date.
+ *
+ * Deliberately not "today" and not the newest blog post: both would tell a
+ * crawler that every page changed when it had not.
+ */
+export const DOCS_BASELINE = "2026-05-31";
+
 export function allApps(): AppDocs[] {
   return APP_DOCS;
 }

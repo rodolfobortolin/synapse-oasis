@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "./blog/data";
-import { flatPages } from "./documentation/lib";
+import { DOCS_BASELINE, allApps, flatPages } from "./documentation/lib";
 import { PRIVACY_FACTS } from "./privacy/facts";
 
 const SITE_URL = "https://synapseoasis.com";
@@ -19,11 +19,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Documentation and the per-app privacy policies are not linked from the marketing
   // navigation yet, so the sitemap is how they get discovered.
+  //
+  // Each app carries its own `updated` date. These used to take the newest blog
+  // post's date instead, which moved every documentation URL whenever an
+  // unrelated article was published -- a `lastmod` that is wrong in both
+  // directions is worse than no `lastmod` at all.
+  const docsUpdated = (iso?: string) => new Date(iso ?? DOCS_BASELINE);
+  const newestDoc = new Date(
+    Math.max(...allApps().map((a) => docsUpdated(a.updated).getTime()))
+  );
+
   const docRoutes: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/documentation`, lastModified: latestPost, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/documentation`, lastModified: newestDoc, changeFrequency: "monthly", priority: 0.7 },
     ...flatPages().map((f) => ({
       url: `${SITE_URL}${f.href}`,
-      lastModified: latestPost,
+      lastModified: docsUpdated(f.app.updated),
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })),

@@ -58,5 +58,15 @@ export interface AppDocs {
   icon: string;
   /** True when the app uses Forge LLM. */
   ai: boolean;
+  /**
+   * When this app's documentation last changed, `YYYY-MM-DD`, for the sitemap.
+   *
+   * Set it in the same commit that edits the pages. Left out, the app falls back
+   * to a site-wide baseline -- which is honest, where the previous behaviour was
+   * not: every documentation URL claimed the date of the latest BLOG post, so it
+   * moved when the docs had not and stood still when they had. A `lastmod` a
+   * crawler learns to distrust is worth less than none.
+   */
+  updated?: string;
   pages: DocPage[];
 }
