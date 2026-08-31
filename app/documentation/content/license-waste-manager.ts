@@ -470,7 +470,7 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "steps",
           items: [
-            "Go to **admin.atlassian.com → Settings → API keys** and create a key. It requires **Organization admin** permissions.",
+            "Go to **admin.atlassian.com → Settings → API keys** and create a key. Choose **Create API key without scopes** — this matters, see the note below. It requires **Organization admin** permissions.",
             "Copy the organisation ID, or click **Use detected Org ID** if the app has already worked it out from the key.",
             "Paste both values into **Settings** and click **Test Connection**. If the organisation ID is wrong, the app lists the organisations your key can actually reach.",
             "Click **Save**. The app can then detect your licence groups automatically, so product access maps to the right groups.",
@@ -488,6 +488,12 @@ export const licenseWasteManager: AppDocs = {
             ["Suspend and restore accounts", "Yes", "No — the app says so instead of failing"],
             ["Automation rules", "Yes", "No — rules will not fire, and the scheduler says so in the log"],
           ],
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "Create the key without scopes",
+          text: "Atlassian offers a choice when you create an organisation API key: **with scopes** or **without**. This app needs one **without**. A scoped key reaches only the endpoints in [Atlassian’s scope table](https://developer.atlassian.com/cloud/admin/scopes/), and suspending or restoring an account is not in it — Atlassian’s own words are that any endpoint not listed “needs an API key without scopes”. The trap is that a scoped key **passes Test Connection**, because reading your organisation is scoped. Everything looks right until the first revocation, which fails with a rejected credential and no obvious cause.",
         },
         {
           type: "callout",
