@@ -21,7 +21,9 @@ import {
   Toggle,
 } from "./ui";
 
-const TABS = ["Dashboard", "Users", "Automation", "Audit Log", "Settings"];
+// The same tabs the app renders, in the same order -- a mock whose chrome
+// disagrees with the product reads as a screenshot of some older version.
+const TABS = ["Dashboard", "Users", "Admin Roles", "API Tokens", "Automation", "Audit Log", "Settings"];
 
 /* ── Dashboard ─────────────────────────────────────────────────────────── */
 
@@ -293,7 +295,7 @@ const audit = (
             ["Tomas Silva", <Code key="a">712020:d7a2…</Code>, <Lozenge key="r" tone="success">success</Lozenge>, "—"],
             [
               "External Auditor",
-              <Code key="a">557058:e38a…</Code>,
+              <Code key="a">557058:0f00…</Code>,
               <Lozenge key="r" tone="danger">failed</Lozenge>,
               "User is managed by another organization",
             ],
@@ -321,7 +323,7 @@ const settings = (
       </Row>
       <div className="mt-3">
         <Row gap={12}>
-          <Field label="Organization ID" value="a1b2c3d4-5e6f-7890-abcd-ef1234567890" width="55%" />
+          <Field label="Organization ID" value="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" width="55%" />
           <Field label="API Key" value="••••••••••••••••••••" width="45%" />
         </Row>
         <Row gap={8}>
@@ -350,7 +352,7 @@ const settings = (
           Protected Users
         </div>
         <Row gap={6}>
-          <Btn>Rodolfo Bortolin ✕</Btn>
+          <Btn>Marina Costa ✕</Btn>
           <Btn>Site Admin ✕</Btn>
           <Btn variant="subtle">Search user to add…</Btn>
         </Row>

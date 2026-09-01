@@ -5,10 +5,11 @@ export const licenseWasteManager: AppDocs = {
   name: "License Waste Manager for Jira",
   shortName: "License Waste Manager",
   tagline:
-    "Finds the licensed accounts nobody uses across Jira, Jira Service Management, Confluence, Jira Product Discovery and Bitbucket. Shows how many seats are dormant, lets you act in bulk or on a schedule, and records every change. Needs an organisation API key.",
+    "Finds the licensed accounts nobody uses across Jira, Jira Service Management, Confluence, Jira Product Discovery and Bitbucket. Shows how many seats are dormant, lets you act in bulk or on a schedule — re-checking every person live before touching them — and records every change. Reads your organisation by API key or by importing the admin-console CSV exports.",
   products: "Jira · JSM · Confluence · Product Discovery",
   color: "#9B59B6",
   icon: "/license-waste.png",
+  updated: "2026-08-31",
   ai: false,
   pages: [
     {
@@ -33,12 +34,15 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "list",
           items: [
-            "**Scans** your organisation's users, their product access and their group membership into a snapshot, with last-activity dates per product.",
-            "**Shows** licence utilisation per product, how inactivity is distributed across your seats, and a breakdown by email domain.",
-            "**Filters** every user by product, account status, how long they have been inactive, whether they hold a licence, email domain and name.",
+            "**Scans** your organisation's users, their product access and their group membership into a snapshot, with last-activity dates per product — on demand, or [on a schedule](/documentation/license-waste-manager/settings) so nobody has to remember.",
+            "**Imports** the admin-console CSV exports instead, when you have them: seconds on tens of thousands of accounts, no API key needed for the data, and three facts a scan cannot reach. See [Importing the CSV exports](/documentation/license-waste-manager/csv-import).",
+            "**Shows** licence utilisation per product, inactivity distribution, a breakdown by email domain — and what **Atlassian Guard** is billing you for, including accounts whose access lives on somebody else's instance.",
+            "**Filters** every user by product, account state, how long they have been inactive, paid seat, Guard billing, which sites their access reaches, two-step verification, department, job title, email domain and name.",
             "**Acts in bulk**: remove people from access groups, revoke the product licences you pick, grant access back, add people to a group, suspend an account or restore one — from the Users tab or from a scheduled rule. See [Browsing and acting on users](/documentation/license-waste-manager/users).",
-            "**Automates** the same actions daily, weekly, every two weeks or monthly.",
-            "**Records** every action, per user, with the result, the reason it was skipped, and who or what asked for it.",
+            "**Automates** the same actions daily, weekly, every two weeks or monthly — and **re-checks every person live** at the moment of acting, so someone who came back after the scan is left alone and counted. See [Automation rules](/documentation/license-waste-manager/automation).",
+            "**Shows who administers what** — organisation admins, site admins, product admins — and which of them are dormant or unprotected. See [Admin roles](/documentation/license-waste-manager/admin-roles).",
+            "**Sweeps API tokens**: which accounts hold them, which have sat unused for months, and revocation one click away. See [API tokens](/documentation/license-waste-manager/api-tokens).",
+            "**Records** every action, per user, with the result, the reason it was skipped, and who or what asked for it — searchable, filterable and exportable. See [Audit log](/documentation/license-waste-manager/audit-log).",
           ],
         },
 
@@ -65,8 +69,8 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "callout",
           variant: "info",
-          title: "The organisation API key is required — to read as well as to act",
-          text: "Every user, group membership and product-access read goes through the organisation admin API, so without a key there is nothing to show: the **Scan Users** button is disabled and the Dashboard says why. This is not a choice we made. Changing group membership needs organisation admin rights, and an app's own token does not have them — Jira answers 403 whatever permissions the app is granted. Reading membership with the app's own token was possible, but only for the price of `manage:jira-configuration`, which the Marketplace listing shows every prospective customer as full Jira administration. That is too much to ask of a licence-hygiene app, so the read moved to the organisation API alongside the writes. One key does both, which is why it is the one credential this app asks for. Apps built on a personal user token need two.",
+          title: "The organisation API key is required to scan and to act — the CSV import is the one exception",
+          text: "Every scan read and every write goes through the organisation admin API, so without a key the **Scan Users** button is disabled and the Dashboard says why. The one path that works without it is [importing the admin-console CSV exports](/documentation/license-waste-manager/csv-import), which fills the same snapshot from files you download yourself — actions still need the key. This is not a choice we made. Changing group membership needs organisation admin rights, and an app's own token does not have them — Jira answers 403 whatever permissions the app is granted. Reading membership with the app's own token was possible, but only for the price of `manage:jira-configuration`, which the Marketplace listing shows every prospective customer as full Jira administration. That is too much to ask of a licence-hygiene app, so the read moved to the organisation API alongside the writes. One key does both, which is why it is the one credential this app asks for. Apps built on a personal user token need two.",
         },
         {
           type: "callout",
@@ -126,10 +130,10 @@ export const licenseWasteManager: AppDocs = {
         },
         { type: "mock", id: "lwm-dashboard" },
 
-        { type: "h", level: 2, text: "One button, two scopes" },
+        { type: "h", level: 2, text: "One button, two scopes — and a third way in" },
         {
           type: "p",
-          text: "There is a single **Scan Users** button with a scope picker beside it. Both scopes run the same phases; the difference is which population they read.",
+          text: "There is a single **Scan Users** button. Clicking it asks what the scan should cover; both answers run the same phases, and the difference is which population they read. The same dialog also offers the third way to fill a snapshot: [importing the admin-console CSV exports](/documentation/license-waste-manager/csv-import), which needs no API key for the data and takes seconds on tens of thousands of accounts.",
         },
         {
           type: "table",
@@ -217,6 +221,30 @@ export const licenseWasteManager: AppDocs = {
           ],
         },
 
+        { type: "h", level: 2, text: "Atlassian Guard — a different bill, answered on the same screen" },
+        {
+          type: "p",
+          text: "Guard is billed **per managed account**, not per seat: every person whose email domain your organisation verified costs you Guard money, whether or not they ever open a product. The Guard block answers the questions that follow from that, and every figure is a link — click it and the Users tab opens on exactly those people.",
+        },
+        {
+          type: "fields",
+          items: [
+            {
+              name: "Managed accounts",
+              text: "What Guard is charged on. **Not** the same population as “managed” in the account filter — verifying a domain makes an account manageable; being billed is a separate fact the scan reads separately. On one real customer, 8,551 of 37,686 managed accounts were billed.",
+            },
+            {
+              name: "Paying Guard, holding no seat",
+              text: "Secured, but not using any of your products. A licence scan cannot see these — they hold no seat to be found by — so this figure needs the wider scan scope or a CSV import, and shows an em dash until it has one.",
+            },
+            { name: "Paying Guard, dormant", text: "Billed for Guard and inactive past your threshold. The double waste." },
+            {
+              name: "Paying Guard, working elsewhere",
+              text: "Accounts on your verified domain whose product access lives on instances that are not yours — you pay Guard for them wherever they work. The sites are listed by name with a count each, and each one clicks through to the people who reach it.",
+            },
+          ],
+        },
+
         { type: "h", level: 2, text: "Two more views under the tiles" },
         {
           type: "fields",
@@ -234,12 +262,89 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "callout",
           variant: "tip",
-          title: "Re-scan before every review",
-          text: "A snapshot is a moment in time. If you present three-week-old numbers, somebody who came back from parental leave is on your dormant list, and your credibility goes with it.",
+          title: "Let the scan re-run itself",
+          text: "A snapshot is a moment in time, and presenting three-week-old numbers costs credibility. Rather than remembering to re-scan, set the **Scheduled scan** in [Settings](/documentation/license-waste-manager/settings) — weekly, biweekly or monthly — and the line next to the Scan button will tell you when the next one runs. And for anyone a **rule** is about to touch, staleness stops mattering entirely: the rule re-checks that person live at the moment of acting.",
         },
       ],
     },
 
+    {
+      slug: "csv-import",
+      title: "Importing the CSV exports",
+      description: "Fill a snapshot from the admin-console exports: no API key for the data, seconds on tens of thousands of accounts, and three facts a scan cannot reach.",
+      blocks: [
+        {
+          type: "p",
+          text: "**What it is.** The other way to fill a snapshot. Atlassian Administration can export your whole directory as CSV; the app reads those files **in your browser**, keeps only the normalised rows, and builds the same snapshot a scan builds — every tab works on it identically.",
+        },
+        {
+          type: "p",
+          text: "**Why you would.** Three reasons. It is fast: tens of thousands of accounts in seconds, where a scan of the same organisation is a long background job. It needs **no API key for the data** — the files come from your own admin console. And it carries three facts no API will hand a scan: **who your organisation admins are**, **Atlassian's own Guard billing flag** per account, and whether **single sign-on is enforced** — which is also what makes the 2FA and Guard filters, and much of the [Admin roles](/documentation/license-waste-manager/admin-roles) page, light up.",
+        },
+
+        { type: "h", level: 2, text: "The two files" },
+        {
+          type: "table",
+          head: ["File", "Where it comes from", "What it carries"],
+          rows: [
+            [
+              "**Managed accounts export**",
+              "admin.atlassian.com → Users → “…” menu → **Export managed accounts**",
+              "One row per managed account: status, last-active dates per product and per site, the Guard billing flag, verified email, two-step verification, single sign-on.",
+            ],
+            [
+              "**Users and groups export**",
+              "admin.atlassian.com → Users → “…” menu → **Export users**",
+              "One row per group membership — who is in which group — plus the **Org role** column that names your organisation admins outright.",
+            ],
+          ],
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "Export with all columns",
+          text: "The app validates the headers before importing and names any column that is missing. If the admin console asks which columns to include, include them all — a narrowed export is recognised and refused with the list of what it lacks, rather than silently importing less.",
+        },
+
+        { type: "h", level: 2, text: "How the import runs" },
+        {
+          type: "steps",
+          items: [
+            "On the **Dashboard**, click **Scan Users** — the dialog that asks about scope also offers the import, under “Already have your Atlassian Administration exports?”.",
+            "Drop in one file or both. The app recognises which is which; order does not matter.",
+            "Answer **“Which of these sites are yours?”** — the one judgement call the files cannot make for you, explained below.",
+            "Choose the scope: **everyone in the file**, or only people holding a product on the sites you ticked.",
+            "Watch the progress in the dialog. The import runs through the same background pipeline as a scan, so leaving the page does not lose it, and the Dashboard shows it running like any scan.",
+          ],
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "Which sites are yours — why it asks, and what it pre-ticks",
+          text: "The export lists every site each person can reach, including other companies' instances — a consultant on your domain appears with their customers' sites. Ticking a site as **yours** decides one number: how many of your people hold access **outside** your organisation, which feeds the Guard block's “working elsewhere” figure and the **Access reaches** filter. The app pre-ticks your busiest site, anything sharing its name or holding many of the same people, every sandbox, and Bitbucket and Trello — those are Atlassian's own addresses, not another company's instance. Review the list; it is a heuristic, stated as one.",
+        },
+        {
+          type: "list",
+          items: [
+            "**Sandboxes are set aside**, not counted: a sandbox seat comes with a Premium or Enterprise plan rather than being billed per user, and on one measured customer it was 43.9% of all product grants — counting it would nearly double the reported waste.",
+            "**A plan tier is not a site.** The Trello column carries values like `Free`; the import knows the difference and does not invent a site called Free.",
+            "**Whole-file imports see the most.** A scoped import has the same blind spot a licence scan has — accounts holding no seat are left out — and the dashboard says so where it matters.",
+          ],
+        },
+
+        { type: "h", level: 2, text: "What still needs the API key" },
+        {
+          type: "p",
+          text: "Everything that **changes** an account: removing groups, revoking products, suspending, restoring — and the [API-token sweep](/documentation/license-waste-manager/api-tokens). The import replaces the reading, not the acting. It is the right first step for a security review, a one-off analysis, or evaluating the app before your organisation approves a key.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "Importing another organisation's exports",
+          text: "The files never leave your browser as files — only the normalised rows are stored, inside your own site. Be aware that importing a directory makes this installation hold those people's account IDs, names and emails, with everything that implies: they enter the snapshot, the filters, and the app's daily personal-data report to Atlassian, until a newer snapshot replaces them or you uninstall.",
+        },
+      ],
+    },
     {
       slug: "users",
       title: "Browsing and acting on users",
@@ -261,14 +366,63 @@ export const licenseWasteManager: AppDocs = {
               "“Who has Confluence but never opens it?” Pick several and choose **Holds any of these** or **Holds all of these**.",
             ],
             [
-              "**Status**: All, Enabled accounts, Suspended accounts, **Never signed in**",
-              "*Never signed in* is your highest-confidence group: a licence that was assigned and never used at all.",
+              "**Status**: All, Enabled accounts, Disabled accounts, **Never signed in**",
+              "Whether the **account is switched on** — which decides whether it costs anything. Disabled accounts keep their product columns in an export but occupy no seat. Where the source distinguishes, rows say the specific word: *Suspended* can be restored, *Deactivated* is on its way out. *Never signed in* is your highest-confidence group: a licence assigned and never used at all.",
             ],
-            ["**Inactive For**", "A slider from 0 to 365 days, defaulting to the threshold you set in Settings. Separates 90 days from a year."],
-            ["**Licence**", "Any, **Holds a licence**, or **No licence — costs nothing**. Useful after a directory-wide scan, to set aside the accounts you are not paying for."],
+            [
+              "**Inactive For**",
+              "A slider from 0 to 365 days, defaulting to the threshold you set in Settings — how long since the person actually used anything, a separate fact from the account being enabled. The STATUS column says the account's state; the LAST ACTIVE column says this.",
+            ],
+            [
+              "**Licence**",
+              "Any, **Holds a paid seat**, or **Holds no paid seat**. A seat is only a seat while the account is on: product access AND an enabled account, which is the dashboard's own definition of Licensed People — so the filter and the figure always agree.",
+            ],
+            [
+              "**Account**: Billed for Guard, Managed, Unmanaged",
+              "**Billed for Guard** is what Atlassian actually charges Guard on — the population every Guard figure on the dashboard counts. **Managed** means you verified their email domain and can administer the account; it is a much larger set. **Unmanaged** accounts you cannot administer, and Guard is not billed for them.",
+            ],
+            [
+              "**Access reaches**",
+              "Any site, also other sites, only this site — or **one named site**: the sites your people reach outside this one are listed by name with a count each, straight from the same figures the dashboard charts. Clicking a site chip on the dashboard lands here with the site pre-selected.",
+            ],
+            ["**2FA**", "With or without two-step verification — as reported for managed accounts. Needs a CSV import or the data stays unknown rather than pretending."],
             ["**Domain**", "Contractors, an acquired company, a partner. Each domain carries its own count."],
+            ["**Department / Job title**", "Identity-provider attributes, when your directory sets them. Frequently blank — the filters appear only when the snapshot actually carries values."],
             ["**Search**", "One person by name or email."],
           ],
+        },
+        {
+          type: "p",
+          text: "Arriving from the **Dashboard** — a Guard figure, a site chip — lands here with the matching filter already applied, and the filter controls show it, so the number you clicked and the list you got always agree.",
+        },
+
+        { type: "h", level: 2, text: "What each row tells you" },
+        {
+          type: "fields",
+          items: [
+            {
+              name: "User",
+              text: "Avatar, name and email. The name links to that account's page in **admin.atlassian.com**, so acting on one person is a click, not a search in another tab. Two flags appear where they apply: **External account** — a domain you never verified, so Guard is not billed and you cannot administer it — and **Also on N other site(s)**, for access that reaches beyond this instance.",
+            },
+            {
+              name: "Status",
+              text: "Whether the **account is switched on** — the fact that decides whether it costs anything. *Disabled* accounts show their specific state where the source said it: *Suspended* can be restored, *Deactivated* is on its way out.",
+            },
+            { name: "Products", text: "One badge per seat the person holds. What the badges show is what the seat filters count." },
+            {
+              name: "Last Active",
+              text: "*Today*, *yesterday*, *53d ago* — in the page's language. The colour bands come from **your** threshold, not a fixed 90: past a third of it is amber, past all of it is red, and **Never** carries the invitation date when there is one.",
+            },
+            { name: "Domain", text: "The email domain, or *Email not visible* where Atlassian withholds the address." },
+            {
+              name: "Groups",
+              text: "**Group membership** opens the person's groups in place — the licence groups marked apart — so you can see exactly which membership grants the seat you are about to reclaim.",
+            },
+          ],
+        },
+        {
+          type: "p",
+          text: "Sort by name, email, last activity or domain from the column headers. Ticking people raises the bulk bar with the count and the actions; the selection belongs to the page you are on — changing page or filter clears it, so an action never carries invisible passengers from three pages back.",
         },
         {
           type: "p",
@@ -338,6 +492,83 @@ export const licenseWasteManager: AppDocs = {
     },
 
     {
+      slug: "admin-roles",
+      title: "Admin roles",
+      description: "Who administers what, whether they still sign in, and which of them a second factor is not protecting.",
+      blocks: [
+        {
+          type: "p",
+          text: "**What this tab is for.** The accounts that can do the most damage, on one page: organisation admins, site admins, Jira system administrators, product admins and user-access admins — each with their last activity, their two-step verification, and whether the account is even one you manage.",
+        },
+        {
+          type: "p",
+          text: "**Where the roles come from — read this once.** Atlassian publishes **no API for roles**: every candidate endpoint answers 404, and the role field the directory does have comes back empty. So the page reads roles from two honest sources and says which it used. **Group names** — `org-admins`, `site-admins`, `system-administrators`, and the product patterns — cover roles granted through groups. The **Org role column of the users-and-groups export** names organisation admins outright, including the ones no admin-named group would ever reveal; on one real customer, all nineteen organisation admins were visible only that way. A role granted directly to a person, outside both, cannot be seen by anyone — which is why the page says *at least this many*.",
+        },
+
+        { type: "h", level: 2, text: "Two views of the same people" },
+        {
+          type: "fields",
+          items: [
+            {
+              name: "By person",
+              text: "A table: who, which roles (with the group each role was read from, or “named by the export”), last active, two-step verification, and whether the account is yours to manage.",
+            },
+            {
+              name: "By level",
+              text: "The same people as a ladder — most powerful role at the top, the people who hold it on each rung, with the role's reach explained in a sentence. Someone holding two roles appears on **both** rungs, deliberately: the lower rung is the access that survives revoking the top one.",
+            },
+          ],
+        },
+
+        { type: "h", level: 2, text: "What to look for" },
+        {
+          type: "list",
+          items: [
+            "**Dormant admins** — an account that can grant itself anything and has not signed in for months is the risk column's first row. The *Only those worth a look* toggle narrows to these.",
+            "**No second factor and no single sign-on** — counted separately from accounts merely lacking 2FA: someone behind an enforced identity provider is protected, and calling them exposed would describe your SSO configuration as a breach. This split needs the [CSV import](/documentation/license-waste-manager/csv-import), because no API reports SSO.",
+            "**Admins you do not manage** — a role held by an account on a domain you never verified is a role you cannot revoke from here.",
+            "**App accounts** are listed apart from people, not counted as administrators alongside them.",
+          ],
+        },
+        {
+          type: "callout",
+          variant: "tip",
+          text: "Protect this page's people before automating anything: add `org-admins` and `site-admins` to **Protected Groups** in Settings, so no rule can ever act on them.",
+        },
+      ],
+    },
+    {
+      slug: "api-tokens",
+      title: "API tokens",
+      description: "Which accounts hold API tokens, which tokens have sat unused for months, and revocation one click away.",
+      blocks: [
+        {
+          type: "p",
+          text: "**What this tab is for.** API tokens are credentials that outlive intentions: created for a script years ago, never expiring, still valid after their owner changed teams. Atlassian shows them one account at a time; this tab sweeps every managed account and lists what it finds in one table.",
+        },
+
+        { type: "h", level: 2, text: "The sweep" },
+        {
+          type: "p",
+          text: "Atlassian publishes no organisation-wide token listing, so the sweep asks **one account at a time**, through the organisation API key, as a background job you can watch — on a large organisation it takes a while, and the table says when its rows were read, because every “unused for N days” is relative to that moment. Accounts Atlassian refuses to reveal tokens for are counted and said, not silently skipped.",
+        },
+        {
+          type: "list",
+          items: [
+            "**Filter** to the tokens that matter: unused for 90+ days, no expiry date, or sitting on a disabled account.",
+            "**Each row** carries the owner, the token's label — the owner's own words for what it is for — when it was created, last used, and when it expires.",
+            "**Revoke** ends the token immediately. The owner keeps their account; the credential dies. Every revocation lands in the [audit log](/documentation/license-waste-manager/audit-log).",
+          ],
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "A token on a disabled account still works",
+          text: "Disabling an account stops the person signing in — it does not stop their API tokens authenticating. A leaver's forgotten token is a live credential with nobody watching it, which is exactly the row this tab sorts to the top.",
+        },
+      ],
+    },
+    {
       slug: "automation",
       title: "Automation rules",
       description: "Turn a filter and an action into a scheduled rule, and roll it out without frightening anyone.",
@@ -383,11 +614,24 @@ export const licenseWasteManager: AppDocs = {
             { name: "Enabled", text: "A rule can exist and be switched off. New rules should start off." },
           ],
         },
+        { type: "h", level: 2, text: "The last look: every person is re-checked live" },
+        {
+          type: "p",
+          text: "A rule's candidates come from the snapshot, and a snapshot is stale by construction — someone seen idle 80 days at scan time crosses the 90-day line by arithmetic alone, and someone seen idle two years may have come back yesterday. So **before a rule touches anyone, it re-asks the live APIs about that person**: still inactive past the threshold? Still in the scoped groups? Whoever came back since the scan, or left the scope, is left alone — and counted, by reason, in the result line on the rule's card: *“3 left alone: the live check found them active or out of scope since the scan.”*",
+        },
+        {
+          type: "list",
+          items: [
+            "Every uncertain answer lands on **leave this person alone**: a read that fails skips the person with its own named reason, never a revocation on a guess.",
+            "The one deliberate exception is a **dead API key** — that is a verdict about the run, not the person, so the run stops with a single clear message instead of dressing up as a green success with a thousand skips.",
+            "Verification is always on for rules whose condition involves activity or group scope. There is no toggle to act unseen.",
+          ],
+        },
         {
           type: "callout",
           variant: "info",
-          title: "Two things a rule refuses to do",
-          text: "It will not act on a snapshot more than **seven days old** — stale data is how somebody back from leave loses their licence. And if its group scope resolves to no known membership, it fails rather than treating “nobody matched” as “act on everybody”. Rules also need the organisation API connection, and an active app licence, both to run on schedule and to **Run Now**.",
+          title: "What a rule still refuses to do",
+          text: "It will not run against a snapshot more than **45 days old** — at that age the candidate list no longer describes the organisation; run a scan, or turn on the [scheduled scan](/documentation/license-waste-manager/settings) so it never happens. Below that, an older snapshot only costs coverage (someone who went idle after the scan is not on the list yet) and the run's result says its age. If a rule's group scope resolves to no known membership, it fails rather than treating “nobody matched” as “act on everybody”. Rules also need the organisation API connection, and an active app licence, both to run on schedule and to **Run Now**. There is no size cap: a run larger than one background invocation continues across as many as it needs, and if it ever meets the platform's chain ceiling it pauses as an honest *partial* — the next scheduled firing picks up exactly where the filter still matches.",
         },
 
         { type: "h", level: 2, text: "How to roll out a rule without breaking anything" },
@@ -409,7 +653,7 @@ export const licenseWasteManager: AppDocs = {
         },
         {
           type: "p",
-          text: "Each rule records its **last run**, the result — `success`, `partial` or `failed` — and how many accounts it affected. A rule that keeps returning `partial` is usually hitting accounts managed by another organisation.",
+          text: "Each rule records its **last run**, the result — `success`, `partial` or `failed` — how many accounts it affected, and one sentence saying what shaped the outcome: how many the live check left alone, the snapshot's age when it mattered, or the reason a run refused to start. A rule that keeps returning `partial` is usually hitting accounts managed by another organisation.",
         },
       ],
     },
@@ -436,21 +680,41 @@ export const licenseWasteManager: AppDocs = {
             "**The groups** the action targeted.",
           ],
         },
+        { type: "h", level: 2, text: "Finding the entry you are looking for" },
+        {
+          type: "list",
+          items: [
+            "**Search** reaches every entry's summary, rule name and target groups, and the matched term is **highlighted** where it hit — each surviving row shows why it survived.",
+            "**Date**: all, last 7 / 30 / 90 days, or a period with two dates.",
+            "**Actor**: the administrators who actually appear in the log, plus **Automated** for entries nobody clicked.",
+            "**Status**: Success, **Partial** — some people failed — or Failed.",
+            "**Action**, **Trigger** and **Rule** narrow by what ran and what asked for it.",
+            "The header counts both sides — *789 entries — showing 12* — so a narrow filter never reads as a small log, and **Reset** clears everything.",
+          ],
+        },
         {
           type: "p",
-          text: "Filter by month, by action and by trigger. **Show details** expands one entry into its per-person rows.",
+          text: "**Show details** expands one entry into its per-person rows: search for a person, filter by outcome — Changed, Failed or **Skipped** — and each name links to that account's page in **admin.atlassian.com**, so acting on what you find is one click.",
+        },
+        { type: "h", level: 2, text: "Taking the evidence with you" },
+        {
+          type: "list",
+          items: [
+            "**Export CSV** writes the log **under exactly the filters on screen** — the file holds what you were looking at, no more and no less, with the same columns the table shows.",
+            "**Export these people (CSV)**, inside an expanded entry, writes that run's named people with each one's result and error — the attachment a licence-reduction ticket actually needs.",
+          ],
         },
         {
           type: "callout",
           variant: "warning",
-          title: "Entries are kept for 90 days, and there is no way to keep them longer",
-          text: "The audit trail is swept at the end of every scan: an entry older than 90 days is deleted, **and so is its per-user detail, on the same horizon**. That pairing is deliberate. An entry that outlived its detail would say “504 users affected” with no way left to see who they were — an audit trail decaying into a number. One horizon means a row is either fully answerable or gone.",
+          title: "Entries are kept for 180 days, and there is no way to keep them longer",
+          text: "The audit trail is swept at the end of every scan: an entry older than 180 days is deleted, **and so is its per-user detail, on the same horizon**. That pairing is deliberate. An entry that outlived its detail would say “504 users affected” with no way left to see who they were — an audit trail decaying into a number. One horizon means a row is either fully answerable or gone.",
         },
         {
           type: "callout",
           variant: "info",
           title: "Keep the evidence before it ages out",
-          text: "The audit entry is your proof that the seats you stopped paying for were released on a specific date. If a licence-reduction cycle or a compliance review is more than three months behind your clean-up, record the entry somewhere outside the app while it is still there.",
+          text: "The audit entry is your proof that the seats you stopped paying for were released on a specific date. If a compliance review runs more than six months behind your clean-up, **Export CSV** the relevant entries somewhere outside the app while they are still there.",
         },
       ],
     },
@@ -504,6 +768,21 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "p",
           text: "If the key is revoked, expires, or stops being an organisation admin key, the app notices the first time a call is rejected and marks the connection as disconnected rather than retrying against a dead credential.",
+        },
+
+        { type: "h", level: 2, text: "Scheduled scan" },
+        {
+          type: "p",
+          text: "Scans can run themselves — **weekly, every two weeks or monthly**, on the day and UTC hour you pick, reading either scope. The point is the rules: they act on the snapshot, and an admin should not have to remember to feed them. The panel previews the next three runs, and the Dashboard shows the next one beside the Scan button.",
+        },
+        {
+          type: "list",
+          items: [
+            "**Saving never starts a scan.** The first scheduled run waits for the next due moment — turning the schedule on at 16:00 does not surprise you with a scan at 16:01.",
+            "**No daily option, deliberately.** The freshness rules need comes from the live per-person check at action time, not from scanning more often; a daily walk of a large directory multiplies API cost and lock time for nothing.",
+            "**Scans and rules take turns.** Only one operation runs at a time. On an hour when both a scan and a rule are due, the scan goes first and the rule follows on the next hourly tick — landing on the snapshot the scan just wrote. Nothing is lost; a blocked firing simply retries.",
+            "**Off by default.** `Off — scans start manually` is the state every installation begins in.",
+          ],
         },
 
         { type: "h", level: 2, text: "Default inactivity threshold" },
@@ -578,11 +857,12 @@ export const licenseWasteManager: AppDocs = {
           items: [
             {
               name: "User snapshots (SQL)",
-              text: "Per account: account ID, display name, **email address** and domain, active flag, account type, managed status, whether the seat is billable, last-active date, date added to the organisation, product access, licence groups and avatar URL. One further row per account per product, carrying that product's own last-active date.",
+              text: "Per account: account ID, display name, **email address** and domain, active flag and account state, account type, managed status, whether Guard bills the account, last-active date, date added to the organisation, product access, licence groups, avatar URL, the sites their access reaches — and, when a CSV import supplied them, two-step verification, verified email, single sign-on, department, job title and organisation-admin role. One further row per account per product, carrying that product's own last-active date.",
             },
             { name: "Groups (SQL)", text: "Group IDs, names and kinds, and who belongs to which group in a snapshot." },
-            { name: "Jobs (SQL)", text: "Scan and action jobs: type, status, phase, who requested them, timings, metrics and errors." },
-            { name: "Audit log (SQL)", text: "Every action with its per-user outcome, kept for **90 days** — the entry and its detail on the same horizon." },
+            { name: "API tokens (SQL)", text: "From a token sweep: the owner's account ID, the token's ID and label, created / last-used / expiry dates. Replaced by the next sweep." },
+            { name: "Jobs (SQL)", text: "Scan and action jobs: type, status, phase, who requested them — a person, or the schedule — timings, metrics and errors." },
+            { name: "Audit log (SQL)", text: "Every action with its per-user outcome, kept for **180 days** — the entry and its detail on the same horizon." },
             { name: "Rules", text: "Your automation rules and their run state." },
             {
               name: "Configuration",
@@ -668,7 +948,7 @@ export const licenseWasteManager: AppDocs = {
             },
             {
               name: "Can I try it without a key, just to see?",
-              text: "Not usefully. You can install it, open it and read the Settings screen, but the Dashboard will refuse to scan. If your security policy will not allow the key, use [Admin Toolkit's User Analysis](/documentation/admin-toolkit/users) instead — it reads CSV files you download yourself.",
+              text: "Yes — with your own files. [Import the admin-console CSV exports](/documentation/license-waste-manager/csv-import): every dashboard figure, every filter, the Guard block, admin roles and the audit views work on an imported snapshot, and the data never needed a credential. What stays locked without the key is **acting** — revoking, suspending, rules, the token sweep.",
             },
             {
               name: "Where is the key stored?",
@@ -680,7 +960,7 @@ export const licenseWasteManager: AppDocs = {
             },
             {
               name: "What if our security policy forbids storing that key?",
-              text: "Use [Admin Toolkit's User Analysis](/documentation/admin-toolkit/users) instead. It reads CSV exports you download yourself and needs no credentials, at the cost of live data and automation.",
+              text: "Use the [CSV import](/documentation/license-waste-manager/csv-import): the whole read side — dashboard, filters, Guard, admin roles — works from exports you download yourself, with no credential stored. What you give up is acting from the app and the scheduled scan. [Admin Toolkit's User Analysis](/documentation/admin-toolkit/users) remains the lighter-weight alternative for a one-off review.",
             },
           ],
         },
@@ -695,7 +975,7 @@ export const licenseWasteManager: AppDocs = {
             },
             {
               name: "How long do you keep the audit log?",
-              text: "**90 days**, for the entry and for the per-user detail behind it alike. There is no setting; older rows are deleted at the end of every scan.",
+              text: "**180 days**, for the entry and for the per-user detail behind it alike. There is no setting; older rows are deleted at the end of every scan. **Export CSV** keeps evidence past the horizon.",
             },
             {
               name: "Does a closed Atlassian account get erased?",
@@ -720,6 +1000,10 @@ export const licenseWasteManager: AppDocs = {
             {
               name: "Will it delete people's accounts?",
               text: "No. It can remove group membership, remove product access, or suspend an account. It never deletes an account.",
+            },
+            {
+              name: "What stops a rule from acting on somebody who just came back?",
+              text: "The rule itself. Before it changes anyone, it re-checks that person against the live APIs — still inactive past the threshold, still in the scoped groups. Someone who returned after the scan is left alone and counted in the run's result. A read that fails is a skip, never a revocation on a guess.",
             },
             {
               name: "Can it lock me out?",
