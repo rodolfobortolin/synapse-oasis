@@ -305,6 +305,19 @@ export const licenseWasteManager: AppDocs = {
           title: "Export with all columns",
           text: "The app validates the headers before importing and names any column that is missing. If the admin console asks which columns to include, include them all — a narrowed export is recognised and refused with the list of what it lacks, rather than silently importing less.",
         },
+        {
+          type: "callout",
+          variant: "tip",
+          title: "The same exports also feed Admin Toolkit, and the totals agree",
+          text: "[Admin Toolkit's User Analysis](/documentation/admin-toolkit/users) reads these two files in the browser, with no API key and no scan, and reports the same billable-seat figures product by product — measured on one organisation's real export, where both apps report 19,002 seats with every product counted once per person and 21,296 with every product counted per site. Both count a **licence** — the site list in the managed-accounts export — and neither counts an access **role**, which outlives the licence: Confluence showed 11,365 roles there against 10,272 seats Atlassian billed, the gap being disabled accounts that keep the record and accounts from outside the verified domain. Two things have to line up for the totals to match exactly: the same [Enterprise products](/documentation/license-waste-manager/settings) — Admin Toolkit asks per analysis, this app is told once — and the same verdict on which sites are yours, since Admin Toolkit will drop another company's site from your bill and this app will not. Use Admin Toolkit for a one-off read; come here to act on what it found.",
+        },
+
+        {
+          type: "callout",
+          variant: "warning",
+          title: "Seats per site are counted here, and only here",
+          text: "While the file is open in your browser, the app knows which site each seat is on. The snapshot does not: its user table has no site column. So the per-site totals a **Standard or Premium** subscription is billed are counted during the import and stored beside the summary — which means an import is what makes them available, and a snapshot taken before this existed shows the per-person count with a warning rather than a number it cannot stand behind. Tick your [Enterprise products](/documentation/license-waste-manager/settings) before reading the Dashboard.",
+        },
 
         { type: "h", level: 2, text: "How the import runs" },
         {
@@ -326,10 +339,18 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "list",
           items: [
-            "**Sandboxes are set aside**, not counted: a sandbox seat comes with a Premium or Enterprise plan rather than being billed per user, and on one measured customer it was 43.9% of all product grants — counting it would nearly double the reported waste.",
+            "**Sandboxes are set aside**, not counted: a sandbox seat comes with a Premium or Enterprise plan rather than being billed per user, and on one measured customer it was 43.9% of all product grants — counting it would nearly double the reported waste. With an organisation API key connected the app knows which sites Atlassian *declares* to be sandboxes and uses that; without one it goes by the host name, which is all a CSV carries.",
             "**A plan tier is not a site.** The Trello column carries values like `Free`; the import knows the difference and does not invent a site called Free.",
+            "**Used or idle is judged per product.** The import records when each person last opened each product they hold, from the export's own per-site activity columns — so a Confluence seat nobody has touched in two years is not counted as used because its owner lives in Jira. On one organisation that difference was about 1,900 seats. An import taken before this existed judged every product on the account's overall last-active date; re-import to correct it.",
             "**Whole-file imports see the most.** A scoped import has the same blind spot a licence scan has — accounts holding no seat are left out — and the dashboard says so where it matters.",
           ],
+        },
+
+        {
+          type: "callout",
+          variant: "warning",
+          title: "Trello is counted here and nowhere else",
+          text: "Trello bills per user only above Free, and the plan tier lives in this export — the `Trello Plan` column — while nothing the organisation API returns carries it. So an API **scan** does not count Trello at all, and says so under the product tiles: it can see the grants and cannot tell which of them anybody pays for. On one organisation that was 806 grants against 13 on a tier that bills, so counting them would have added 793 seats nobody pays for. Import these files and Trello is counted properly, tier by tier.",
         },
 
         { type: "h", level: 2, text: "What still needs the API key" },
@@ -477,6 +498,12 @@ export const licenseWasteManager: AppDocs = {
           variant: "warning",
           title: "Removing a licence is not the same as removing a person",
           text: "Removing product access keeps the account, its history and its issue assignments. The person simply cannot use that product. Suspension blocks the account entirely. Always prefer the narrowest action that recovers the seat, which is usually removing one licence group.",
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "Trello, Loom and Compass are counted but cannot be revoked here",
+          text: "Revocation works by removing somebody from the group that grants a product. Trello lives on trello.com, and Loom and Compass are granted directly, so none of them has a licence group to remove — no amount of group removal touches those seats. They are still counted, because they cost real money. When a revocation leaves one of them standing, the audit row is marked **partial** and names what is still billed, so a reclaimed-seat figure never counts a seat that survived. Remove those in the product's own admin. Trello also bills per user only on Standard, Premium and Enterprise: a Free grant is not a seat and is not counted.",
         },
         {
           type: "callout",
@@ -789,6 +816,29 @@ export const licenseWasteManager: AppDocs = {
         {
           type: "p",
           text: "The number of days after which an account counts as inactive, set on a slider from 7 to 365. It drives the dashboard's dormant-seat count and the default position of the **Inactive For** filter. Ninety days is a common starting point; a quarterly business rhythm may justify more.",
+        },
+
+        { type: "h", level: 2, text: "Products on an Enterprise plan" },
+        {
+          type: "p",
+          text: "How Atlassian bills somebody who holds the same product on more than one site — the one setting here that changes a headline number rather than a filter. A product **not** ticked is counted per product **per site**; a product ticked is counted once per person across every site. It is a list rather than a single choice because Atlassian sells Cloud Enterprise per product: Jira can be on Enterprise while Confluence is on Premium.",
+        },
+        {
+          type: "callout",
+          variant: "info",
+          title: "Why the two differ, in Atlassian's words",
+          text: "An Enterprise plan “allows you to have multiple instances of Atlassian apps, up to 150, within the same plan. This is different from other plans, such as Standard and Premium, where the plan includes only one instance of the app.” On Enterprise, “a user with access to more than one instance is only counted once” — and “if a user has access to Jira and Confluence Enterprise, they're included in both bills”, which is what makes this a per-product question. So a colleague with Jira on two production sites is two subscriptions unless Jira itself is on Enterprise. On a real organisation's export the two extremes are 21,296 seats and 19,002 — a 12% difference on the same data.",
+        },
+        {
+          type: "list",
+          items: [
+            "**Three products, not eight.** Atlassian sells a Cloud Enterprise plan — the one with “up to 150 instances” — for **Jira**, **Confluence** and **Jira Service Management**. Bitbucket, Compass and Jira Product Discovery stop at Premium; Trello and Loom have tiers named Enterprise that are not that plan. Anything detected from your organisation is shown too, so a product Atlassian adds appears on its own.",
+            "**Nothing is ticked by default.** An Enterprise plan is the rarer one, and assuming it would understate a Standard customer's bill — the direction that matters for an app whose job is telling you what you pay for.",
+            "**It is detected where it can be.** With an organisation API key connected, Test Connection and every scan read each site's per-product entitlement and tick the ones on an Enterprise plan, and the setting shows a **detected from your organization** badge. Correct it here if your contract says otherwise.",
+            "**Your answer wins and keeps winning.** Once you tick these yourself, no later connection or scan changes them back.",
+            "**It only moves a number for a product granted on more than one of your production sites.** Sandboxes never count either way, and an organisation on a single site sees identical totals whatever is ticked.",
+            "**It changes the Dashboard without re-importing.** The snapshot carries the seats counted both ways, so ticking a product re-totals the page. The exception is a snapshot imported before the app counted per site: there the Dashboard shows the per-person count and says plainly that the per-site figure is unavailable until you import again.",
+          ],
         },
 
         { type: "h", level: 2, text: "Product licence groups" },

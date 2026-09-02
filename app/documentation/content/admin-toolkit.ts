@@ -572,7 +572,7 @@ export const adminToolkit: AppDocs = {
           items: [
             {
               name: "The headline row",
-              text: "Product users, managed accounts, sites in the org, groups, org admins and Atlassian Guard billable seats — with a second line under each giving the number that qualifies it, such as how many of those accounts are disabled.",
+              text: "Billable seats, managed accounts, sites in the org, groups, org admins and Atlassian Guard billable seats — with a second line under each giving the number that qualifies it, such as how many of those accounts are disabled. **Billable seats** counts a person once per product and leaves sandboxes out, which is how Atlassian charges; the product table below lists a person on every site that grants them the product, so it deliberately sums higher.",
             },
             {
               name: "Three alerts, each of which opens a list",
@@ -616,6 +616,18 @@ export const adminToolkit: AppDocs = {
         },
         {
           type: "callout",
+          variant: "warning",
+          title: "It asks you to confirm the sites before it counts anything",
+          text: "Neither CSV states which host is a sandbox or whose instance it is, and both change the seat total — a sandbox is included with Premium and Enterprise, and a seat on another company's instance is on their bill. The only evidence in the file is the host name, so the tool guesses from it, shows you the guess, and counts on your answer. The suggestion ticks your busiest site and anything sharing its name, every sandbox, the production site each sandbox mirrors, any site holding a large share of the same people, and Bitbucket and Trello — those are Atlassian's own addresses, not another company's. Review the list before pressing Analyze: on a real organisation, 42% of all product grants sat on hosts the name test called sandboxes.",
+        },
+        {
+          type: "callout",
+          variant: "warning",
+          title: "It asks which products are on an Enterprise plan",
+          text: "Because Atlassian bills the same product on two sites two different ways, and the difference is not small. Atlassian's own words: an Enterprise plan “allows you to have multiple instances of Atlassian apps, up to 150, within the same plan. This is different from other plans, such as Standard and Premium, where the plan includes only one instance of the app” — and on Enterprise “a user with access to more than one instance is only counted once”. So on Standard or Premium somebody holding Jira on two production sites is two subscriptions and two seats; on Enterprise they are one. On the organisation this was measured against that is 21,198 seats against 18,960 — a 12% difference on the same export. **It is asked per product, because Atlassian sells it per product:** “if a user has access to Jira and Confluence Enterprise, they're included in both bills”, so Jira Enterprise beside Confluence Premium is an ordinary estate and a single answer for the whole organisation would understate whatever is not on Enterprise. The tool lists only the products that can change a number: granted on more than one of your production sites **and** one Atlassian sells a Cloud Enterprise plan for — Jira, Confluence and Jira Service Management, since Bitbucket, Compass and Jira Product Discovery stop at Premium and Trello's and Loom's Enterprise tiers are not that plan. They start unticked, and both extremes are shown beside your figure. An organisation with one production site per product gets the same total whatever you tick.",
+        },
+        {
+          type: "callout",
           variant: "info",
           title: "Everything here happens in your browser",
           text: "The two CSVs are parsed and analysed in the page. Nothing is uploaded, nothing is stored by the app, and no resolver is called — which is also why this one tool keeps working when the app has no licence.",
@@ -624,7 +636,13 @@ export const adminToolkit: AppDocs = {
           type: "callout",
           variant: "info",
           title: "This tool or License Waste Manager?",
-          text: "**User Analysis** reads CSV files and needs no credentials. Good for a one-off review, or when you cannot get an organisation API key. **[License Waste Manager](/documentation/license-waste-manager/overview)** connects to the organisation API, sees live activity data, and can act on what it finds on a schedule.",
+          text: "**User Analysis** reads CSV files and needs no credentials. Good for a one-off review, or when you cannot get an organisation API key. It reports; it does not act. **[License Waste Manager](/documentation/license-waste-manager/overview)** reads the same two exports — or connects to the organisation API for live activity — and is the one that does something about what it finds: it re-checks every person live at the moment of acting, so somebody who came back after the export is left alone; it reclaims idle seats on a schedule; and it records every change in an audit log you can filter and export. Getting there needs an organisation API key, created once by an organisation administrator.",
+        },
+        {
+          type: "callout",
+          variant: "tip",
+          title: "The two apps report the same billable total",
+          text: "Give both apps the same two exports, the same billing plan and the same site verdicts, and the billable-seat figures match, product by product — measured, not assumed: on one organisation's real export both report 19,002 seats counted the Enterprise way and 21,296 counted per site. Both count a **licence** — the site list in the managed-accounts export — and neither counts an access **role**, which outlives the licence and would overstate the bill: Confluence showed 11,365 roles there against 10,272 seats Atlassian actually charged for, the gap being disabled accounts that keep the record and accounts from outside the verified domain. Two things move one app and not the other, and both are deliberate: this tool lets you untick a site as **not yours** and drops its seats from your bill, which License Waste Manager does not do; and the billing plan is asked here per analysis and set once in [License Waste Manager's Settings](/documentation/license-waste-manager/settings). Line those up and the two agree exactly.",
         },
 
         { type: "h", level: 2, text: "User Offboarding" },
